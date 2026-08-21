@@ -48,6 +48,13 @@ export default function Home() {
 
   const modules = [
     {
+      title: "Document Upload & Processing",
+      description: "Upload Satbara 7/12, RTC, or Jamabandi deeds with Sarvam & Mistral multi-model OCR.",
+      tag: "AI Pipeline",
+      href: "/upload",
+      icon: Sparkles
+    },
+    {
       title: "Executive Analytics Dashboard",
       description: "Real-time KPIs, document throughput, digitization rates, and district-wise coverage metrics.",
       tag: "Analytics & Telemetry",
@@ -67,6 +74,13 @@ export default function Home() {
       tag: "Verification & Audit",
       href: "/verification",
       icon: FileCheck2
+    },
+    {
+      title: "Enterprise Audit Trail",
+      description: "Tamper-evident logs of all deed alterations, officer sign-offs, and RBAC security events.",
+      tag: "Compliance & RBAC",
+      href: "/audit",
+      icon: ShieldCheck
     }
   ];
 

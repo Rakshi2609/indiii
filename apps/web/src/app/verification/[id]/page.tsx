@@ -22,7 +22,8 @@ import {
   XCircle,
   ZoomIn,
   ZoomOut,
-  Edit3
+  Edit3,
+  Loader2
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -364,7 +365,11 @@ export default function VerificationWorkspacePage({ params }: VerificationPagePr
                 disabled={actionLoading}
                 className="bg-emerald-600 hover:bg-emerald-500 text-white gap-1.5 text-xs font-semibold"
               >
-                <CheckCircle2 className="w-3.5 h-3.5" />
+                {actionLoading ? (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                ) : (
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                )}
                 [ ACCEPT / APPROVE ]
               </Button>
             </>
@@ -384,7 +389,11 @@ export default function VerificationWorkspacePage({ params }: VerificationPagePr
                 disabled={actionLoading}
                 className="bg-indigo-600 hover:bg-indigo-500 text-white gap-1.5 text-xs"
               >
-                <Save className="w-3.5 h-3.5" />
+                {actionLoading ? (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                ) : (
+                  <Save className="w-3.5 h-3.5" />
+                )}
                 Save & Verify
               </Button>
             </>
@@ -927,8 +936,9 @@ export default function VerificationWorkspacePage({ params }: VerificationPagePr
                 size="sm"
                 onClick={handleReject}
                 disabled={actionLoading}
-                className="text-xs"
+                className="text-xs gap-1.5"
               >
+                {actionLoading && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                 Confirm Rejection
               </Button>
             </div>
