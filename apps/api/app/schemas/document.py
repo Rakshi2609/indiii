@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List, Optional
+from typing import Any, Dict, List, Optional
 from pydantic import BaseModel, Field
 
 from app.models.document import DocumentStatus
@@ -21,6 +21,9 @@ class DocumentCreate(DocumentBase):
 class DocumentUpdate(BaseModel):
     status: Optional[DocumentStatus] = None
     original_name: Optional[str] = None
+    extracted_data: Optional[Dict[str, Any]] = None
+    error_message: Optional[str] = None
+    processed_at: Optional[datetime] = None
 
 
 class DocumentResponse(DocumentBase):
@@ -28,6 +31,9 @@ class DocumentResponse(DocumentBase):
     filename: str
     file_path: str
     uploader_id: Optional[int] = None
+    extracted_data: Optional[Dict[str, Any]] = None
+    error_message: Optional[str] = None
+    processed_at: Optional[datetime] = None
     created_at: datetime
     updated_at: datetime
 
@@ -45,3 +51,15 @@ class DocumentUploadBatchResponse(BaseModel):
     message: str
     uploaded_count: int
     documents: List[DocumentResponse]
+
+
+class DocumentProcessRequest(BaseModel):
+    provider: Optional[str] = Field(default="sarvam", description="AI provider to use for extraction")
+    document_type: Optional[str] = Field(default="7/12_extract", description="Revenue document type hint")
+
+
+class DocumentProcessResponse(BaseModel):
+    message: str
+    document_id: int
+    status: DocumentStatus
+    extracted_data: Optional[Dict[str, Any]] = None

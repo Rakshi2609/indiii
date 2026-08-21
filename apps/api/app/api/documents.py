@@ -1,6 +1,6 @@
 import logging
-from typing import Annotated, List, Optional
-from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile, status
+from typing import Annotated, Any, Dict, List, Optional
+from fastapi import APIRouter, BackgroundTasks, Depends, File, HTTPException, Query, UploadFile, status
 from sqlalchemy.orm import Session
 
 from app.api.deps import oauth2_scheme
@@ -11,9 +11,12 @@ from app.models.document import Document, DocumentStatus
 from app.models.user import User
 from app.schemas.document import (
     DocumentListResponse,
+    DocumentProcessRequest,
+    DocumentProcessResponse,
     DocumentResponse,
     DocumentUploadBatchResponse
 )
+from app.services.document_service import background_process_document, document_service
 from app.services.storage_service import StorageService, storage_service
 
 logger = logging.getLogger(__name__)
@@ -54,7 +57,7 @@ async def upload_documents(
 ) -> DocumentUploadBatchResponse:
     """
     Upload land revenue documents (7/12 extracts, RTCs, sale deeds, Jamabandi).
-    Files are stored in local/object storage and queued with PENDING status for OCR extraction.
+    Files are stored on disk and registered with PENDING status.
     """
     if not files:
         raise HTTPException(
@@ -66,10 +69,8 @@ async def upload_documents(
     uploader_id = current_user.id if current_user else None
 
     for file in files:
-        # Save file to storage
         stored_filename, file_path, file_size, mime_type = await storage_service.save_file(file)
 
-        # Create database record
         doc_record = Document(
             filename=stored_filename,
             original_name=file.filename or "unknown_document",
@@ -103,7 +104,7 @@ def list_documents(
     limit: int = Query(50, ge=1, le=100, description="Items per page"),
     db: Session = Depends(get_db)
 ) -> DocumentListResponse:
-    """Retrieve all uploaded documents with optional filtering and pagination."""
+    """Retrieve all uploaded documents with optional status filtering and pagination."""
     query = db.query(Document)
 
     if status_filter:
@@ -121,13 +122,13 @@ def list_documents(
 @router.get(
     "/{document_id}",
     response_model=DocumentResponse,
-    summary="Get document details by ID"
+    summary="Get document details and extraction result by ID"
 )
 def get_document(
     document_id: int,
     db: Session = Depends(get_db)
 ) -> DocumentResponse:
-    """Retrieve a single document by its database ID."""
+    """Retrieve document metadata along with extracted structured intelligence."""
     doc = db.query(Document).filter(Document.id == document_id).first()
     if not doc:
         raise HTTPException(
@@ -135,6 +136,92 @@ def get_document(
             detail=f"Document with ID {document_id} not found."
         )
     return DocumentResponse.model_validate(doc)
+
+
+@router.post(
+    "/{document_id}/process",
+    response_model=DocumentProcessResponse,
+    status_code=status.HTTP_202_ACCEPTED,
+    summary="Trigger Sarvam Document AI processing for a document"
+)
+async def process_document_endpoint(
+    document_id: int,
+    background_tasks: BackgroundTasks,
+    request: Optional[DocumentProcessRequest] = None,
+    sync: bool = Query(False, description="If true, processes synchronously and waits for result"),
+    db: Session = Depends(get_db)
+) -> DocumentProcessResponse:
+    """
+    Trigger Document AI OCR & information extraction (using Sarvam Vision AI).
+    Can be run as a background task (202 Accepted) or synchronously for instant results.
+    """
+    doc = db.query(Document).filter(Document.id == document_id).first()
+    if not doc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Document with ID {document_id} not found."
+        )
+
+    provider_name = request.provider if request else "sarvam"
+    doc_type = request.document_type if request else "7/12_extract"
+
+    if sync:
+        # Run synchronously
+        processed_doc = await document_service.process_document(
+            document_id=document_id,
+            db=db,
+            provider_name=provider_name,
+            document_type=doc_type
+        )
+        return DocumentProcessResponse(
+            message="Document processing completed successfully.",
+            document_id=processed_doc.id,
+            status=processed_doc.status,
+            extracted_data=processed_doc.extracted_data
+        )
+    else:
+        # Queue as background task
+        doc.status = DocumentStatus.PROCESSING
+        db.commit()
+        db.refresh(doc)
+
+        background_tasks.add_task(
+            background_process_document,
+            document_id=document_id,
+            provider_name=provider_name,
+            document_type=doc_type
+        )
+
+        return DocumentProcessResponse(
+            message="Document processing task scheduled in background.",
+            document_id=doc.id,
+            status=DocumentStatus.PROCESSING,
+            extracted_data=None
+        )
+
+
+@router.get(
+    "/{document_id}/extraction",
+    response_model=Dict[str, Any],
+    summary="Get raw extracted land record JSON"
+)
+def get_document_extraction(
+    document_id: int,
+    db: Session = Depends(get_db)
+) -> Dict[str, Any]:
+    """Retrieve raw structured revenue data extracted by Sarvam Document AI."""
+    doc = db.query(Document).filter(Document.id == document_id).first()
+    if not doc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Document with ID {document_id} not found."
+        )
+    if doc.status != DocumentStatus.COMPLETED or not doc.extracted_data:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Extraction is not completed yet. Current status: {doc.status}"
+        )
+    return doc.extracted_data
 
 
 @router.delete(
@@ -146,7 +233,7 @@ def delete_document(
     document_id: int,
     db: Session = Depends(get_db)
 ) -> dict:
-    """Delete a document record and remove the associated file from disk."""
+    """Delete a document record and clean up the underlying file."""
     doc = db.query(Document).filter(Document.id == document_id).first()
     if not doc:
         raise HTTPException(
@@ -154,9 +241,7 @@ def delete_document(
             detail=f"Document with ID {document_id} not found."
         )
 
-    # Delete physical file from disk
     storage_service.delete_file(doc.filename)
-
     db.delete(doc)
     db.commit()
 

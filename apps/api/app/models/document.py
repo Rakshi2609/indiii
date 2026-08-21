@@ -1,6 +1,7 @@
 from datetime import datetime
 from enum import Enum
-from sqlalchemy import String, Integer, DateTime, Enum as SAEnum, ForeignKey, BigInteger, func
+from typing import Any, Dict, Optional
+from sqlalchemy import String, Integer, DateTime, Enum as SAEnum, ForeignKey, BigInteger, Text, JSON, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
@@ -33,6 +34,21 @@ class Document(Base):
         ForeignKey("users.id", ondelete="SET NULL"),
         nullable=True,
         index=True
+    )
+    extracted_data: Mapped[Optional[Dict[str, Any]]] = mapped_column(
+        JSON,
+        nullable=True,
+        default=None
+    )
+    error_message: Mapped[Optional[str]] = mapped_column(
+        Text,
+        nullable=True,
+        default=None
+    )
+    processed_at: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True,
+        default=None
     )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
