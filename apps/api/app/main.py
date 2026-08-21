@@ -9,6 +9,7 @@ from app.db.database import init_db
 from app.api.auth import router as auth_router
 from app.api.documents import router as documents_router
 from app.api.records import router as records_router
+from app.api.verification import router as verification_router
 from app.api.v1.api import api_router
 from app.schemas.health import HealthResponse
 
@@ -65,6 +66,9 @@ def create_application() -> FastAPI:
 
     # Land Records & Evidence router
     app.include_router(records_router, prefix="/api/records")
+
+    # Human Verification & Audit router
+    app.include_router(verification_router, prefix="/api/verification")
 
     # API v1 routes
     app.include_router(api_router, prefix=settings.API_V1_STR)

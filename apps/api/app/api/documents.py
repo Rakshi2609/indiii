@@ -1,6 +1,8 @@
 import logging
+import os
 from typing import Annotated, Any, Dict, List, Optional
 from fastapi import APIRouter, BackgroundTasks, Depends, File, HTTPException, Query, UploadFile, status
+from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 
 from app.api.deps import oauth2_scheme
@@ -136,6 +138,35 @@ def get_document(
             detail=f"Document with ID {document_id} not found."
         )
     return DocumentResponse.model_validate(doc)
+
+
+@router.get(
+    "/{document_id}/file",
+    summary="Stream raw document image / PDF file"
+)
+def get_document_file(
+    document_id: int,
+    db: Session = Depends(get_db)
+):
+    """Serve the raw document file directly to the frontend for human verification viewing."""
+    doc = db.query(Document).filter(Document.id == document_id).first()
+    if not doc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Document with ID {document_id} not found."
+        )
+
+    if not os.path.exists(doc.file_path):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Document file not found on disk storage."
+        )
+
+    return FileResponse(
+        path=doc.file_path,
+        media_type=doc.mime_type or "application/octet-stream",
+        filename=doc.original_name
+    )
 
 
 @router.post(
