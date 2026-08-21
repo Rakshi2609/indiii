@@ -12,6 +12,7 @@ from app.api.records import router as records_router
 from app.api.verification import router as verification_router
 from app.api.gis import router as gis_router
 from app.api.analytics import router as analytics_router
+from app.api.audit import router as audit_router
 from app.api.v1.api import api_router
 from app.schemas.health import HealthResponse
 
@@ -69,7 +70,7 @@ def create_application() -> FastAPI:
     # Land Records & Evidence router
     app.include_router(records_router, prefix="/api/records")
 
-    # Human Verification & Audit router
+    # Human Verification & Active Learning router
     app.include_router(verification_router, prefix="/api/verification")
 
     # GIS & Cadastral Mapping router
@@ -78,6 +79,9 @@ def create_application() -> FastAPI:
 
     # Analytics & Metrics router
     app.include_router(analytics_router, prefix="/api/analytics")
+
+    # Enterprise Audit Trail router
+    app.include_router(audit_router, prefix="/api/audit")
 
     # API v1 routes
     app.include_router(api_router, prefix=settings.API_V1_STR)

@@ -1,16 +1,14 @@
 import logging
 import os
 from typing import Annotated, Any, Dict, List, Optional
-from fastapi import APIRouter, BackgroundTasks, Depends, File, HTTPException, Query, UploadFile, status
+from fastapi import APIRouter, BackgroundTasks, Depends, File, HTTPException, Query, Request, UploadFile, status
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 
-from app.api.deps import oauth2_scheme
-import jwt
-from app.core.config import settings
+from app.api.deps import get_optional_current_user
 from app.db.database import get_db
 from app.models.document import Document, DocumentStatus
-from app.models.user import User
+from app.models.user import User, UserRole
 from app.schemas.document import (
     DocumentListResponse,
     DocumentProcessRequest,
@@ -18,32 +16,12 @@ from app.schemas.document import (
     DocumentResponse,
     DocumentUploadBatchResponse
 )
+from app.services.audit_service import audit_service
 from app.services.document_service import background_process_document, document_service
 from app.services.storage_service import StorageService, storage_service
 
 logger = logging.getLogger(__name__)
 router = APIRouter(tags=["Documents"])
-
-
-def get_optional_current_user(
-    db: Annotated[Session, Depends(get_db)],
-    token: Annotated[Optional[str], Depends(oauth2_scheme)] = None
-) -> Optional[User]:
-    """Optionally resolve authenticated user if Bearer token is provided."""
-    if not token:
-        return None
-    try:
-        payload = jwt.decode(
-            token,
-            settings.JWT_SECRET,
-            algorithms=[settings.JWT_ALGORITHM]
-        )
-        user_id = payload.get("sub")
-        if user_id:
-            return db.query(User).filter(User.id == int(user_id)).first()
-    except Exception:
-        pass
-    return None
 
 
 @router.post(
@@ -53,13 +31,14 @@ def get_optional_current_user(
     summary="Upload one or multiple land revenue documents"
 )
 async def upload_documents(
+    request: Request,
     files: List[UploadFile] = File(..., description="Single or batch files (PDF, JPG, PNG, TIFF)"),
     db: Session = Depends(get_db),
     current_user: Optional[User] = Depends(get_optional_current_user)
 ) -> DocumentUploadBatchResponse:
     """
     Upload land revenue documents (7/12 extracts, RTCs, sale deeds, Jamabandi).
-    Files are stored on disk and registered with PENDING status.
+    Files are stored on disk, registered with PENDING status, and logged in audit trail.
     """
     if not files:
         raise HTTPException(
@@ -69,6 +48,7 @@ async def upload_documents(
 
     saved_documents: List[DocumentResponse] = []
     uploader_id = current_user.id if current_user else None
+    client_ip = request.client.host if request.client else None
 
     for file in files:
         stored_filename, file_path, file_size, mime_type = await storage_service.save_file(file)
@@ -85,6 +65,22 @@ async def upload_documents(
         db.add(doc_record)
         db.commit()
         db.refresh(doc_record)
+
+        # Audit Logging
+        audit_service.log_event(
+            db=db,
+            action="DOCUMENT_UPLOAD",
+            resource_type="DOCUMENT",
+            resource_id=doc_record.id,
+            user_id=uploader_id,
+            new_value={
+                "filename": stored_filename,
+                "original_name": file.filename,
+                "file_size": file_size,
+                "mime_type": mime_type
+            },
+            ip_address=client_ip
+        )
 
         saved_documents.append(DocumentResponse.model_validate(doc_record))
 
@@ -197,7 +193,6 @@ async def process_document_endpoint(
     doc_type = request.document_type if request else "7/12_extract"
 
     if sync:
-        # Run synchronously
         processed_doc = await document_service.process_document(
             document_id=document_id,
             db=db,
@@ -211,7 +206,6 @@ async def process_document_endpoint(
             extracted_data=processed_doc.extracted_data
         )
     else:
-        # Queue as background task
         doc.status = DocumentStatus.PROCESSING
         db.commit()
         db.refresh(doc)
@@ -262,7 +256,9 @@ def get_document_extraction(
 )
 def delete_document(
     document_id: int,
-    db: Session = Depends(get_db)
+    request: Request,
+    db: Session = Depends(get_db),
+    current_user: Optional[User] = Depends(get_optional_current_user)
 ) -> dict:
     """Delete a document record and clean up the underlying file."""
     doc = db.query(Document).filter(Document.id == document_id).first()
@@ -275,5 +271,16 @@ def delete_document(
     storage_service.delete_file(doc.filename)
     db.delete(doc)
     db.commit()
+
+    # Audit logging
+    audit_service.log_event(
+        db=db,
+        action="DOCUMENT_DELETE",
+        resource_type="DOCUMENT",
+        resource_id=document_id,
+        user_id=current_user.id if current_user else None,
+        old_value={"filename": doc.filename, "original_name": doc.original_name},
+        ip_address=request.client.host if request.client else None
+    )
 
     return {"message": f"Document {document_id} deleted successfully."}

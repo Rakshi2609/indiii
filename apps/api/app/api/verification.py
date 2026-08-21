@@ -1,12 +1,12 @@
 import logging
 from typing import Optional
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from sqlalchemy.orm import Session
 
-from app.api.documents import get_optional_current_user
+from app.api.deps import get_optional_current_user
 from app.db.database import get_db
 from app.models.audit import VerificationAction
-from app.models.user import User
+from app.models.user import User, UserRole
 from app.schemas.verification import (
     VerificationActionResponse,
     VerificationApproveRequest,
@@ -15,6 +15,7 @@ from app.schemas.verification import (
     VerificationQueueResponse,
     VerificationRejectRequest,
 )
+from app.services.audit_service import audit_service
 from app.services.verification_service import verification_service
 
 logger = logging.getLogger(__name__)
@@ -61,6 +62,7 @@ def get_verification_detail_endpoint(
 )
 def approve_record_endpoint(
     record_id: int,
+    request: Request,
     payload: Optional[VerificationApproveRequest] = None,
     db: Session = Depends(get_db),
     current_user: Optional[User] = Depends(get_optional_current_user)
@@ -74,6 +76,18 @@ def approve_record_endpoint(
         officer_id=officer_id,
         notes=notes,
         db=db
+    )
+
+    # General system audit log
+    audit_service.log_event(
+        db=db,
+        action="RECORD_APPROVE",
+        resource_type="RECORD",
+        resource_id=record.id,
+        user_id=officer_id,
+        old_value=audit_log.original_values,
+        new_value={"validation_status": record.validation_status, "notes": notes},
+        ip_address=request.client.host if request.client else None
     )
 
     return VerificationActionResponse(
@@ -94,6 +108,7 @@ def approve_record_endpoint(
 )
 def correct_record_endpoint(
     record_id: int,
+    request: Request,
     payload: VerificationCorrectionRequest,
     db: Session = Depends(get_db),
     current_user: Optional[User] = Depends(get_optional_current_user)
@@ -110,6 +125,18 @@ def correct_record_endpoint(
         officer_id=officer_id,
         notes=payload.notes,
         db=db
+    )
+
+    # General system audit log
+    audit_service.log_event(
+        db=db,
+        action="RECORD_CORRECT",
+        resource_type="RECORD",
+        resource_id=record.id,
+        user_id=officer_id,
+        old_value=audit_log.original_values,
+        new_value=audit_log.corrected_values,
+        ip_address=request.client.host if request.client else None
     )
 
     return VerificationActionResponse(
@@ -130,6 +157,7 @@ def correct_record_endpoint(
 )
 def reject_record_endpoint(
     record_id: int,
+    request: Request,
     payload: VerificationRejectRequest,
     db: Session = Depends(get_db),
     current_user: Optional[User] = Depends(get_optional_current_user)
@@ -143,6 +171,18 @@ def reject_record_endpoint(
         reason=payload.reason,
         notes=payload.notes,
         db=db
+    )
+
+    # General system audit log
+    audit_service.log_event(
+        db=db,
+        action="RECORD_REJECT",
+        resource_type="RECORD",
+        resource_id=record.id,
+        user_id=officer_id,
+        old_value=audit_log.original_values,
+        new_value=audit_log.corrected_values,
+        ip_address=request.client.host if request.client else None
     )
 
     return VerificationActionResponse(
