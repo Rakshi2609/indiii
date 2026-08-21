@@ -49,6 +49,13 @@ export default function LandIntelligencePage() {
   const [lineageGraphData, setLineageGraphData] = useState<any>(null);
   const [docInventoryData, setDocInventoryData] = useState<any>(null);
 
+  // Custom Graph DB State
+  const [dbDocuments, setDbDocuments] = useState<any[]>([]);
+  const [selectedCustomDocId, setSelectedCustomDocId] = useState<string | number>("1");
+  const [customSearchQuery, setCustomSearchQuery] = useState<string>("");
+  const [customGraphData, setCustomGraphData] = useState<any>(null);
+  const [customLoading, setCustomLoading] = useState<boolean>(false);
+
   const fetchAllIntelligence = async (survey: string) => {
     setLoading(true);
     try {
@@ -83,6 +90,13 @@ export default function LandIntelligencePage() {
       // 8. Document Inventory
       const diRes = await fetch(`http://localhost:8000/api/intelligence/document-inventory/1`);
       if (diRes.ok) setDocInventoryData(await diRes.json());
+
+      // 9. Fetch DB Documents for Custom Selector
+      const docsRes = await fetch(`http://localhost:8000/api/documents`);
+      if (docsRes.ok) {
+        const docsData = await docsRes.json();
+        setDbDocuments(docsData.documents || []);
+      }
     } catch {
       // Fallback
     } finally {
@@ -90,8 +104,31 @@ export default function LandIntelligencePage() {
     }
   };
 
+  const handleFetchCustomGraph = async (docIdOrParam: string | number) => {
+    setCustomLoading(true);
+    try {
+      let url = `http://localhost:8000/api/intelligence/custom-lineage`;
+      if (typeof docIdOrParam === "number" || (!isNaN(Number(docIdOrParam)) && !docIdOrParam.toString().includes("/"))) {
+        url += `?document_id=${docIdOrParam}`;
+      } else {
+        url += `?survey_number=${encodeURIComponent(docIdOrParam.toString())}`;
+      }
+
+      const res = await fetch(url);
+      if (res.ok) {
+        const data = await res.json();
+        setCustomGraphData(data);
+      }
+    } catch {
+      // Fallback
+    } finally {
+      setCustomLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchAllIntelligence(surveyQuery);
+    handleFetchCustomGraph(1);
   }, []);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
@@ -698,6 +735,166 @@ export default function LandIntelligencePage() {
           </Card>
         </div>
       )}
+
+      {/* Section 9: Custom Document Lineage Graph & Database Search */}
+      <div className="pt-8 border-t border-white/[0.08] space-y-6">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-5 rounded-xl bg-gradient-to-r from-indigo-950/40 via-slate-900 to-teal-950/40 border border-indigo-500/20">
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <Search className="w-4 h-4 text-indigo-400" />
+              <span className="text-[11px] uppercase font-mono tracking-wider text-indigo-400 font-semibold">
+                Custom Document Ownership Lineage Generator
+              </span>
+            </div>
+            <h2 className="text-xl font-bold text-white">
+              Dynamic Document Search & Succession Flow Engine
+            </h2>
+            <p className="text-xs text-slate-400 mt-0.5">
+              Select any registered document from your database or enter a custom Survey / Deed identifier to automatically extract parties, transactions, and synthesize an interactive ownership transfer graph.
+            </p>
+          </div>
+          
+          {/* Custom Search Form */}
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (customSearchQuery.trim()) {
+                handleFetchCustomGraph(customSearchQuery.trim());
+              }
+            }}
+            className="flex items-center gap-2 shrink-0"
+          >
+            <div className="relative">
+              <Search className="w-3.5 h-3.5 absolute left-3 top-2.5 text-slate-500" />
+              <input
+                type="text"
+                value={customSearchQuery}
+                onChange={(e) => setCustomSearchQuery(e.target.value)}
+                placeholder="Survey / Deed ID / Village"
+                className="h-8 w-44 pl-8 pr-3 bg-slate-950 border border-slate-700 rounded-lg text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+              />
+            </div>
+            <Button
+              type="submit"
+              size="sm"
+              className="bg-indigo-600 hover:bg-indigo-500 text-white text-xs h-8 gap-1.5"
+            >
+              <RefreshCw className={`w-3 h-3 ${customLoading ? "animate-spin" : ""}`} />
+              <span>Search DB</span>
+            </Button>
+          </form>
+        </div>
+
+        {/* Database Documents Selector Grid */}
+        <Card className="bg-slate-900/60 border-slate-800">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-semibold text-white flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <FileText className="w-4 h-4 text-indigo-400" />
+                <span>Select from Database Documents & Registered Deeds ({dbDocuments.length || 3})</span>
+              </div>
+              <Badge variant="outline" className="text-[10px] border-slate-700 text-slate-400">
+                1-Click Graph Synthesis
+              </Badge>
+            </CardTitle>
+            <CardDescription className="text-xs text-slate-400">
+              Click any deed below to inspect its extracted entities and visualize its custom directed succession graph.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              {/* Preset 1: Satbara 142 Wagholi */}
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedCustomDocId("142");
+                  handleFetchCustomGraph("142");
+                }}
+                className={`p-3.5 rounded-lg border text-left transition-all ${
+                  selectedCustomDocId === "142" || selectedCustomDocId === 142
+                    ? "bg-teal-950/40 border-teal-500 text-white ring-1 ring-teal-500"
+                    : "bg-slate-950/70 border-slate-800 hover:border-slate-700 text-slate-300"
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-white">Maharashtra 7/12 Satbara</span>
+                  <Badge variant="verified" className="text-[9px]">3-Way Split</Badge>
+                </div>
+                <div className="text-[11px] text-teal-400 mt-1">Survey 142 • Wagholi, Pune (10.0 Ac)</div>
+                <div className="text-[10px] text-slate-500 mt-1 font-mono">Parties: Anand Rao → Ramesh, Suresh, Sunita → Arun</div>
+              </button>
+
+              {/* Preset 2: Rajasthan Patta Vilekh */}
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedCustomDocId(1);
+                  handleFetchCustomGraph(1);
+                }}
+                className={`p-3.5 rounded-lg border text-left transition-all ${
+                  selectedCustomDocId === 1 || selectedCustomDocId === "1"
+                    ? "bg-teal-950/40 border-teal-500 text-white ring-1 ring-teal-500"
+                    : "bg-slate-950/70 border-slate-800 hover:border-slate-700 text-slate-300"
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-white">Rajasthan Patta Vilekh</span>
+                  <Badge variant="verified" className="text-[9px]">Lease Grant</Badge>
+                </div>
+                <div className="text-[11px] text-indigo-400 mt-1">Stamp #D 245243 • Durgapura, Jaipur (1.20 Ac)</div>
+                <div className="text-[10px] text-slate-500 mt-1 font-mono">Parties: Governor of RJ → Vagish Champa Trust</div>
+              </button>
+
+              {/* Preset 3: Andhra Pradesh Telugu Sale Deed */}
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedCustomDocId("telugu");
+                  handleFetchCustomGraph("telugu");
+                }}
+                className={`p-3.5 rounded-lg border text-left transition-all ${
+                  selectedCustomDocId === "telugu"
+                    ? "bg-teal-950/40 border-teal-500 text-white ring-1 ring-teal-500"
+                    : "bg-slate-950/70 border-slate-800 hover:border-slate-700 text-slate-300"
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-white">Andhra Pradesh Telugu Sale Deed</span>
+                  <Badge variant="verified" className="text-[9px]">Sale Transfer</Badge>
+                </div>
+                <div className="text-[11px] text-amber-400 mt-1">విక్రయ దస్తావేజు • Guntur City (2.10 Ac)</div>
+                <div className="text-[10px] text-slate-500 mt-1 font-mono">Parties: V. Mallikarjuna Rao → G. Vijayalakshmi</div>
+              </button>
+            </div>
+
+            {/* Custom Dynamic Graph Canvas for Selected Document */}
+            <div className="mt-6 pt-6 border-t border-slate-800">
+              {customLoading ? (
+                <div className="py-12 flex flex-col items-center justify-center gap-3 text-slate-400">
+                  <RefreshCw className="w-8 h-8 animate-spin text-teal-400" />
+                  <span className="text-xs font-mono">Querying database & synthesizing custom lineage graph...</span>
+                </div>
+              ) : customGraphData ? (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between bg-slate-950/80 p-3 rounded-lg border border-slate-800">
+                    <div className="flex items-center gap-2">
+                      <Sparkles className="w-4 h-4 text-teal-400" />
+                      <span className="text-xs font-bold text-white">
+                        Synthesized Custom Graph for: {customGraphData.document_name || customGraphData.survey_number}
+                      </span>
+                    </div>
+                    <Badge variant="outline" className="text-[10px] font-mono border-teal-500/30 text-teal-300">
+                      {customGraphData.source || "DYNAMIC_DB_GRAPH"}
+                    </Badge>
+                  </div>
+
+                  <OwnershipLineageGraph data={customGraphData} />
+                </div>
+              ) : null}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
 
     </div>
   );
