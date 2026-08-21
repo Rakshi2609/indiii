@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 from app.api.deps import get_optional_current_user
 from app.db.database import get_db
 from app.models.document import Document, DocumentStatus
+from app.models.record import LandRecord
 from app.models.user import User, UserRole
 from app.schemas.document import (
     DocumentListResponse,
@@ -256,6 +257,41 @@ def get_document_extraction(
 
 
 @router.delete(
+    "/reset/demo",
+    status_code=status.HTTP_200_OK,
+    summary="Reset all demo documents and records"
+)
+def reset_demo_documents(
+    request: Request,
+    db: Session = Depends(get_db),
+    current_user: Optional[User] = Depends(get_optional_current_user)
+) -> dict:
+    """Wipe all uploaded documents and extracted land records for demo reset."""
+    docs = db.query(Document).all()
+    count = len(docs)
+    for doc in docs:
+        storage_service.delete_file(doc.filename)
+        rec = db.query(LandRecord).filter(LandRecord.document_id == doc.id).first()
+        if rec:
+            db.delete(rec)
+        db.delete(doc)
+    db.commit()
+
+    # Audit logging
+    audit_service.log_event(
+        db=db,
+        action="DEMO_RESET",
+        resource_type="SYSTEM",
+        resource_id=0,
+        user_id=current_user.id if current_user else None,
+        new_value={"deleted_documents_count": count},
+        ip_address=request.client.host if request.client else None
+    )
+
+    return {"message": f"Successfully reset demo state. Removed {count} document(s) and records."}
+
+
+@router.delete(
     "/{document_id}",
     status_code=status.HTTP_200_OK,
     summary="Delete document and its stored file"
@@ -266,13 +302,18 @@ def delete_document(
     db: Session = Depends(get_db),
     current_user: Optional[User] = Depends(get_optional_current_user)
 ) -> dict:
-    """Delete a document record and clean up the underlying file."""
+    """Delete a document record and clean up the underlying file and associated records."""
     doc = db.query(Document).filter(Document.id == document_id).first()
     if not doc:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Document with ID {document_id} not found."
         )
+
+    # Delete associated land record if any
+    rec = db.query(LandRecord).filter(LandRecord.document_id == doc.id).first()
+    if rec:
+        db.delete(rec)
 
     storage_service.delete_file(doc.filename)
     db.delete(doc)

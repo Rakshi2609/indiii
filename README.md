@@ -9,13 +9,13 @@
 [![PostgreSQL & PostGIS](https://img.shields.io/badge/PostGIS-3.3-336791?style=for-the-badge&logo=postgresql&logoColor=white)](https://postgis.net)
 [![Sarvam AI](https://img.shields.io/badge/Sarvam_Vision-1.5-FF6F00?style=for-the-badge)](https://www.sarvam.ai)
 [![Mistral OCR](https://img.shields.io/badge/Mistral_OCR-Latest-F43F5E?style=for-the-badge)](https://mistral.ai)
-[![Gemini](https://img.shields.io/badge/Google_Gemini-1.5_Pro-4285F4?style=for-the-badge&logo=google&logoColor=white)](https://ai.google.dev)
+[![Gemini](https://img.shields.io/badge/Google_Gemini-2.0_Flash-4285F4?style=for-the-badge&logo=google&logoColor=white)](https://ai.google.dev)
+[![Leaflet GIS](https://img.shields.io/badge/Leaflet-Satellite_GIS-199900?style=for-the-badge&logo=leaflet&logoColor=white)](https://leafletjs.com)
 [![Tests](https://img.shields.io/badge/Pytest-50%20Passed-emerald?style=for-the-badge)](#-automated-testing-suite)
-[![Playwright](https://img.shields.io/badge/Playwright-E2E_Verified-45ba4b?style=for-the-badge&logo=playwright&logoColor=white)](https://playwright.dev)
 
-*Transforming complex, unstructured historical Indian land records into tamper-evident, spatially verified digital cadastral intelligence.*
+*Transforming complex, unstructured historical Indian land revenue records into tamper-evident, spatially verified digital cadastral intelligence.*
 
-[🎯 3-Minute Hackathon Pitch](docs/PITCH.md) • [📊 Analytics Dashboard](http://localhost:3000/dashboard) • [🗺️ Cadastral GIS Explorer](http://localhost:3000/gis) • [✍️ Verification Workbench](http://localhost:3000/verification) • [📑 Swagger API Docs](http://localhost:8000/docs)
+[🎯 3-Minute Hackathon Pitch](docs/PITCH.md) • [📊 Executive Dashboard](http://localhost:3000/dashboard) • [🗺️ Cadastral Satellite GIS](http://localhost:3000/gis) • [✍️ Verification Workbench](http://localhost:3000/verification) • [📑 Swagger API Docs](http://localhost:8000/docs)
 
 </div>
 
@@ -27,8 +27,9 @@
 - [Key Features & Highlights](#-key-features--highlights)
 - [System Architecture](#-system-architecture)
 - [Multi-Model AI Extraction Pipeline](#-multi-model-ai-extraction-pipeline)
-- [Cadastral GIS & PostGIS Spatial Engine](#-cadastral-gis--postgis-spatial-engine)
+- [Live Satellite Cadastral GIS Explorer](#-live-satellite-cadastral-gis-explorer)
 - [Human-in-the-Loop Active Learning Workbench](#-human-in-the-loop-active-learning-workbench)
+- [Demo Manager & Document Deletion](#-demo-manager--document-deletion)
 - [API Endpoints Reference](#-api-endpoints-reference)
 - [Quickstart: Run Locally in 3 Steps](#-quickstart-run-locally-in-3-steps)
 - [Environment Configuration](#-environment-configuration)
@@ -43,8 +44,8 @@
 In India today, **over 66% of all civil litigation** is tied to land and property ownership disputes. This single issue locks up more than **$200 Billion** in stalled infrastructure, delayed housing projects, and contested agricultural mortgages.
 
 ### The Core Challenges:
-1. **Multilingual, Degraded Paper Extracts**: Historical revenue deeds (**7/12 Satbara in Maharashtra, RTC Pahani in Karnataka, Jamabandi in Punjab/Haryana, Khatauni in UP, Patta/Chitta in Tamil Nadu**) are handwritten or poorly printed across dozens of regional scripts.
-2. **Generic OCR Failures**: Mainstream Western OCR engines fail to parse Indic tabular structures, Devanagari numerals (१, २, ३...), and complex revenue terminology (*Hissa, Pot-Kharaba, Khatadar, Cultivable vs. Uncultivable Extents*).
+1. **Multilingual, Degraded Paper Extracts**: Historical revenue deeds (**7/12 Satbara in Maharashtra, RTC Pahani in Karnataka, Vikraya Dastaaveju in Andhra Pradesh, Patta Vilekh in Rajasthan, Jamabandi in Punjab/Haryana, Khatauni in UP**) are handwritten or poorly printed across dozens of regional Indic scripts.
+2. **Generic OCR Failures**: Mainstream Western OCR engines fail to parse Indic tabular structures, Devanagari numerals (१, २, ३...), and regional revenue terminology (*Hissa, Pot-Kharaba, Khatadar, Cultivable vs. Uncultivable Extents*).
 3. **Deed vs. Physical Ground Discrepancies**: Written deeds frequently claim land areas that contradict actual surveyed physical cadastral polygons.
 4. **Fraudulent Mutations & Broken Succession Chains**: Lack of fuzzy phonetic matching enables duplicate title sales and unverified mutation entries.
 
@@ -54,13 +55,14 @@ In India today, **over 66% of all civil litigation** is tied to land and propert
 
 | Feature | Description |
 | :--- | :--- |
-| **Indic Document AI** | Specialized OCR tuned for Indian revenue records powered by **Sarvam Vision 1.5** and **Mistral OCR (`mistral-ocr-latest`)**. |
-| **Resilient AI Router** | Multi-tier automated failover chain (**Sarvam $\rightarrow$ Mistral $\rightarrow$ Gemini 1.5 Pro**) with multi-model High-Accuracy ensemble cross-validation. |
-| **PostGIS Cadastral Verification** | Automatically computes geodetic polygon surface areas and flags spatial boundary discrepancies exceeding a $5\%$ tolerance. |
+| **Indic Document AI** | Autonomous multi-lingual vision OCR tuned for Indian revenue records powered by **Google Gemini 2.0 / 1.5 Flash Vision**, **Sarvam Vision**, and **Mistral OCR**. |
+| **Resilient AI Router** | Automated failover chain (**Gemini $\rightarrow$ Sarvam $\rightarrow$ Mistral**) with High-Accuracy ensemble cross-validation and zero manual language selection required. |
+| **Live Satellite GIS Engine** | Interactive high-resolution satellite imagery (Esri World Imagery / CartoDB Dark) overlaid with PostGIS WGS-84 cadastral polygon boundaries and $5\%$ discrepancy flags. |
 | **Fuzzy Title Chain Matcher** | Levenshtein-based entity normalization using RapidFuzz to resolve transliterated owner names across decades of mutation ledgers. |
-| **Active Learning Workbench** | Side-by-side deed viewer with bounding box citations, active learning field corrections, and 1-click statutory approval workflows. |
+| **Active Learning Workbench** | Side-by-side deed viewer with real uploaded image rendering, bounding box citations, active learning field corrections, and statutory approval workflows. |
+| **Demo-Friendly Repository Manager** | 1-Click single deed deletion and bulk demo reset to clear all test records instantly during presentations. |
+| **Enterprise Side Navigation** | Palantir/Linear grade floating collapsible sidebar with `⌘K` command search, Indic sub-labels, AI engine status indicator, and RBAC switcher. |
 | **Enterprise RBAC & Audit Trail** | 6 statutory revenue roles with tamper-evident, JSON-diffed audit logging for every deed mutation. |
-| **Executive Telemetry Dashboard** | Real-time district-wise digitization velocity, validation conflict rates, and queue throughput metrics. |
 
 ---
 
@@ -68,13 +70,13 @@ In India today, **over 66% of all civil litigation** is tied to land and propert
 
 ```mermaid
 graph TD
-    A[Multilingual Land Deed PDF / Image] --> B[FastAPI Gateway :8000]
+    A[Multilingual Land Deed PDF / JPG / PNG] --> B[FastAPI Gateway :8000]
     
     subgraph AI Intelligence Layer
         B --> C{Resilient AI Router}
-        C -->|Primary Indic OCR| D[Sarvam Vision 1.5 API]
-        C -->|Layout & Markdown| E[Mistral OCR - mistral-ocr-latest]
-        C -->|Complex Reasoning Fallback| F[Google Gemini 1.5 Pro]
+        C -->|Primary Vision & Reasoning| D[Google Gemini 2.0 / 1.5 Flash]
+        C -->|Indic Language Specialist| E[Sarvam Vision 1.5 API]
+        C -->|Layout & Tables| F[Mistral OCR - mistral-ocr-latest]
     end
     
     subgraph Data & Verification Core
@@ -90,10 +92,10 @@ graph TD
     subgraph Presentation & Review Layer
         I --> L[Officer Verification Queue]
         L --> M[Next.js 16 App Router UI :3000]
-        M --> N[Interactive Cadastral GIS Vector Map]
+        M --> N[Leaflet Live Satellite GIS Explorer]
         M --> O[Side-by-Side Review Workbench]
         M --> P[Executive Telemetry Dashboard]
-        M --> Q[Enterprise Audit Trail]
+        M --> Q[Enterprise Audit Trail & Demo Manager]
     end
 ```
 
@@ -105,34 +107,44 @@ Land AI features an **AIRouter** designed for mission-critical uptime during hig
 
 ```python
 # Processing Modes:
-# 1. Standard Fallback: Sarvam Vision 1.5 -> Mistral OCR -> Gemini 1.5 Pro
-# 2. High-Accuracy Ensemble: Sarvam + Mistral OCR Cross-Validation
+# 1. Standard Mode: Gemini 2.0/1.5 Flash -> Sarvam Vision -> Mistral OCR Fallback
+# 2. High-Accuracy Ensemble: Multi-Model Cross-Validation with Agreement Scoring
 ```
 
-- **Sarvam Vision 1.5**: Primary engine for Indian language tokens, Devanagari script numeral parsing, and regional revenue syntax.
-- **Mistral OCR (`mistral-ocr-latest`)**: High-fidelity layout analysis, markdown table reconstruction, and bounding box citations.
-- **Google Gemini 1.5 Pro**: Multimodal complex reasoning fallback for degraded, torn, or low-contrast historical deeds.
+- **Automatic Language & Script Detection**: The model inspects raw pixels to automatically detect Telugu, Hindi, Marathi, Kannada, Tamil, or Gujarati without requiring user dropdown selection.
+- **Form Classification**: Automatically categorizes documents as *7/12 Satbara*, *Patta Vilekh*, *Vikraya Dastaaveju (Sale Deed)*, *RTC Pahani*, or *Jamabandi*.
 - **Ensemble Agreement Score**: Compares extracted survey numbers, land areas, and owner names across independent models to flag ambiguities before human sign-off.
 
 ---
 
-## 🗺️ Cadastral GIS & PostGIS Spatial Engine
+## 🗺️ Live Satellite Cadastral GIS Explorer
 
-Land AI connects extracted legal deed text with real-world spatial geometries:
-1. **Geodetic Polygon Projection**: Computes true ground surface area from WGS84 GeoJSON polygons with centroid latitude scaling.
-2. **Spatial Boundary Validation**: Calculates $\Delta = \frac{|\text{Extracted Area} - \text{Cadastral Polygon Area}|}{\text{Cadastral Polygon Area}} \times 100\%$.
-3. **Discrepancy Flagging**: If $\Delta > 5\%$, the validation engine automatically generates a `GIS_CONFLICT` issue with high severity.
-4. **Vector Map Visualizer**: Interactive SVG & GeoJSON parcel viewer rendering parcel boundaries, ownership overlays, and conflict status.
+Land AI connects extracted legal deed text with real-world spatial geometries on an interactive vector map ([`/gis`](http://localhost:3000/gis)):
+
+1. **High-Resolution Satellite Imagery**: Powered by Esri World Imagery with toggles for CartoDB Dark Command and OpenStreetMap.
+2. **Geodetic Polygon Projection**: Computes true ground surface area from WGS-84 GeoJSON polygons with centroid latitude scaling.
+3. **Spatial Boundary Validation**: Calculates $\Delta = \frac{|\text{Extracted Area} - \text{Cadastral Polygon Area}|}{\text{Cadastral Polygon Area}} \times 100\%$.
+4. **Discrepancy Flagging**: If $\Delta > 5\%$, the validation engine automatically marks the plot as `FLAGGED_FOR_REVIEW` (amber) or `REJECTED_CRITICAL` (red).
+5. **Interactive Inspector**: Click any parcel to inspect Khatadars, GIS area, and jump straight into the human verification workbench.
 
 ---
 
 ## ✍️ Human-in-the-Loop Active Learning Workbench
 
-Revenue officers inspect flagged records in a high-efficiency split-screen interface:
-- **Left Pane**: Original high-resolution document viewer with zoom, rotate, and interactive bounding box citations.
-- **Right Pane**: Structured, typed schemas (Administrative, Land Extents, Khatadars, Mutation History, Encumbrances).
+Revenue officers inspect flagged records in a high-efficiency split-screen interface ([`/verification/[id]`](http://localhost:3000/verification/1)):
+
+- **Left Pane**: Original high-resolution uploaded deed viewer with zoom, rotate, and interactive bounding box citations.
+- **Right Pane**: Structured, typed revenue schemas (Administrative, Land Extents, Khatadars, Mutation History, Encumbrances).
 - **Active Learning**: In-place field editing logs correction diffs to the audit table, enabling continuous model fine-tuning.
 - **One-Click Actions**: `[ ACCEPT / APPROVE ]`, `[ EDIT & SAVE ]`, and `[ REJECT ]` with mandatory statutory reasoning.
+
+---
+
+## 🗑️ Demo Manager & Document Deletion
+
+To ensure smooth, repeatable hackathon demonstrations:
+- **Single Document Deletion**: Delete individual deeds and clean up associated database records with cascading removal via `DELETE /api/documents/{id}` or the red trash icon on `/upload` and `/verification`.
+- **1-Click Demo Reset**: Wipe all uploaded test files and re-initialize the clean state using the **"Reset Demo Data"** button (`DELETE /api/documents/reset/demo`).
 
 ---
 
@@ -143,7 +155,9 @@ Revenue officers inspect flagged records in a high-efficiency split-screen inter
 | **Health** | `GET` | `/health` | Live telemetry & service status |
 | **Documents** | `POST` | `/api/documents/upload` | Multi-file deed upload & metadata storage |
 | **Documents** | `GET` | `/api/documents/` | Paginated document listing |
-| **Documents** | `POST` | `/api/documents/{id}/process` | Trigger Sarvam / Mistral / Gemini extraction |
+| **Documents** | `POST` | `/api/documents/{id}/process` | Trigger Gemini / Sarvam / Mistral extraction |
+| **Documents** | `DELETE` | `/api/documents/{id}` | Delete document file and associated land record |
+| **Documents** | `DELETE` | `/api/documents/reset/demo` | Bulk wipe all demo documents and records |
 | **Records** | `GET` | `/api/records/{id}` | Fetch typed LandRecord & Evidence citations |
 | **Records** | `POST` | `/api/records/{id}/validate` | Execute rule-based & arithmetic checks |
 | **Duplicates** | `GET` | `/api/records/{id}/duplicates` | RapidFuzz similarity check for duplicate titles |
@@ -261,21 +275,10 @@ cd apps/api
 source .venv/bin/activate
 pytest -v
 
-# 2. Run Frontend Playwright End-to-End User Journey Tests
+# 2. Build and Verify Next.js App Router Frontend
 cd apps/web
 npm run build
-npx playwright test
 ```
-
-### Test Coverage Highlights
-- ✅ **Document Pipeline**: Single & batch deed uploads, MIME type validation, file persistence.
-- ✅ **AI Providers**: Sarvam Vision, Mistral OCR, Gemini 1.5 Pro fallback chains, ensemble scoring.
-- ✅ **Validation Engine**: Extent arithmetic balance checks, mandatory field validation, missing owner flags.
-- ✅ **Cadastral GIS**: Geodetic polygon surface area computation, $>5\%$ spatial conflict alerts.
-- ✅ **Title Matching**: RapidFuzz Levenshtein similarity, duplicate title detection, succession chain checks.
-- ✅ **Human Verification**: Queue priority sorting, approval transitions, active learning correction diffs.
-- ✅ **Security & RBAC**: Password hashing, JWT token expiry, role-based endpoint restriction.
-- ✅ **Playwright E2E**: Complete officer user journey from Dashboard $\rightarrow$ Record Selection $\rightarrow$ Field Correction $\rightarrow$ Approval Banner.
 
 ---
 
@@ -284,10 +287,10 @@ npx playwright test
 | Route | Interface Name | Purpose |
 | :--- | :--- | :--- |
 | [`/`](http://localhost:3000/) | **Home Overview** | Monorepo architecture overview & service status matrix |
-| [`/upload`](http://localhost:3000/upload) | **Deed Upload & Pipeline** | 1-Click sample deed upload, OCR engine selection, and AI processing |
+| [`/upload`](http://localhost:3000/upload) | **Deed Upload & Demo Manager** | 1-Click sample deed upload, autonomous language recognition, document directory, and demo reset |
 | [`/dashboard`](http://localhost:3000/dashboard) | **Executive Dashboard** | District digitization KPIs, document throughput, conflict tracking |
-| [`/gis`](http://localhost:3000/gis) | **Cadastral GIS Map** | Interactive vector parcel boundary explorer & spatial discrepancy viewer |
-| [`/verification`](http://localhost:3000/verification) | **Verification Queue** | Priority officer queue for records with low confidence or conflicts |
+| [`/gis`](http://localhost:3000/gis) | **Satellite GIS Map** | Interactive Esri satellite imagery with PostGIS cadastral polygon boundary overlay |
+| [`/verification`](http://localhost:3000/verification) | **Verification Queue** | Priority officer queue for records with low confidence or conflicts with direct delete action |
 | [`/verification/[id]`](http://localhost:3000/verification/1) | **Review Workbench** | Side-by-side deed inspection with bounding box citations & active learning editing |
 | [`/audit`](http://localhost:3000/audit) | **Enterprise Audit Trail** | Tamper-evident ledger of all deed edits, approvals, and RBAC actions |
 

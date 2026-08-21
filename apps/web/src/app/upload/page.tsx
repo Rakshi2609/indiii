@@ -4,8 +4,10 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
+  AlertOctagon,
   ArrowRight,
   CheckCircle2,
+  Clock,
   Cpu,
   FileCheck2,
   FileText,
@@ -19,6 +21,7 @@ import {
   ShieldAlert,
   ShieldCheck,
   Sparkles,
+  Trash2,
   UploadCloud,
   Zap
 } from "lucide-react";
@@ -41,6 +44,10 @@ export default function DocumentUploadPage() {
     confidence?: number;
   } | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [uploadedDocs, setUploadedDocs] = useState<any[]>([]);
+  const [docsLoading, setDocsLoading] = useState<boolean>(false);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [resettingDemo, setResettingDemo] = useState<boolean>(false);
 
   const sampleDeeds = [
     {
@@ -88,6 +95,72 @@ export default function DocumentUploadPage() {
       setError(null);
     } catch {
       setError("Failed to load sample deed file.");
+    }
+  };
+
+  const fetchUploadedDocs = async () => {
+    setDocsLoading(true);
+    try {
+      const res = await fetch("http://localhost:8000/api/documents");
+      if (res.ok) {
+        const data = await res.json();
+        setUploadedDocs(data.documents || []);
+      }
+    } catch {
+      // Offline fallback
+    } finally {
+      setDocsLoading(false);
+    }
+  };
+
+  React.useEffect(() => {
+    fetchUploadedDocs();
+  }, []);
+
+  const handleDeleteDocument = async (docId: number) => {
+    if (!confirm(`Are you sure you want to delete Document #${docId}? This will remove the file and associated land record.`)) {
+      return;
+    }
+    setDeletingId(docId);
+    try {
+      const res = await fetch(`http://localhost:8000/api/documents/${docId}`, {
+        method: "DELETE"
+      });
+      if (res.ok) {
+        setUploadedDocs((prev) => prev.filter((d) => d.id !== docId));
+        if (resultRecordId === docId) {
+          setResultRecordId(null);
+          setExtractedMetadata(null);
+        }
+      } else {
+        alert("Failed to delete document from server.");
+      }
+    } catch {
+      setUploadedDocs((prev) => prev.filter((d) => d.id !== docId));
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
+  const handleResetDemo = async () => {
+    if (!confirm("Are you sure you want to reset all demo documents and records? This creates a clean slate for pitch presentation.")) {
+      return;
+    }
+    setResettingDemo(true);
+    try {
+      const res = await fetch("http://localhost:8000/api/documents/reset/demo", {
+        method: "DELETE"
+      });
+      if (res.ok) {
+        setUploadedDocs([]);
+        setResultRecordId(null);
+        setExtractedMetadata(null);
+        setFile(null);
+      }
+    } catch {
+      setUploadedDocs([]);
+    } finally {
+      setResettingDemo(false);
     }
   };
 
@@ -421,6 +494,113 @@ export default function DocumentUploadPage() {
                     </Button>
                   </Link>
                 </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Uploaded Documents Directory & Demo Reset Manager */}
+        <Card className="bg-slate-900/60 border-slate-800">
+          <CardHeader className="pb-3 flex flex-row items-center justify-between">
+            <div>
+              <CardTitle className="text-sm font-semibold text-white flex items-center gap-2">
+                <FileText className="w-4 h-4 text-teal-400" />
+                Uploaded Documents Repository & Demo Manager
+              </CardTitle>
+              <CardDescription className="text-xs text-slate-400 mt-0.5">
+                Manage registered land deeds, inspect extractions, or delete files to reset demo state.
+              </CardDescription>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={fetchUploadedDocs}
+                disabled={docsLoading}
+                className="h-8 border-slate-700 bg-slate-800/80 text-xs text-slate-300 hover:text-white"
+              >
+                <RefreshCw className={`w-3.5 h-3.5 mr-1.5 ${docsLoading ? "animate-spin" : ""}`} />
+                Refresh
+              </Button>
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={handleResetDemo}
+                disabled={resettingDemo || uploadedDocs.length === 0}
+                className="h-8 text-xs font-semibold gap-1.5"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                {resettingDemo ? "Resetting..." : "Reset Demo Data"}
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {uploadedDocs.length === 0 ? (
+              <div className="text-center py-8 border border-dashed border-slate-800 rounded-lg text-slate-500 text-xs">
+                No documents uploaded yet. Upload a deed above or click a sample to test extraction.
+              </div>
+            ) : (
+              <div className="divide-y divide-slate-800/80 rounded-lg border border-slate-800 overflow-hidden bg-slate-950/60">
+                {uploadedDocs.map((doc) => (
+                  <div
+                    key={doc.id}
+                    className="p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-slate-900/40 transition-colors"
+                  >
+                    <div className="flex items-center gap-3 overflow-hidden">
+                      <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-slate-900 border border-slate-800 text-teal-400 shrink-0">
+                        <FileText className="w-4 h-4" />
+                      </div>
+                      <div className="flex flex-col min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-semibold text-white truncate max-w-xs" title={doc.original_name}>
+                            {doc.original_name}
+                          </span>
+                          <Badge
+                            variant={doc.status === "COMPLETED" ? "verified" : "secondary"}
+                            className="text-[10px] px-1.5 py-0"
+                          >
+                            {doc.status}
+                          </Badge>
+                        </div>
+                        <div className="flex items-center gap-2 text-[11px] text-slate-500 mt-0.5">
+                          <span>ID #{doc.id}</span>
+                          <span>•</span>
+                          <span>{(doc.file_size / 1024).toFixed(0)} KB</span>
+                          <span>•</span>
+                          <span>{doc.created_at ? new Date(doc.created_at).toLocaleTimeString() : "Uploaded"}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 shrink-0">
+                      <Link href={`/verification/${doc.id}`}>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-8 border-slate-700 bg-slate-800 text-slate-200 hover:text-white text-xs gap-1.5"
+                        >
+                          <FileCheck2 className="w-3.5 h-3.5 text-emerald-400" />
+                          <span>Inspect</span>
+                        </Button>
+                      </Link>
+
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => handleDeleteDocument(doc.id)}
+                        disabled={deletingId === doc.id}
+                        className="h-8 w-8 p-0 text-slate-500 hover:text-red-400 hover:bg-red-950/30 transition-colors"
+                        title="Delete Document"
+                      >
+                        {deletingId === doc.id ? (
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        ) : (
+                          <Trash2 className="w-3.5 h-3.5" />
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
           </CardContent>

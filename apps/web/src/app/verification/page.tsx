@@ -13,7 +13,9 @@ import {
   Search, 
   ShieldAlert, 
   ArrowRight,
-  Sparkles
+  Sparkles,
+  Trash2,
+  Loader2
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -40,6 +42,30 @@ export default function VerificationQueuePage() {
   const [loading, setLoading] = useState(true);
   const [filterStatus, setFilterStatus] = useState<string>("ALL");
   const [searchQuery, setSearchQuery] = useState("");
+  const [deletingId, setDeletingId] = useState<number | null>(null);
+
+  const handleDeleteQueueItem = async (e: React.MouseEvent, docId: number, recordId: number) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!confirm(`Are you sure you want to delete Record #${recordId}? This will remove the document and all validation results.`)) {
+      return;
+    }
+    setDeletingId(recordId);
+    try {
+      const res = await fetch(`http://localhost:8000/api/documents/${docId}`, {
+        method: "DELETE"
+      });
+      if (res.ok) {
+        setItems((prev) => prev.filter((item) => item.record_id !== recordId));
+      } else {
+        alert("Failed to delete record from server.");
+      }
+    } catch {
+      setItems((prev) => prev.filter((item) => item.record_id !== recordId));
+    } finally {
+      setDeletingId(null);
+    }
+  };
 
   const fetchQueue = async () => {
     setLoading(true);
@@ -272,13 +298,28 @@ export default function VerificationQueuePage() {
                     </div>
                   </div>
 
-                  <div className="shrink-0 flex items-center gap-3">
+                  <div className="shrink-0 flex items-center gap-2">
                     <Link href={`/verification/${item.record_id}`}>
                       <Button className="bg-emerald-600 hover:bg-emerald-500 text-white gap-2 text-xs">
                         Open Workspace
                         <ArrowRight className="w-3.5 h-3.5" />
                       </Button>
                     </Link>
+
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={(e) => handleDeleteQueueItem(e, item.document_id, item.record_id)}
+                      disabled={deletingId === item.record_id}
+                      className="h-8 w-8 p-0 text-slate-500 hover:text-red-400 hover:bg-red-950/30 transition-colors"
+                      title="Delete Record"
+                    >
+                      {deletingId === item.record_id ? (
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      ) : (
+                        <Trash2 className="w-3.5 h-3.5" />
+                      )}
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
