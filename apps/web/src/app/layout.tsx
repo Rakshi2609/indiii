@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { Navbar } from "@/components/Navbar";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -14,7 +15,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Land AI - Land Record Intelligence & Cadastral Verification Platform",
-  description: "Enterprise Indian Land Revenue, Sarvam Vision OCR & Cadastral GIS Verification Platform",
+  description: "Enterprise Indian Land Revenue, Indic Document AI & Cadastral GIS Verification Platform",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -23,7 +24,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-slate-950 text-slate-100">{children}</body>
+      <body className="min-h-full flex flex-col bg-slate-950 text-slate-100">
+        <Navbar />
+        <div className="flex-1 flex flex-col">
+          {children}
+        </div>
+      </body>
     </html>
   );
 }
