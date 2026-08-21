@@ -20,8 +20,11 @@ def test_validation_rule_checks():
         uncultivable_area=0.05,
         area_unit="hectares",
         owners_data=[
-            {"name_english": "Ramesh Patil", "share_percentage": 50.0},
-            {"name_english": "Suresh Patil", "share_percentage": 50.0}
+            {"name_english": "Ramesh Patil", "share_percentage": 50.0, "mutation_entry_number": "M-101"},
+            {"name_english": "Suresh Patil", "share_percentage": 50.0, "mutation_entry_number": "M-101"}
+        ],
+        mutations_data=[
+            {"mutation_number": "M-101", "type": "Inheritance"}
         ],
         encumbrances_data=[],
         evidence_items=[

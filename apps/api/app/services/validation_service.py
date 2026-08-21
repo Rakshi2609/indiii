@@ -1,10 +1,12 @@
 import logging
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 from sqlalchemy.orm import Session
 
 from app.models.record import Evidence, LandRecord
 from app.models.validation import IssueSeverity, IssueType, ValidationResult, ValidationStatus
 from app.schemas.validation import ValidationResultResponse, ValidationSummary
+from app.services.duplicate_service import duplicate_service
+from app.services.ownership_service import ownership_service
 
 logger = logging.getLogger(__name__)
 
@@ -12,12 +14,16 @@ logger = logging.getLogger(__name__)
 class ValidationService:
     """
     Automated validation engine for land records: runs cross-field consistency rules,
-    area balance formulas, ownership share checks, and evidence confidence scans.
+    area balance formulas, ownership chain mutations, duplicate detection, and evidence confidence scans.
     """
 
-    def validate_record(self, record: LandRecord) -> Tuple[List[Dict[str, Any]], float, str]:
+    def validate_record(
+        self,
+        record: LandRecord,
+        db: Optional[Session] = None
+    ) -> Tuple[List[Dict[str, Any]], float, str]:
         """
-        Execute deterministic rule-based checks on a LandRecord.
+        Execute deterministic rule-based checks, ownership chain audits, and duplicate scans on a LandRecord.
         Returns: (issues_list, overall_confidence_score, validation_status)
         """
         issues: List[Dict[str, Any]] = []
@@ -96,7 +102,6 @@ class ValidationService:
                 "description": "No registered land owners or khatadars identified in record."
             })
         else:
-            # Check if all owners have percentage shares
             percentages = [o.get("share_percentage") for o in owners if o.get("share_percentage") is not None]
             if len(percentages) == len(owners) and len(owners) > 0:
                 total_percentage = sum(percentages)
@@ -111,7 +116,20 @@ class ValidationService:
                     })
 
         # -------------------------------------------------------------
-        # 4. Evidence Confidence & OCR Quality Checks
+        # 4. Ownership Chain & Mutation Continuity (OwnershipService)
+        # -------------------------------------------------------------
+        ownership_issues = ownership_service.analyze_ownership_chain(record)
+        issues.extend(ownership_issues)
+
+        # -------------------------------------------------------------
+        # 5. Duplicate & Collision Detection (DuplicateDetectionService)
+        # -------------------------------------------------------------
+        if db is not None:
+            duplicate_issues = duplicate_service.detect_duplicates(record, db)
+            issues.extend(duplicate_issues)
+
+        # -------------------------------------------------------------
+        # 6. Evidence Confidence & OCR Quality Checks
         # -------------------------------------------------------------
         evidence_items = record.evidence_items or []
         confidences: List[float] = []
@@ -137,7 +155,7 @@ class ValidationService:
                 })
 
         # -------------------------------------------------------------
-        # 5. Encumbrance & Boja Active Charge Alerts
+        # 7. Encumbrance & Boja Active Charge Alerts
         # -------------------------------------------------------------
         encumbrances = record.encumbrances_data or []
         for enc in encumbrances:
@@ -152,11 +170,10 @@ class ValidationService:
                 })
 
         # -------------------------------------------------------------
-        # 6. Overall Confidence & Health Score Calculation
+        # 8. Overall Confidence & Health Score Calculation
         # -------------------------------------------------------------
         base_confidence = (sum(confidences) / len(confidences)) if confidences else 0.95
 
-        # Penalty deductions based on severity
         penalties = 0.0
         for issue in issues:
             sev = issue["severity"]
@@ -171,7 +188,6 @@ class ValidationService:
 
         final_score = max(0.0, min(1.0, round(base_confidence - penalties, 3)))
 
-        # Derive validation status string
         if any(i["severity"] == IssueSeverity.CRITICAL for i in issues):
             val_status = "REJECTED_CRITICAL"
         elif any(i["severity"] == IssueSeverity.HIGH for i in issues):
@@ -192,7 +208,7 @@ class ValidationService:
         Run validation checks, persist ValidationResult records in DB,
         and update the LandRecord's overall_confidence_score and validation_status.
         """
-        raw_issues, confidence_score, val_status = self.validate_record(record)
+        raw_issues, confidence_score, val_status = self.validate_record(record, db)
 
         # Update LandRecord summary fields
         record.overall_confidence_score = confidence_score
@@ -247,7 +263,7 @@ class ValidationService:
         )
 
         logger.info(
-            f"Record {record.id} validated: score={confidence_score}, status={val_status}, issues={len(persisted_results)}"
+            f"Record {record.id} validated with ownership & duplicate scans: score={confidence_score}, status={val_status}, issues={len(persisted_results)}"
         )
         return record, summary
 
