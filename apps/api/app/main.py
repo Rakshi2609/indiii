@@ -1,10 +1,28 @@
+import logging
+from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import settings
+from app.db.database import init_db
+from app.api.auth import router as auth_router
 from app.api.v1.api import api_router
 from app.schemas.health import HealthResponse
+
+# Configure root logger
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Application lifespan context manager for startup and shutdown events."""
+    logger.info("Starting Land AI API Service...")
+    # Initialize database tables on startup
+    init_db()
+    yield
+    logger.info("Shutting down Land AI API Service...")
 
 
 def create_application() -> FastAPI:
@@ -14,6 +32,7 @@ def create_application() -> FastAPI:
         openapi_url=f"{settings.API_V1_STR}/openapi.json",
         docs_url=f"{settings.API_V1_STR}/docs",
         redoc_url=f"{settings.API_V1_STR}/redoc",
+        lifespan=lifespan
     )
 
     # CORS configuration
@@ -36,7 +55,10 @@ def create_application() -> FastAPI:
             timestamp=datetime.now(timezone.utc)
         )
 
-    # Include API router
+    # Primary auth router mounted at /api/auth
+    app.include_router(auth_router, prefix="/api/auth")
+
+    # API v1 routes (including /api/v1/health and v1 features)
     app.include_router(api_router, prefix=settings.API_V1_STR)
 
     return app
