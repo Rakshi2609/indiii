@@ -52,6 +52,9 @@ data/uploads/
 *.png
 *.tiff
 
+# Allow sample deeds for hackathon evaluation
+!sample/**
+
 # Test Artifacts & Playwright
 test-results/
 playwright-report/
