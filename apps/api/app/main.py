@@ -7,6 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
 from app.db.database import init_db
 from app.api.auth import router as auth_router
+from app.api.documents import router as documents_router
 from app.api.v1.api import api_router
 from app.schemas.health import HealthResponse
 
@@ -55,10 +56,13 @@ def create_application() -> FastAPI:
             timestamp=datetime.now(timezone.utc)
         )
 
-    # Primary auth router mounted at /api/auth
+    # Authentication router
     app.include_router(auth_router, prefix="/api/auth")
 
-    # API v1 routes (including /api/v1/health and v1 features)
+    # Documents upload & management router
+    app.include_router(documents_router, prefix="/api/documents")
+
+    # API v1 routes
     app.include_router(api_router, prefix=settings.API_V1_STR)
 
     return app

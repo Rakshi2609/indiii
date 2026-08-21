@@ -42,3 +42,12 @@ Thumbs.db
 .vscode/
 *.swp
 *.swo
+
+# Uploads & Temp Data
+apps/api/data/
+data/uploads/
+*.pdf
+*.jpg
+*.jpeg
+*.png
+*.tiff
