@@ -1,36 +1,33 @@
 "use client";
 
-import React, { useEffect, useState, useMemo, useRef } from "react";
+import React, { useEffect, useState, useMemo } from "react";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import {
-  AlertTriangle,
   ArrowRight,
-  CheckCircle2,
   Compass,
   FileText,
   Filter,
   Globe,
-  Layers,
   MapPin,
-  Maximize2,
-  Minimize2,
   RefreshCw,
   Search,
-  ShieldAlert,
-  Sparkles,
-  UserCheck,
-  X,
-  ZoomIn,
-  ZoomOut,
-  Map as MapIcon,
   Satellite,
-  Navigation,
-  Eye,
-  SlidersHorizontal
+  Map as MapIcon,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+
+// Dynamically import Leaflet LiveMap component (client-side only)
+const LiveMap = dynamic(() => import("@/components/LiveMap"), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full h-full flex flex-col items-center justify-center bg-[#050912] text-[#8B98AA] gap-3">
+      <RefreshCw className="w-8 h-8 animate-spin text-teal-400" />
+      <span className="text-xs font-mono">Initializing High-Resolution Satellite Tiles...</span>
+    </div>
+  ),
+});
 
 interface GeoFeature {
   id: number;
@@ -67,15 +64,8 @@ export default function GISMapExplorerPage() {
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [activeTileLayer, setActiveTileLayer] = useState<"satellite" | "dark" | "osm">("satellite");
-  const [showOverlapConflicts, setShowOverlapConflicts] = useState<boolean>(true);
-  const [showParcelLabels, setShowParcelLabels] = useState<boolean>(true);
 
-  const mapContainerRef = useRef<HTMLDivElement>(null);
-  const leafletMapRef = useRef<any>(null);
-  const geojsonLayerRef = useRef<any>(null);
-  const tileLayerRef = useRef<any>(null);
-
-  // Fetch GeoJSON from API
+  // Fetch GeoJSON features
   const fetchParcels = async () => {
     setLoading(true);
     try {
@@ -83,7 +73,6 @@ export default function GISMapExplorerPage() {
       if (res.ok) {
         const data = await res.json();
         const feats = data.features || [];
-        // Add sample features for Andhra Pradesh and Rajasthan if not present
         const comprehensiveFeats: GeoFeature[] = [
           ...feats,
           {
@@ -283,142 +272,10 @@ export default function GISMapExplorerPage() {
     });
   }, [features, searchQuery, statusFilter]);
 
-  // Initialize and update Leaflet Map
-  useEffect(() => {
-    if (typeof window === "undefined" || !mapContainerRef.current) return;
-
-    let isMounted = true;
-
-    async function initMap() {
-      const L = await import("leaflet");
-
-      if (!mapContainerRef.current || !isMounted) return;
-
-      // Fix Leaflet icon issue in Next.js
-      delete (L.Icon.Default.prototype as any)._getIconUrl;
-      L.Icon.Default.mergeOptions({
-        iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
-        iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
-        shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
-      });
-
-      if (!leafletMapRef.current) {
-        const map = L.map(mapContainerRef.current, {
-          center: [18.5805, 73.9810],
-          zoom: 14,
-          zoomControl: false,
-          attributionControl: false,
-        });
-
-        L.control.zoom({ position: "topright" }).addTo(map);
-
-        leafletMapRef.current = map;
-      }
-
-      const map = leafletMapRef.current;
-
-      // Update Tile Layer
-      if (tileLayerRef.current) {
-        map.removeLayer(tileLayerRef.current);
-      }
-
-      let tileUrl = "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}";
-      let maxZoom = 19;
-
-      if (activeTileLayer === "dark") {
-        tileUrl = "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png";
-        maxZoom = 19;
-      } else if (activeTileLayer === "osm") {
-        tileUrl = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
-        maxZoom = 19;
-      }
-
-      const newTileLayer = L.tileLayer(tileUrl, {
-        maxZoom,
-        subdomains: "abcd",
-      }).addTo(map);
-
-      tileLayerRef.current = newTileLayer;
-
-      // Update GeoJSON Cadastral Layer
-      if (geojsonLayerRef.current) {
-        map.removeLayer(geojsonLayerRef.current);
-      }
-
-      if (filteredFeatures.length > 0) {
-        const geojson = L.geoJSON(filteredFeatures as any, {
-          style: (feature: any) => {
-            const p = feature?.properties;
-            const isSelected = selectedParcel?.properties?.parcel_id === p?.parcel_id;
-            const isFlagged = p?.validation_status?.includes("FLAGGED") || p?.confidence_score < 0.85;
-            const isCritical = p?.validation_status?.includes("REJECTED");
-
-            let fillColor = "#10B981"; // Emerald
-            let borderColor = "#059669";
-
-            if (isCritical) {
-              fillColor = "#EF4444";
-              borderColor = "#DC2626";
-            } else if (isFlagged) {
-              fillColor = "#F59E0B";
-              borderColor = "#D97706";
-            }
-
-            if (isSelected) {
-              borderColor = "#2DD4BF"; // Bright teal highlight
-            }
-
-            return {
-              fillColor,
-              fillOpacity: isSelected ? 0.6 : 0.35,
-              color: borderColor,
-              weight: isSelected ? 3.5 : 2,
-              dashArray: isFlagged ? "4, 4" : undefined,
-            };
-          },
-          onEachFeature: (feature: any, layer: any) => {
-            const p = feature?.properties;
-
-            // Hover tooltip
-            if (showParcelLabels) {
-              layer.bindTooltip(
-                `<strong>Survey ${p?.survey_number}</strong><br/>${p?.village} (${p?.area_hectares} Ha)`,
-                { permanent: false, direction: "center", className: "leaflet-custom-tooltip" }
-              );
-            }
-
-            // Click listener
-            layer.on({
-              click: () => {
-                setSelectedParcel(feature);
-                map.fitBounds(layer.getBounds(), { padding: [40, 40], maxZoom: 16 });
-              },
-            });
-          },
-        }).addTo(map);
-
-        geojsonLayerRef.current = geojson;
-      }
-    }
-
-    initMap();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [filteredFeatures, selectedParcel, activeTileLayer, showParcelLabels]);
-
-  // Jump to Preset Region
-  const handleRegionJump = (preset: typeof REGION_PRESETS[0]) => {
-    if (leafletMapRef.current) {
-      leafletMapRef.current.flyTo([preset.lat, preset.lng], preset.zoom, { duration: 1.2 });
-    }
-  };
-
   const p = selectedParcel?.properties;
 
   return (
-    <div className="flex-1 flex flex-col h-[calc(100vh)] bg-[#070B14] text-[#F4F7FA] overflow-hidden">
+    <div className="flex-1 flex flex-col h-screen bg-[#070B14] text-[#F4F7FA] overflow-hidden">
       
       {/* Top Cadastral Command Toolbar */}
       <header className="h-[60px] border-b border-white/[0.08] bg-[#070B14]/90 backdrop-blur-md px-6 flex items-center justify-between gap-4 shrink-0 z-10">
@@ -439,13 +296,16 @@ export default function GISMapExplorerPage() {
           </div>
         </div>
 
-        {/* Region Fast Jump Selector */}
+        {/* Region Presets */}
         <div className="hidden md:flex items-center gap-1.5 bg-white/[0.03] p-1 rounded-lg border border-white/[0.06]">
           <span className="text-[10px] uppercase font-semibold text-[#5F6B7A] px-2 font-mono">Jump:</span>
           {REGION_PRESETS.map((preset) => (
             <button
               key={preset.name}
-              onClick={() => handleRegionJump(preset)}
+              onClick={() => {
+                const matched = features.find((f) => f.properties.village.toLowerCase().includes(preset.name.split(" ")[0].toLowerCase()));
+                if (matched) setSelectedParcel(matched);
+              }}
               className="text-xs px-2.5 py-1 rounded-md text-[#8B98AA] hover:text-[#F4F7FA] hover:bg-white/[0.06] transition-colors whitespace-nowrap"
             >
               {preset.name.split(" ")[0]}
@@ -505,14 +365,19 @@ export default function GISMapExplorerPage() {
       </header>
 
       {/* Main Map Viewport & Right Inspector Panel */}
-      <div className="flex-1 flex overflow-hidden relative">
+      <div className="flex-1 flex overflow-hidden relative min-h-0">
         
-        {/* Leaflet Live Map Canvas */}
-        <div className="flex-1 h-full w-full relative">
-          <div ref={mapContainerRef} className="h-full w-full z-0 bg-[#050912]" />
+        {/* Leaflet Live Map Canvas Container */}
+        <div className="flex-1 h-full w-full relative flex">
+          <LiveMap
+            features={filteredFeatures}
+            selectedParcel={selectedParcel}
+            onSelectParcel={(feat) => setSelectedParcel(feat)}
+            tileLayerType={activeTileLayer}
+          />
 
-          {/* Floating Map Overlay Badges */}
-          <div className="absolute top-4 left-4 z-10 flex flex-col gap-2 pointer-events-none">
+          {/* Floating Map Legend Overlay */}
+          <div className="absolute top-4 left-4 z-[400] flex flex-col gap-2 pointer-events-none">
             <div className="bg-[#070B14]/90 backdrop-blur-md border border-white/[0.08] px-3 py-2 rounded-lg shadow-xl text-xs space-y-1 pointer-events-auto max-w-xs">
               <div className="flex items-center justify-between text-[11px] font-semibold text-[#F4F7FA]">
                 <span>Cadastral Legend</span>
@@ -638,13 +503,7 @@ export default function GISMapExplorerPage() {
               return (
                 <button
                   key={fp.parcel_id}
-                  onClick={() => {
-                    setSelectedParcel(feat);
-                    if (leafletMapRef.current) {
-                      const coords = feat.geometry.coordinates[0][0];
-                      leafletMapRef.current.flyTo([coords[1], coords[0]], 16, { duration: 0.8 });
-                    }
-                  }}
+                  onClick={() => setSelectedParcel(feat)}
                   className={`w-full text-left p-2.5 rounded-lg border transition-all ${
                     isSelected
                       ? "bg-teal-500/10 border-teal-500/40 text-white"
