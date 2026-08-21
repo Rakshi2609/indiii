@@ -12,6 +12,7 @@ import app.models.document  # noqa: F401
 import app.models.record  # noqa: F401
 import app.models.validation  # noqa: F401
 import app.models.audit  # noqa: F401
+import app.models.parcel  # noqa: F401
 
 logger = logging.getLogger(__name__)
 

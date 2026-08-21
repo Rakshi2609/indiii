@@ -6,6 +6,7 @@ from app.models.record import Evidence, LandRecord
 from app.models.validation import IssueSeverity, IssueType, ValidationResult, ValidationStatus
 from app.schemas.validation import ValidationResultResponse, ValidationSummary
 from app.services.duplicate_service import duplicate_service
+from app.services.gis_service import gis_service
 from app.services.ownership_service import ownership_service
 
 logger = logging.getLogger(__name__)
@@ -14,7 +15,8 @@ logger = logging.getLogger(__name__)
 class ValidationService:
     """
     Automated validation engine for land records: runs cross-field consistency rules,
-    area balance formulas, ownership chain mutations, duplicate detection, and evidence confidence scans.
+    area balance formulas, ownership chain mutations, duplicate detection, GIS spatial discrepancies,
+    and evidence confidence scans.
     """
 
     def validate_record(
@@ -23,7 +25,7 @@ class ValidationService:
         db: Optional[Session] = None
     ) -> Tuple[List[Dict[str, Any]], float, str]:
         """
-        Execute deterministic rule-based checks, ownership chain audits, and duplicate scans on a LandRecord.
+        Execute deterministic rule-based checks, ownership chain audits, duplicate scans, and GIS checks on a LandRecord.
         Returns: (issues_list, overall_confidence_score, validation_status)
         """
         issues: List[Dict[str, Any]] = []
@@ -129,7 +131,14 @@ class ValidationService:
             issues.extend(duplicate_issues)
 
         # -------------------------------------------------------------
-        # 6. Evidence Confidence & OCR Quality Checks
+        # 6. GIS Spatial Discrepancy & Cadastral Checks (GISService)
+        # -------------------------------------------------------------
+        if db is not None:
+            spatial_issues = gis_service.validate_spatial_alignment(record, db)
+            issues.extend(spatial_issues)
+
+        # -------------------------------------------------------------
+        # 7. Evidence Confidence & OCR Quality Checks
         # -------------------------------------------------------------
         evidence_items = record.evidence_items or []
         confidences: List[float] = []
@@ -155,7 +164,7 @@ class ValidationService:
                 })
 
         # -------------------------------------------------------------
-        # 7. Encumbrance & Boja Active Charge Alerts
+        # 8. Encumbrance & Boja Active Charge Alerts
         # -------------------------------------------------------------
         encumbrances = record.encumbrances_data or []
         for enc in encumbrances:
@@ -170,7 +179,7 @@ class ValidationService:
                 })
 
         # -------------------------------------------------------------
-        # 8. Overall Confidence & Health Score Calculation
+        # 9. Overall Confidence & Health Score Calculation
         # -------------------------------------------------------------
         base_confidence = (sum(confidences) / len(confidences)) if confidences else 0.95
 
@@ -263,7 +272,7 @@ class ValidationService:
         )
 
         logger.info(
-            f"Record {record.id} validated with ownership & duplicate scans: score={confidence_score}, status={val_status}, issues={len(persisted_results)}"
+            f"Record {record.id} validated with ownership, duplicate & GIS checks: score={confidence_score}, status={val_status}, issues={len(persisted_results)}"
         )
         return record, summary
 
