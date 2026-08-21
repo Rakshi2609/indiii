@@ -82,27 +82,27 @@ export function Navbar() {
 
   return (
     <>
-      <header className="sticky top-0 z-50 w-full h-[74px] border-b border-white/[0.06] bg-[#070B14]/90 backdrop-blur-xl transition-all">
-        <div className="h-full max-w-[1440px] mx-auto px-6 sm:px-8 lg:px-10 flex items-center justify-between gap-6">
+      <header className="sticky top-0 z-50 w-full max-w-full overflow-x-clip h-[74px] border-b border-white/[0.06] bg-[#070B14]/90 backdrop-blur-xl transition-all">
+        <div className="h-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-3 sm:gap-6">
           
           {/* ========================================================================= */}
           {/* ZONE 1: BRAND + IDENTITY (Left, ~220–250px)                               */}
           {/* ========================================================================= */}
-          <div className="flex items-center gap-3 shrink-0 min-w-[210px] max-w-[250px]">
+          <div className="flex items-center gap-3 shrink-0">
             <Link href="/" className="flex items-center gap-3 group">
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-teal-500/10 border border-teal-500/20 text-teal-400 group-hover:bg-teal-500/20 group-hover:border-teal-500/40 transition-all">
                 <MapPin className="h-4 w-4 text-teal-400 stroke-[1.75]" />
               </div>
               <div className="flex flex-col">
                 <div className="flex items-center gap-2">
-                  <span className="text-[17px] font-semibold tracking-tight text-[#F4F7FA] group-hover:text-teal-300 transition-colors">
+                  <span className="text-[16px] sm:text-[17px] font-semibold tracking-tight text-[#F4F7FA] group-hover:text-teal-300 transition-colors">
                     Land AI
                   </span>
                   <span className="text-[10px] font-medium text-teal-400/80 bg-teal-500/[0.08] px-1.5 py-0.5 rounded tracking-wide">
                     भू-अभिलेख
                   </span>
                 </div>
-                <span className="text-[11px] text-[#8B98AA] font-normal leading-tight">
+                <span className="text-[11px] text-[#8B98AA] font-normal leading-tight hidden xs:inline">
                   Indic Revenue Intelligence · SIH &apos;26
                 </span>
               </div>
@@ -115,7 +115,7 @@ export function Navbar() {
           {/* ========================================================================= */}
           {/* ZONE 2: PRIMARY NAVIGATION (Center, Unified Seamless System)              */}
           {/* ========================================================================= */}
-          <nav className="hidden md:flex items-center gap-1 lg:gap-1.5 flex-1 justify-center max-w-2xl">
+          <nav className="hidden lg:flex items-center gap-1 xl:gap-1.5 flex-1 justify-center max-w-2xl">
             {navItems.map((item) => {
               const Icon = item.icon;
               const active = isActive(item.href);
@@ -123,7 +123,7 @@ export function Navbar() {
                 <Link
                   key={item.name}
                   href={item.href}
-                  className={`relative flex items-center gap-2 px-3 py-2 rounded-md text-[13px] font-medium transition-all duration-150 whitespace-nowrap ${
+                  className={`relative flex items-center gap-1.5 xl:gap-2 px-2.5 xl:px-3 py-2 rounded-md text-[13px] font-medium transition-all duration-150 whitespace-nowrap ${
                     active
                       ? "text-[#F4F7FA] bg-teal-500/[0.12] shadow-sm shadow-teal-950/40"
                       : "text-[#8B98AA] hover:text-[#F4F7FA] hover:bg-white/[0.04]"
@@ -158,12 +158,12 @@ export function Navbar() {
           {/* ========================================================================= */}
           {/* ZONE 3: CONTROLS & PRIMARY ACTION (Right)                                */}
           {/* ========================================================================= */}
-          <div className="flex items-center gap-4 lg:gap-5 shrink-0 justify-end">
+          <div className="flex items-center gap-2 sm:gap-4 lg:gap-5 shrink-0 justify-end">
             
             {/* 1. Search Input (⌘K Command Palette Trigger) */}
             <button
               onClick={() => setSearchModalOpen(true)}
-              className="hidden lg:flex items-center justify-between w-[190px] xl:w-[210px] h-9 px-3 rounded-lg bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.06] text-[12px] text-[#8B98AA] hover:text-[#F4F7FA] transition-all"
+              className="hidden lg:flex items-center justify-between w-[160px] xl:w-[200px] h-9 px-3 rounded-lg bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.06] text-[12px] text-[#8B98AA] hover:text-[#F4F7FA] transition-all"
             >
               <div className="flex items-center gap-2 truncate">
                 <Search className="w-3.5 h-3.5 text-[#5F6B7A] stroke-[1.75]" />
@@ -174,7 +174,7 @@ export function Navbar() {
               </kbd>
             </button>
 
-            {/* Compact Search Trigger for Tablets */}
+            {/* Compact Search Trigger for Tablets/Mobile */}
             <button
               onClick={() => setSearchModalOpen(true)}
               className="flex lg:hidden items-center justify-center h-8 w-8 rounded-lg bg-white/[0.03] border border-white/[0.06] text-[#8B98AA] hover:text-[#F4F7FA]"

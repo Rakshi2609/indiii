@@ -570,7 +570,7 @@ export default function VerificationWorkspacePage({ params }: VerificationPagePr
                   className="max-h-[75vh] w-auto object-contain rounded shadow-2xl border border-slate-700 bg-white"
                 />
               ) : (
-                <div className="bg-white text-slate-900 shadow-2xl rounded-sm p-8 min-w-[420px] max-w-[500px] border border-slate-300 font-serif">
+                <div className="bg-white text-slate-900 shadow-2xl rounded-sm p-6 sm:p-8 w-full max-w-[500px] border border-slate-300 font-serif">
                   {/* Revenue Record Header */}
                   <div className="text-center border-b-2 border-slate-900 pb-3 mb-4">
                     <div className="text-[10px] font-bold tracking-widest text-slate-600 uppercase">
