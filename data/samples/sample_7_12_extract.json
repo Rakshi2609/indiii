@@ -1,0 +1,36 @@
+{
+  "state": "Maharashtra",
+  "district": "Pune",
+  "taluk": "Haveli",
+  "village": "Wagholi",
+  "surveyNumber": "142",
+  "hissaNumber": "2B",
+  "totalArea": {
+    "potKharaba": 0.05,
+    "cultivable": 1.45,
+    "unit": "hectares"
+  },
+  "tenure": "Occupant Class 1 (Bhogwata-1)",
+  "owners": [
+    {
+      "name": "Ramesh Shankarrao Patil",
+      "mutationNumber": "M-4512",
+      "share": "1/2"
+    },
+    {
+      "name": "Suresh Shankarrao Patil",
+      "mutationNumber": "M-4512",
+      "share": "1/2"
+    }
+  ],
+  "encumbrances": [
+    {
+      "type": "Bank Mortgage",
+      "institution": "Bank of Maharashtra, Wagholi Branch",
+      "amountInr": 500000,
+      "date": "2021-04-15",
+      "status": "Active"
+    }
+  ],
+  "disputeFlags": []
+}
