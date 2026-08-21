@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from app.ai.router import DocumentAIProvider, get_document_ai_provider
 from app.db.database import SessionLocal
 from app.models.document import Document, DocumentStatus
+from app.services.extraction_service import extraction_service
 
 logger = logging.getLogger(__name__)
 
@@ -22,7 +23,8 @@ class DocumentProcessingService:
     ) -> Document:
         """
         Process a document using the specified AI provider.
-        Manages state transitions: PENDING -> PROCESSING -> COMPLETED / FAILED.
+        Manages state transitions: PENDING -> PROCESSING -> COMPLETED / FAILED,
+        and automatically maps & persists the structured LandRecord and field Evidence.
         """
         doc = db.query(Document).filter(Document.id == document_id).first()
         if not doc:
@@ -47,14 +49,21 @@ class DocumentProcessingService:
                 document_type=document_type
             )
 
-            # Step 4: Update status to COMPLETED and persist results
+            # Step 4: Persist structured LandRecord and Evidence layer
+            extraction_service.extract_and_persist_record(
+                doc=doc,
+                raw_data=extracted_data,
+                db=db
+            )
+
+            # Step 5: Update document status to COMPLETED and persist results
             doc.status = DocumentStatus.COMPLETED
             doc.extracted_data = extracted_data
             doc.processed_at = datetime.now(timezone.utc)
             doc.error_message = None
             db.commit()
             db.refresh(doc)
-            logger.info(f"Document {document_id} successfully COMPLETED extraction.")
+            logger.info(f"Document {document_id} successfully COMPLETED extraction and schema mapping.")
             return doc
 
         except Exception as exc:

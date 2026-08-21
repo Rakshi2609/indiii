@@ -9,6 +9,7 @@ from app.db.base import Base
 # Import all models here so that Base.metadata knows about them for create_all
 import app.models.user  # noqa: F401
 import app.models.document  # noqa: F401
+import app.models.record  # noqa: F401
 
 logger = logging.getLogger(__name__)
 

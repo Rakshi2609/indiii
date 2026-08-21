@@ -8,6 +8,7 @@ from app.core.config import settings
 from app.db.database import init_db
 from app.api.auth import router as auth_router
 from app.api.documents import router as documents_router
+from app.api.records import router as records_router
 from app.api.v1.api import api_router
 from app.schemas.health import HealthResponse
 
@@ -59,8 +60,11 @@ def create_application() -> FastAPI:
     # Authentication router
     app.include_router(auth_router, prefix="/api/auth")
 
-    # Documents upload & management router
+    # Documents upload & processing router
     app.include_router(documents_router, prefix="/api/documents")
+
+    # Land Records & Evidence router
+    app.include_router(records_router, prefix="/api/records")
 
     # API v1 routes
     app.include_router(api_router, prefix=settings.API_V1_STR)
