@@ -2,6 +2,8 @@ from datetime import datetime
 from typing import Any, Dict, List, Optional
 from pydantic import BaseModel, Field
 
+from app.schemas.validation import ValidationResultResponse
+
 
 # 1. Administrative Domain
 class AdministrativeInfo(BaseModel):
@@ -91,6 +93,9 @@ class LandRecordResponse(BaseModel):
     mutations: List[MutationInfo] = Field(default_factory=list)
     encumbrances: List[EncumbranceInfo] = Field(default_factory=list)
     evidence: List[EvidenceSchema] = Field(default_factory=list)
+    validation_results: List[ValidationResultResponse] = Field(default_factory=list)
+    overall_confidence_score: float = 1.0
+    validation_status: str = "VALIDATED"
     created_at: datetime
     updated_at: datetime
 

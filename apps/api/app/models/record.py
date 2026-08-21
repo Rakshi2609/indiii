@@ -45,6 +45,10 @@ class LandRecord(Base):
     encumbrances_data: Mapped[Optional[List[Dict[str, Any]]]] = mapped_column(JSON, nullable=True)
     raw_extracted_payload: Mapped[Optional[Dict[str, Any]]] = mapped_column(JSON, nullable=True)
 
+    # Validation Engine Metadata
+    overall_confidence_score: Mapped[float] = mapped_column(Float, default=1.0, nullable=False)
+    validation_status: Mapped[str] = mapped_column(String(50), default="PENDING_VALIDATION", nullable=False)
+
     # Timestamps
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
@@ -66,9 +70,15 @@ class LandRecord(Base):
         cascade="all, delete-orphan",
         lazy="selectin"
     )
+    validation_results = relationship(
+        "ValidationResult",
+        back_populates="record",
+        cascade="all, delete-orphan",
+        lazy="selectin"
+    )
 
     def __repr__(self) -> str:
-        return f"<LandRecord(id={self.id}, survey='{self.survey_number}', village='{self.village}', district='{self.district}')>"
+        return f"<LandRecord(id={self.id}, survey='{self.survey_number}', village='{self.village}', confidence={self.overall_confidence_score})>"
 
 
 class Evidence(Base):

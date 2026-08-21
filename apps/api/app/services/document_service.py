@@ -7,12 +7,13 @@ from app.ai.router import DocumentAIProvider, get_document_ai_provider
 from app.db.database import SessionLocal
 from app.models.document import Document, DocumentStatus
 from app.services.extraction_service import extraction_service
+from app.services.validation_service import validation_service
 
 logger = logging.getLogger(__name__)
 
 
 class DocumentProcessingService:
-    """Service orchestrating document OCR, Indian language AI extraction, and status transitions."""
+    """Service orchestrating document OCR, Indian language AI extraction, schema mapping, and validation."""
 
     async def process_document(
         self,
@@ -22,9 +23,12 @@ class DocumentProcessingService:
         document_type: Optional[str] = None
     ) -> Document:
         """
-        Process a document using the specified AI provider.
-        Manages state transitions: PENDING -> PROCESSING -> COMPLETED / FAILED,
-        and automatically maps & persists the structured LandRecord and field Evidence.
+        Process a document through the complete Land AI pipeline:
+        1. Status -> PROCESSING
+        2. Sarvam Document AI OCR extraction
+        3. Schema mapping and evidence generation (ExtractionService)
+        4. Rule-based consistency and confidence scoring (ValidationService)
+        5. Status -> COMPLETED
         """
         doc = db.query(Document).filter(Document.id == document_id).first()
         if not doc:
@@ -50,20 +54,26 @@ class DocumentProcessingService:
             )
 
             # Step 4: Persist structured LandRecord and Evidence layer
-            extraction_service.extract_and_persist_record(
+            record = extraction_service.extract_and_persist_record(
                 doc=doc,
                 raw_data=extracted_data,
                 db=db
             )
 
-            # Step 5: Update document status to COMPLETED and persist results
+            # Step 5: Automatically run validation engine & confidence scoring
+            validation_service.validate_and_persist_record(
+                record=record,
+                db=db
+            )
+
+            # Step 6: Update document status to COMPLETED and persist results
             doc.status = DocumentStatus.COMPLETED
             doc.extracted_data = extracted_data
             doc.processed_at = datetime.now(timezone.utc)
             doc.error_message = None
             db.commit()
             db.refresh(doc)
-            logger.info(f"Document {document_id} successfully COMPLETED extraction and schema mapping.")
+            logger.info(f"Document {document_id} and Record {record.id} successfully COMPLETED & VALIDATED.")
             return doc
 
         except Exception as exc:

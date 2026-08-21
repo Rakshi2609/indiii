@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.db.database import get_db
 from app.models.record import Evidence, LandRecord
+from app.models.validation import ValidationResult, ValidationStatus
 from app.schemas.record import (
     AdministrativeInfo,
     EncumbranceInfo,
@@ -13,11 +14,18 @@ from app.schemas.record import (
     LandRecordListResponse,
     LandRecordResponse,
     MutationInfo,
-    OwnerInfo
+    OwnerInfo,
 )
+from app.schemas.validation import (
+    ValidationResultResponse,
+    ValidationResultUpdate,
+    ValidationSummary,
+    ValidationTriggerResponse,
+)
+from app.services.validation_service import validation_service
 
 logger = logging.getLogger(__name__)
-router = APIRouter(tags=["Land Records"])
+router = APIRouter(tags=["Land Records & Validation"])
 
 
 def format_record_response(record: LandRecord) -> LandRecordResponse:
@@ -55,6 +63,10 @@ def format_record_response(record: LandRecord) -> LandRecordResponse:
         )
         for ev in (record.evidence_items or [])
     ]
+    validation_results = [
+        ValidationResultResponse.model_validate(v)
+        for v in (record.validation_results or [])
+    ]
 
     return LandRecordResponse(
         id=record.id,
@@ -65,22 +77,26 @@ def format_record_response(record: LandRecord) -> LandRecordResponse:
         mutations=mutations,
         encumbrances=encumbrances,
         evidence=evidence_items,
+        validation_results=validation_results,
+        overall_confidence_score=record.overall_confidence_score,
+        validation_status=record.validation_status,
         created_at=record.created_at,
         updated_at=record.updated_at
     )
 
 
-@router.get("", response_model=LandRecordListResponse, summary="List all structured land records")
+@router.get("", response_model=LandRecordListResponse, summary="List all extracted records")
 def list_records(
     state: Optional[str] = Query(None, description="Filter by state"),
     district: Optional[str] = Query(None, description="Filter by district"),
     village: Optional[str] = Query(None, description="Filter by village"),
     survey_number: Optional[str] = Query(None, description="Filter by survey number"),
+    validation_status: Optional[str] = Query(None, description="Filter by validation status"),
     skip: int = Query(0, ge=0),
     limit: int = Query(50, ge=1, le=100),
     db: Session = Depends(get_db)
 ) -> LandRecordListResponse:
-    """Retrieve structured land revenue records with spatial and administrative filters."""
+    """Retrieve structured land revenue records with spatial, administrative, and status filters."""
     query = db.query(LandRecord)
 
     if state:
@@ -91,6 +107,8 @@ def list_records(
         query = query.filter(LandRecord.village.ilike(f"%{village}%"))
     if survey_number:
         query = query.filter(LandRecord.survey_number == survey_number)
+    if validation_status:
+        query = query.filter(LandRecord.validation_status == validation_status)
 
     total = query.count()
     items = query.order_by(LandRecord.created_at.desc()).offset(skip).limit(limit).all()
@@ -101,12 +119,12 @@ def list_records(
     )
 
 
-@router.get("/{record_id}", response_model=LandRecordResponse, summary="Get structured land record by ID")
+@router.get("/{record_id}", response_model=LandRecordResponse, summary="Fetch single record with evidence & validation")
 def get_record(
     record_id: int,
     db: Session = Depends(get_db)
 ) -> LandRecordResponse:
-    """Retrieve a single land record including all ownership, mutation, encumbrance, and evidence data."""
+    """Retrieve a single record with all evidence and validation results."""
     record = db.query(LandRecord).filter(LandRecord.id == record_id).first()
     if not record:
         raise HTTPException(
@@ -131,6 +149,31 @@ def get_record_by_document(
     return format_record_response(record)
 
 
+@router.post("/{record_id}/validate", response_model=ValidationTriggerResponse, summary="Trigger validation engine manually")
+def validate_record_endpoint(
+    record_id: int,
+    db: Session = Depends(get_db)
+) -> ValidationTriggerResponse:
+    """Manually run the rule-based validation engine on a land record."""
+    record = db.query(LandRecord).filter(LandRecord.id == record_id).first()
+    if not record:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Land record with ID {record_id} not found."
+        )
+
+    updated_record, summary = validation_service.validate_and_persist_record(record, db)
+
+    return ValidationTriggerResponse(
+        message="Validation engine executed successfully.",
+        record_id=updated_record.id,
+        overall_confidence_score=updated_record.overall_confidence_score,
+        validation_status=updated_record.validation_status,
+        total_issues_found=summary.total_issues,
+        summary=summary
+    )
+
+
 @router.get("/{record_id}/evidence", response_model=List[EvidenceSchema], summary="Get explainability evidence for a record")
 def get_record_evidence(
     record_id: int,
@@ -149,3 +192,31 @@ def get_record_evidence(
         )
         for ev in evidence_list
     ]
+
+
+@router.patch("/{record_id}/validation/{result_id}", response_model=ValidationResultResponse, summary="Update validation issue status")
+def update_validation_issue(
+    record_id: int,
+    result_id: int,
+    payload: ValidationResultUpdate,
+    db: Session = Depends(get_db)
+) -> ValidationResultResponse:
+    """Update resolution status (PENDING, RESOLVED, IGNORED) for a specific validation issue."""
+    v_res = db.query(ValidationResult).filter(
+        ValidationResult.id == result_id,
+        ValidationResult.record_id == record_id
+    ).first()
+    if not v_res:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Validation result with ID {result_id} not found for record {record_id}."
+        )
+
+    if payload.status:
+        v_res.status = payload.status
+    if payload.description:
+        v_res.description = payload.description
+
+    db.commit()
+    db.refresh(v_res)
+    return ValidationResultResponse.model_validate(v_res)
