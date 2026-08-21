@@ -1,7 +1,7 @@
 import logging
 import os
 from typing import Annotated, Any, Dict, List, Optional
-from fastapi import APIRouter, BackgroundTasks, Depends, File, HTTPException, Query, Request, UploadFile, status
+from fastapi import APIRouter, BackgroundTasks, Depends, File, Form, HTTPException, Query, Request, UploadFile, status
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 
@@ -33,6 +33,7 @@ router = APIRouter(tags=["Documents"])
 async def upload_documents(
     request: Request,
     files: List[UploadFile] = File(..., description="Single or batch files (PDF, JPG, PNG, TIFF)"),
+    processing_mode: Optional[str] = Form("standard", description="Processing mode: 'standard' (fallback) or 'high_accuracy' (ensemble)"),
     db: Session = Depends(get_db),
     current_user: Optional[User] = Depends(get_optional_current_user)
 ) -> DocumentUploadBatchResponse:
@@ -77,7 +78,8 @@ async def upload_documents(
                 "filename": stored_filename,
                 "original_name": file.filename,
                 "file_size": file_size,
-                "mime_type": mime_type
+                "mime_type": mime_type,
+                "processing_mode": processing_mode
             },
             ip_address=client_ip
         )
@@ -169,7 +171,7 @@ def get_document_file(
     "/{document_id}/process",
     response_model=DocumentProcessResponse,
     status_code=status.HTTP_202_ACCEPTED,
-    summary="Trigger Sarvam Document AI processing for a document"
+    summary="Trigger Document AI processing (Sarvam, Mistral, Gemini with Fallback or High Accuracy)"
 )
 async def process_document_endpoint(
     document_id: int,
@@ -179,8 +181,9 @@ async def process_document_endpoint(
     db: Session = Depends(get_db)
 ) -> DocumentProcessResponse:
     """
-    Trigger Document AI OCR & information extraction (using Sarvam Vision AI).
-    Can be run as a background task (202 Accepted) or synchronously for instant results.
+    Trigger Document AI OCR & information extraction.
+    Supports multi-model automatic fallback (Sarvam -> Mistral -> Gemini) and
+    High-Accuracy multi-model ensemble comparison mode.
     """
     doc = db.query(Document).filter(Document.id == document_id).first()
     if not doc:
@@ -189,18 +192,20 @@ async def process_document_endpoint(
             detail=f"Document with ID {document_id} not found."
         )
 
-    provider_name = request.provider if request else "sarvam"
-    doc_type = request.document_type if request else "7/12_extract"
+    provider_name = request.provider if request and request.provider else "sarvam"
+    doc_type = request.document_type if request and request.document_type else "7/12_extract"
+    mode = request.mode if request and request.mode else "standard"
 
     if sync:
         processed_doc = await document_service.process_document(
             document_id=document_id,
             db=db,
             provider_name=provider_name,
-            document_type=doc_type
+            document_type=doc_type,
+            mode=mode
         )
         return DocumentProcessResponse(
-            message="Document processing completed successfully.",
+            message=f"Document processing completed successfully in '{mode}' mode.",
             document_id=processed_doc.id,
             status=processed_doc.status,
             extracted_data=processed_doc.extracted_data
@@ -214,11 +219,12 @@ async def process_document_endpoint(
             background_process_document,
             document_id=document_id,
             provider_name=provider_name,
-            document_type=doc_type
+            document_type=doc_type,
+            mode=mode
         )
 
         return DocumentProcessResponse(
-            message="Document processing task scheduled in background.",
+            message=f"Document processing task scheduled in background (mode: {mode}).",
             document_id=doc.id,
             status=DocumentStatus.PROCESSING,
             extracted_data=None
@@ -234,7 +240,7 @@ def get_document_extraction(
     document_id: int,
     db: Session = Depends(get_db)
 ) -> Dict[str, Any]:
-    """Retrieve raw structured revenue data extracted by Sarvam Document AI."""
+    """Retrieve raw structured revenue data extracted by Document AI."""
     doc = db.query(Document).filter(Document.id == document_id).first()
     if not doc:
         raise HTTPException(
