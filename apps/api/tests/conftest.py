@@ -1,12 +1,20 @@
 import pytest
+import pytest_asyncio
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 from fastapi.testclient import TestClient
+import httpx
+from httpx import ASGITransport
 
 from app.db.base import Base
 from app.db.database import get_db
-import app.models.user  # Ensure all models are imported
+import app.models.user
+import app.models.document
+import app.models.record
+import app.models.validation
+import app.models.parcel
+import app.models.audit
 from app.main import app
 
 # Shared In-memory SQLite with StaticPool for test isolation
@@ -44,7 +52,7 @@ def db_session():
 
 @pytest.fixture(scope="function")
 def client(db_session):
-    """Test client with overridden database dependency."""
+    """Synchronous test client with overridden database dependency."""
     def override_get_db():
         try:
             yield db_session
@@ -54,4 +62,20 @@ def client(db_session):
     app.dependency_overrides[get_db] = override_get_db
     with TestClient(app) as test_client:
         yield test_client
+    app.dependency_overrides.clear()
+
+
+@pytest_asyncio.fixture(scope="function")
+async def async_client(db_session):
+    """Asynchronous testing client using httpx.AsyncClient connected to FastAPI app."""
+    def override_get_db():
+        try:
+            yield db_session
+        finally:
+            pass
+
+    app.dependency_overrides[get_db] = override_get_db
+    transport = ASGITransport(app=app)
+    async with httpx.AsyncClient(transport=transport, base_url="http://testserver") as ac:
+        yield ac
     app.dependency_overrides.clear()
