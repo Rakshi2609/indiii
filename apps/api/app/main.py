@@ -11,6 +11,7 @@ from app.api.documents import router as documents_router
 from app.api.records import router as records_router
 from app.api.verification import router as verification_router
 from app.api.gis import router as gis_router
+from app.api.analytics import router as analytics_router
 from app.api.v1.api import api_router
 from app.schemas.health import HealthResponse
 
@@ -74,6 +75,9 @@ def create_application() -> FastAPI:
     # GIS & Cadastral Mapping router
     app.include_router(gis_router, prefix="/api/parcels")
     app.include_router(gis_router, prefix="/api/gis")
+
+    # Analytics & Metrics router
+    app.include_router(analytics_router, prefix="/api/analytics")
 
     # API v1 routes
     app.include_router(api_router, prefix=settings.API_V1_STR)
