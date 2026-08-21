@@ -13,6 +13,7 @@ from app.api.verification import router as verification_router
 from app.api.gis import router as gis_router
 from app.api.analytics import router as analytics_router
 from app.api.audit import router as audit_router
+from app.api.intelligence import router as intelligence_router
 from app.api.v1.api import api_router
 from app.schemas.health import HealthResponse
 
@@ -82,6 +83,9 @@ def create_application() -> FastAPI:
 
     # Enterprise Audit Trail router
     app.include_router(audit_router, prefix="/api/audit")
+
+    # Land Intelligence, History Timeline & Lineage Engine router
+    app.include_router(intelligence_router, prefix="/api/intelligence")
 
     # API v1 routes
     app.include_router(api_router, prefix=settings.API_V1_STR)

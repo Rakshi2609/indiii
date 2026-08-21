@@ -15,6 +15,7 @@ import {
   FileCheck2,
   FileText,
   FileUp,
+  GitFork,
   Layers,
   MapPin,
   Menu,
@@ -44,6 +45,13 @@ export function Sidebar() {
     { name: "Dashboard", href: "/dashboard", icon: BarChart3, labelIndic: "डैशबोर्ड" },
     { name: "Cadastral GIS", href: "/gis", icon: Compass, labelIndic: "मानचित्र" },
     { 
+      name: "Intelligence", 
+      href: "/intelligence", 
+      icon: GitFork, 
+      labelIndic: "वंशावली",
+      badge: "NEW" 
+    },
+    { 
       name: "Verification", 
       href: "/verification", 
       icon: FileCheck2, 
@@ -55,6 +63,7 @@ export function Sidebar() {
 
   const quickSearchRecords = [
     { title: "Survey No. 142/2A • Wagholi, Pune (Maharashtra)", href: "/verification/1", type: "Cadastral Record" },
+    { title: "Land Ownership Lineage Graph & Timeline (10 Acres Split)", href: "/intelligence", type: "Lineage Graph" },
     { title: "Sale Deed • Guntur City, Andhra Pradesh (Telugu)", href: "/verification/4", type: "Deed Extract" },
     { title: "Cadastral GIS Conflict Map (Survey 142)", href: "/gis", type: "Spatial Map" },
     { title: "Upload New Multilingual Deed (Sarvam / Gemini)", href: "/upload", type: "Document Action" },

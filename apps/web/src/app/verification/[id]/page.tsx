@@ -23,6 +23,7 @@ import {
   ZoomIn,
   ZoomOut,
   Edit3,
+  GitFork,
   Loader2
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -408,6 +409,17 @@ export default function VerificationWorkspacePage({ params }: VerificationPagePr
 
         {/* Global Action Buttons */}
         <div className="flex items-center gap-3">
+          <Link href="/intelligence">
+            <Button
+              variant="outline"
+              size="sm"
+              className="border-teal-500/30 bg-teal-500/10 text-teal-300 hover:bg-teal-500/20 gap-1.5 text-xs"
+            >
+              <GitFork className="w-3.5 h-3.5" />
+              <span>Lineage & Timeline</span>
+            </Button>
+          </Link>
+
           {!editMode ? (
             <>
               <Button
