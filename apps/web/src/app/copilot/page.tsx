@@ -33,6 +33,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { MarkdownRenderer } from "@/components/MarkdownRenderer";
 
 interface SourceRef {
   record_id?: number;
@@ -322,9 +323,9 @@ export default function LandAICopilotPage() {
                   </div>
                 </div>
 
-                {/* Natural Language Body */}
-                <div className="prose prose-invert prose-sm max-w-none text-slate-200 leading-relaxed space-y-2 whitespace-pre-line">
-                  {msg.text}
+                {/* Natural Language Body with Rich React Markdown */}
+                <div className="text-slate-200 leading-relaxed">
+                  <MarkdownRenderer content={msg.text} />
                 </div>
 
                 {/* Aggregates Summary Stats Bar */}
