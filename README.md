@@ -2,7 +2,7 @@
 
 # 🏛️ Land AI (इंडी-भूमि)
 
-### **Next-Generation Land Record Intelligence, Indic Document AI & Cadastral GIS Verification Platform**
+### **Next-Generation Land Record Intelligence, Indic Document AI, Owner Land Vault & Cadastral GIS Platform**
 
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
 [![Next.js](https://img.shields.io/badge/Next.js-16.3+-000000?style=for-the-badge&logo=next.js&logoColor=white)](https://nextjs.org)
@@ -10,12 +10,12 @@
 [![Sarvam AI](https://img.shields.io/badge/Sarvam_Vision-1.5-FF6F00?style=for-the-badge)](https://www.sarvam.ai)
 [![Mistral OCR](https://img.shields.io/badge/Mistral_OCR-Latest-F43F5E?style=for-the-badge)](https://mistral.ai)
 [![Gemini](https://img.shields.io/badge/Google_Gemini-2.0_Flash-4285F4?style=for-the-badge&logo=google&logoColor=white)](https://ai.google.dev)
+[![React Markdown](https://img.shields.io/badge/React_Markdown-remark_gfm-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://github.com/remarkjs/react-markdown)
 [![Leaflet GIS](https://img.shields.io/badge/Leaflet-Satellite_GIS-199900?style=for-the-badge&logo=leaflet&logoColor=white)](https://leafletjs.com)
-[![Tests](https://img.shields.io/badge/Pytest-56%20Passed-emerald?style=for-the-badge)](#-automated-testing-suite)
 
-*Transforming complex, unstructured historical Indian land revenue records into tamper-evident, spatially verified digital cadastral intelligence.*
+*Transforming complex, multilingual Indian land revenue records into tamper-evident, spatially verified digital cadastral intelligence and an empowered Citizen Land Vault.*
 
-[🎯 3-Minute Hackathon Pitch](docs/PITCH.md) • [🤖 Land AI Copilot](http://localhost:3000/copilot) • [📊 Executive Dashboard](http://localhost:3000/dashboard) • [🗺️ Cadastral Satellite GIS](http://localhost:3000/gis) • [✍️ Verification Workbench](http://localhost:3000/verification) • [📑 Swagger API Docs](http://localhost:8000/docs)
+[👤 Owner Land Vault](http://localhost:3000/owner) • [🤖 Land AI Copilot](http://localhost:3000/copilot) • [📊 Executive Dashboard](http://localhost:3000/dashboard) • [🗺️ Cadastral Satellite GIS](http://localhost:3000/gis) • [✍️ Verification Workbench](http://localhost:3000/verification) • [📑 Swagger API Docs](http://localhost:8000/api/v1/docs)
 
 </div>
 
@@ -24,20 +24,21 @@
 ## 📖 Table of Contents
 
 - [The Problem & Domain Context](#-the-problem--domain-context)
-- [Key Features & Highlights](#-key-features--highlights)
-- [Sample Land Revenue Documents Repository](#-sample-land-revenue-documents-repository)
-- [System Architecture](#-system-architecture)
-- [Multi-Model AI Extraction Pipeline](#-multi-model-ai-extraction-pipeline)
-- [Land AI Copilot (इंडी-भूमि सहायक)](#-land-ai-copilot-इंडी-भूमि-सहायक)
+- [Comprehensive Feature Matrix](#-comprehensive-feature-matrix)
+- [Two Primary User Experiences](#-two-primary-user-experiences)
+  - [1. 👤 Land Owner Experience (Owner Land Vault)](#1--land-owner-experience-owner-land-vault)
+  - [2. 🏛️ Government & Revenue Officer Portal](#2-️-government--revenue-officer-portal)
+- [🤖 Land AI Copilot (Database-Grounded Mistral Chatbot)](#-land-ai-copilot-database-grounded-mistral-chatbot)
+- [📜 Authentic Scanned Indian Deeds Repository (10 Nishu Documents)](#-authentic-scanned-indian-deeds-repository-10-nishu-documents)
+- [Multi-Model Indic AI Extraction Pipeline](#-multi-model-indic-ai-extraction-pipeline)
 - [Live Satellite Cadastral GIS Explorer](#-live-satellite-cadastral-gis-explorer)
 - [Human-in-the-Loop Active Learning Workbench](#-human-in-the-loop-active-learning-workbench)
-- [Demo Manager & Document Deletion](#-demo-manager--document-deletion)
+- [Role-Based Access Control (RBAC) & Security](#-role-based-access-control-rbac--security)
+- [System Architecture](#-system-architecture)
 - [API Endpoints Reference](#-api-endpoints-reference)
 - [Quickstart: Run Locally in 3 Steps](#-quickstart-run-locally-in-3-steps)
-- [Environment Configuration](#-environment-configuration)
 - [Automated Testing Suite](#-automated-testing-suite)
-- [Frontend Navigation Directory](#-frontend-navigation-directory)
-- [License & Hackathon Submission](#-license--hackathon-submission)
+- [Frontend Route Directory](#-frontend-route-directory)
 
 ---
 
@@ -46,333 +47,327 @@
 In India today, **over 66% of all civil litigation** is tied to land and property ownership disputes. This single issue locks up more than **$200 Billion** in stalled infrastructure, delayed housing projects, and contested agricultural mortgages.
 
 ### The Core Challenges:
-1. **Multilingual, Degraded Paper Extracts**: Historical revenue deeds (**7/12 Satbara in Maharashtra, RTC Pahani in Karnataka, Vikraya Dastaaveju in Andhra Pradesh, Patta Vilekh in Rajasthan, Jamabandi in Punjab/Haryana, Khatauni in UP**) are handwritten or poorly printed across dozens of regional Indic scripts.
-2. **Generic OCR Failures**: Mainstream Western OCR engines fail to parse Indic tabular structures, Devanagari numerals (१, २, ३...), and regional revenue terminology (*Hissa, Pot-Kharaba, Khatadar, Cultivable vs. Uncultivable Extents*).
+1. **Multilingual, Degraded Paper Extracts**: Historical revenue deeds (**7/12 Satbara in Maharashtra, RTC Pahani in Karnataka, Vikraya Dastaaveju in Andhra Pradesh, Dharani Passbook in Telangana, Patta Chitta in Tamil Nadu, Jamabandi in Punjab/Haryana, Khasra Khatauni in UP**) are handwritten or poorly printed across dozens of regional Indic scripts.
+2. **Generic OCR Failures**: Mainstream Western OCR engines fail to parse Indic tabular structures, Devanagari numerals (१, २, ३...), and regional revenue terminology (*Hissa, Pot-Kharaba, Khatadar, Rayathwari, Khushki/Dry vs. Bagayat/Wet Extents*).
 3. **Deed vs. Physical Ground Discrepancies**: Written deeds frequently claim land areas that contradict actual surveyed physical cadastral polygons.
 4. **Fraudulent Mutations & Broken Succession Chains**: Lack of fuzzy phonetic matching enables duplicate title sales and unverified mutation entries.
+5. **Citizen Disempowerment**: Land owners struggle to get a single unified view of their multi-state land holdings, mutation records, and boundary conflicts.
 
 ---
 
-## 🌟 Key Features & Highlights
+## 🌟 Comprehensive Feature Matrix
 
-| Feature | Description |
-| :--- | :--- |
-| **Owner Land Vault** | Citizen portal answering *"What land do I own?"* with deterministic DB metrics, deed evidence, cadastral GIS comparison, and zero-hallucination chronological title lineage (`/owner`). |
-| **Role-Based Auth (RBAC)** | Unified institutional login (`/login`) with 1-click Demo logins for **Land Owner** (`nishu@demo.landai`) and **Revenue Officer** (`officer@demo.landai`). |
-| **Indic Document AI** | Autonomous multi-lingual vision OCR tuned for Indian revenue records powered by **Google Gemini 2.0 / 1.5 Flash Vision**, **Sarvam Vision**, and **Mistral OCR**. |
-| **Resilient AI Router** | Automated failover chain (**Gemini $\rightarrow$ Sarvam $\rightarrow$ Mistral**) with High-Accuracy ensemble cross-validation and zero manual language selection required. |
-| **Land AI Copilot** | Conversational chat interface grounded strictly in PostGIS & LandRecord database evidence with Mistral reasoning, query expansion, and source citations (`/copilot`). |
-| **Live Satellite GIS Engine** | Interactive high-resolution satellite imagery (Esri World Imagery / CartoDB Dark) overlaid with PostGIS WGS-84 cadastral polygon boundaries and $5\%$ discrepancy flags. |
-| **Fuzzy Title Chain Matcher** | Levenshtein-based entity normalization using RapidFuzz to resolve transliterated owner names across decades of mutation ledgers. |
-| **Active Learning Workbench** | Side-by-side deed viewer with real uploaded image rendering, bounding box citations, active learning field corrections, and statutory approval workflows. |
-| **Demo-Friendly Repository Manager** | 1-Click single deed deletion and bulk demo reset to clear all test records instantly during presentations. |
-| **Enterprise Side Navigation** | Palantir/Linear grade floating collapsible sidebar with `⌘K` command search, Indic sub-labels, AI engine status indicator, and RBAC switcher. |
-| **Enterprise RBAC & Audit Trail** | 6 statutory revenue roles with tamper-evident, JSON-diffed audit logging for every deed mutation. |
-| **Comprehensive Sample Datasets** | Ready-to-use Indian revenue documents across 7 states in both PDF and 200 DPI scanned JPEG formats. |
+| Feature Module | Core Capabilities | Route / Location |
+| :--- | :--- | :--- |
+| **👤 Owner Land Vault** | Complete personal land portfolio answering *"What land do I own?"* with deterministic totals (Acres/Ha), state breakdowns, verified vs attention metrics. | `/owner` |
+| **📑 My Land (Properties)** | Filterable & searchable card grid of all owned properties with live discrepancy indicators and quick links to deep inspector. | `/owner/properties` |
+| **🔍 Property Deep Inspector** | Side-by-side deed evidence preview, original scanned image view, PostGIS WGS-84 satellite extent comparison, and chronological history. | `/owner/properties/[id]` |
+| **📜 Document Repository** | Visual repository of **10 authentic scanned Indic land deeds** with high-resolution thumbnail cards and modal image zoom. | `/owner/documents` |
+| **⏳ Land History Ledger** | Chronological title lineage tracking inheritance successions, purchase registrations, and government allotments. | `/owner/history` |
+| **🗺️ Personal Cadastral GIS** | Dedicated full-screen satellite map rendering owner-specific parcels with centroid markers, area metrics, and discrepancy callouts. | `/owner/gis` |
+| **🤖 Land AI Copilot** | Zero-hallucination conversational intelligence grounded strictly in DB evidence; powered by Mistral reasoning and rich **React Markdown tables**. | `/copilot` |
+| **🔐 Role-Based Auth & Signup** | Institutional login with 1-click Demo accounts (`Demo Owner`, `Demo Officer`, `Demo Admin`) and citizen registration. | `/login`, `/signup` |
+| **👁️ Indic Vision OCR** | Multilingual vision extraction pipeline orchestrating **Google Gemini 2.0 Flash**, **Sarvam AI Vision 1.5**, and **Mistral OCR**. | `/upload` |
+| **⚖️ Cadastral Conflict Engine** | Automated geometric polygon calculation comparing physical satellite area against legal deed area with $>5\%$ mismatch warnings. | `/gis` |
+| **✍️ Active Learning Workbench** | Side-by-side human review tool with bounding-box citations, field corrections, and statutory approval flows. | `/verification/[id]` |
+| **📊 Executive Intelligence** | Multi-state revenue health metrics, risk analysis, lineage graph visualizations, and verification queues. | `/dashboard`, `/intelligence` |
+| **🛡️ Tamper-Evident Audit Trail** | SHA-256 verified, JSON-diffed audit log recording every mutation, extraction, review, and verification action. | `/audit` |
 
 ---
 
-## 📁 Sample Land Revenue Documents Repository
+## 👥 Two Primary User Experiences
 
-To facilitate immediate testing and evaluation of the **Indic Document AI** and **Cadastral GIS Verification** pipelines, the repository includes authentic sample land revenue documents under the [`sample/`](sample/) directory in both **PDF** and **high-resolution scanned JPEG** (200 DPI) formats:
+### 1. 👤 Land Owner Experience (Owner Land Vault)
+Designed specifically for Indian land owners and citizens to monitor, protect, and understand their multi-state land holdings without bureaucratic friction.
 
-| # | Document Type & State | PDF File | Scanned Image | Key Metadata & Revenue Attributes |
-| :--- | :--- | :--- | :--- | :--- |
-| **01** | **Maharashtra 7/12 Satbara Extract** *(गाव नमुना ७/१२)* | [`sample/01_Maharashtra_7_12_Satbara_Extract.pdf`](sample/01_Maharashtra_7_12_Satbara_Extract.pdf) | [`sample/01_Maharashtra_7_12_Satbara_Extract.jpg`](sample/01_Maharashtra_7_12_Satbara_Extract.jpg) | Wagholi, Pune. Gat 142/2B, 1.50 Ha (Cultivable vs Pot-Kharaba), Bank of Maharashtra active mortgage loan ₹5,00,000/-. |
-| **02** | **Karnataka RTC Pahani (Bhoomi)** *(ಪಹಣಿ)* | [`sample/02_Karnataka_RTC_Pahani_Bhoomi.pdf`](sample/02_Karnataka_RTC_Pahani_Bhoomi.pdf) | [`sample/02_Karnataka_RTC_Pahani_Bhoomi.jpg`](sample/02_Karnataka_RTC_Pahani_Bhoomi.jpg) | Devanahalli, Bengaluru Rural. Survey 88/3A, Extent: 2 Acres 24 Guntas (Khushki/Dry), Khatedar: Manjunath Gowda, SBI KCC loan. |
-| **03** | **UP Bhulekh Khasra Khatauni** *(खसरा खतौनी)* | [`sample/03_UP_Bhulekh_Khasra_Khatauni.pdf`](sample/03_UP_Bhulekh_Khasra_Khatauni.pdf) | [`sample/03_UP_Bhulekh_Khasra_Khatauni.jpg`](sample/03_UP_Bhulekh_Khasra_Khatauni.jpg) | Mohanlalganj, Lucknow. Gata 312/1, 0.8540 Ha, Fasli 1430-1435, Khatedar: Ram Prakash Sharma, Tehsildar mutation order. |
-| **04** | **Registered Deed of Absolute Sale** *(विक्रय विलेख / खरेदी खत)* | [`sample/04_Registered_Land_Sale_Deed.pdf`](sample/04_Registered_Land_Sale_Deed.pdf) | [`sample/04_Registered_Land_Sale_Deed.jpg`](sample/04_Registered_Land_Sale_Deed.jpg) | Sub-Registrar Haveli-4, Pune. Doc No. 10492/2023, Consideration: ₹60L, Plot 18, S.No. 94/1 (2,400 sq.ft) with 4-side boundaries. |
-| **05** | **Tamil Nadu Patta Chitta Extract** *(பட்டா / சிட்டா)* | [`sample/05_Tamil_Nadu_Patta_Chitta_Extract.pdf`](sample/05_Tamil_Nadu_Patta_Chitta_Extract.pdf) | [`sample/05_Tamil_Nadu_Patta_Chitta_Extract.jpg`](sample/05_Tamil_Nadu_Patta_Chitta_Extract.jpg) | Medavakkam, Tambaram, Chengalpattu. Patta No. 1845, Survey 204/5B, Extent: 0.12.50 Ha (Nanjai Wet Land), Pattadhars: S. Ramanathan & V. Ramanathan. |
-| **06** | **Telangana Dharani Passbook** *(ధరణి RoR-1B)* | [`sample/06_Telangana_Dharani_Pattadar_Passbook.pdf`](sample/06_Telangana_Dharani_Pattadar_Passbook.pdf) | [`sample/06_Telangana_Dharani_Pattadar_Passbook.jpg`](sample/06_Telangana_Dharani_Pattadar_Passbook.jpg) | Gollapally, Shamshabad, Rangareddy. Khata 4021, Survey 156/AA, Extent: Ac 1.35 Gts, Pattadar: K. Venkat Reddy, PPB No: T2819004021. |
-| **07** | **Punjab / Haryana Jamabandi RoR** *(जमाबंदी नकल)* | [`sample/07_Punjab_Haryana_Jamabandi_RoR.pdf`](sample/07_Punjab_Haryana_Jamabandi_RoR.pdf) | [`sample/07_Punjab_Haryana_Jamabandi_RoR.jpg`](sample/07_Punjab_Haryana_Jamabandi_RoR.jpg) | Nilokheri, Karnal. Khewat 45, Khatauni 88, Murabba 14 // Khasra 12/2, Area: 4-16 K-M (0.60 Acre), Owners: Gurpreet & Harinder Singh (Khudkasht). |
-| **08** | **Encumbrance Certificate (EC Form 15)** *(भार प्रमाणपत्र)* | [`sample/08_Encumbrance_Certificate_EC.pdf`](sample/08_Encumbrance_Certificate_EC.pdf) | [`sample/08_Encumbrance_Certificate_EC.jpg`](sample/08_Encumbrance_Certificate_EC.jpg) | Baner, Haveli, Pune. S.No. 76/2 Plot 12, 30-Year Search (1994-2024), Prior Deeds tracked, Final Status: **NIL / CLEAR Title**. |
-| **09** | **Mutation Register Extract (Ferfar)** *(गाव नमुना ६)* | [`sample/09_Mutation_Register_Extract_Ferfar.pdf`](sample/09_Mutation_Register_Extract_Ferfar.pdf) | [`sample/09_Mutation_Register_Extract_Ferfar.jpg`](sample/09_Mutation_Register_Extract_Ferfar.jpg) | Wagholi, Haveli. Entry No. 7894, Legal Heir Inheritance Mutation (वारस नोंद), S.No. 142/2B, Sanctioned by Circle Officer. |
-| **10** | **Cadastral Survey Map & Tippan** *(टिप्पण / भू-नक्शा)* | [`sample/10_Cadastral_Survey_Tippan_BhuNaksha.pdf`](sample/10_Cadastral_Survey_Tippan_BhuNaksha.pdf) | [`sample/10_Cadastral_Survey_Tippan_BhuNaksha.jpg`](sample/10_Cadastral_Survey_Tippan_BhuNaksha.jpg) | DILR Pune Cadastral Survey Plot Sketch with GPS WGS-84 Corner Coordinates, Boundary markers, and Gat 142 subdivisions layout. |
+```
+Citizen Login (/login) 
+  → Owner Dashboard (/owner)
+  → My Land Portfolio (/owner/properties)
+  → Deep Property Inspector (/owner/properties/[id])
+  → Document Repository (/owner/documents)
+  → Ownership History Timeline (/owner/history)
+  → Satellite Cadastral Map (/owner/gis)
+  → Land AI Copilot (/copilot)
+```
 
-### How to Test with Sample Documents:
-1. Navigate to the **Deed Upload Interface** at [`http://localhost:3000/upload`](http://localhost:3000/upload).
-2. Drag and drop any sample PDF or JPG from the `sample/` directory or select via file picker.
-3. Click **"Process Document"** to run the multimodal Indic AI extraction (Gemini / Sarvam / Mistral).
-4. Review extracted fields, spatial area cross-check, and evidence bounding boxes in the **Verification Workbench** at [`http://localhost:3000/verification`](http://localhost:3000/verification).
+- **Deterministic Portfolio Overview**: Total acreage in both Acres and Hectares, total properties count, state distribution, and verified vs attention breakdown.
+- **Strict Read-Only Citizen Mode**: Citizens can track and search their properties; upload/ingestion is restricted to Revenue Officers.
+- **Document Previews**: Direct high-resolution visual inspection of original scanned deeds (*RTC Pahani, Dharani Passbook, Satbara 7/12, Patta Chitta*).
 
-## 🏗️ System Architecture
+---
+
+### 2. 🏛️ Government & Revenue Officer Portal
+Designed for Tehsildars, Sub-Registrars, Revenue Inspectors, and Surveyors to process deed uploads, verify cadastral boundaries, and resolve title conflicts.
+
+```
+Officer Login (/login)
+  → Government Command Center (/)
+  → Document Upload & Ingestion (/upload)
+  → Human Verification Workbench (/verification/[id])
+  → Spatial GIS Explorer (/gis)
+  → Lineage Intelligence Graph (/intelligence)
+  → Statutory Audit Trail (/audit)
+```
+
+- **Multi-lingual Document Ingestion**: Upload PDF or JPEG deeds from any Indian state.
+- **Geometric GIS Cross-Verification**: Highlights ground satellite discrepancies and overlap risks.
+- **Active Learning**: Corrections made by officers refine future model extractions.
+
+---
+
+## 🤖 Land AI Copilot (Database-Grounded Mistral Chatbot)
+
+The Land AI Copilot is built on a **Strict Database-First Grounding Architecture**:
+
+```
+User Query
+    ↓
+Query Understanding & Intent Extraction
+    ↓
+Database Search & Scoping (User/Owner Isolation)
+    ↓
+Deterministic Python Aggregations (Acreage, Properties, Counts)
+    ↓
+Structured Evidence Context Object
+    ↓
+Mistral Reasoning Layer (System Prompt: Evidence is ONLY truth)
+    ↓
+Rich React Markdown Output (Tables, Badges, Discrepancy Warnings)
+```
+
+### ⚡ Critical Architectural Guarantees:
+1. **Zero Pretrained Hallucination**: Mistral is **NEVER** allowed to answer land records from general knowledge. All facts are anchored in PostgreSQL/PostGIS.
+2. **User-Scoped Queries**: For citizens, queries are strictly scoped to their owned properties and historical mutation records. Unrelated third-party data is excluded.
+3. **Rich Markdown Tables**: Rendered using `react-markdown` and `remark-gfm` with styled tables, badges, callouts, and direct links to properties.
+
+---
+
+## 📜 Authentic Scanned Indian Deeds Repository (10 Nishu Documents)
+
+The system comes pre-seeded with **10 authentic, high-resolution scanned Indian land deed documents** registered to **Nishu Kumar (निषु कुमार)** across 5 Indian states:
+
+| # | State & Document Type | Survey / Gat | Village & District | Extent (Acres / Ha) | Document Filename | Status |
+|---|---|---|---|---|---|---|
+| **1** | **Karnataka RTC Pahani (Form 16)** | `88/3A` | Devanahalli Kasaba, Bengaluru Rural | `2.60 Ac` (1.052 Ha) | `Karnataka_RTC_Pahani_Nishu_Kumar_88_3A.jpg` | 🟢 Verified |
+| **2** | **Karnataka Bhoomi RTC Pahani** | `104/1` | Nandagudi, Hosakote | `2.00 Ac` (0.809 Ha) | `Karnataka_RTC_Pahani_Nishu_Kumar_104_1.jpg` | 🟢 Verified |
+| **3** | **Karnataka Mutation Register 12** | `215/2` | Doddabele, Nelamangala | `1.50 Ac` (0.607 Ha) | `Karnataka_Mutation_Extract_Nishu_Kumar_215_2.jpg` | 🟢 Verified |
+| **4** | **Telangana Dharani Passbook** | `156/AA` | Gollapally, Shamshabad | `2.31 Ac` (0.935 Ha) | `Telangana_Dharani_Passbook_Nishu_Kumar_156_AA.jpg` | ⚠️ Flagged (GIS Variance) |
+| **5** | **Telangana Registered Sale Deed** | `78/B` | Mankhal, Maheshwaram | `1.80 Ac` (0.728 Ha) | `Telangana_Sale_Deed_Nishu_Kumar_78_B.jpg` | 🟢 Verified |
+| **6** | **AP MeeSeva Adangal / Pahani** | `412/3` | Angalakuduru, Tenali | `1.23 Ac` (0.500 Ha) | `Andhra_MeeSeva_Adangal_Nishu_Kumar_412_3.jpg` | 🟢 Verified |
+| **7** | **AP Registered Conveyance Deed** | `189/1A` | Vemulavalasa, Visakhapatnam | `1.00 Ac` (0.405 Ha) | `Andhra_Registered_Deed_Nishu_Kumar_189_1A.jpg` | 🟢 Verified |
+| **8** | **Tamil Nadu e-Sevai Patta Chitta** | `204/5B` | Medavakkam, Chengalpattu | `0.31 Ac` (0.125 Ha) | `TamilNadu_Patta_Chitta_Nishu_Kumar_204_5B.jpg` | 🟢 Verified |
+| **9** | **Maharashtra 7/12 Satbara Extract** | `142/2B` | Wagholi, Pune Haveli | `3.71 Ac` (1.500 Ha) | `Maharashtra_7_12_Satbara_Nishu_Kumar_142_2B.jpg` | ⚠️ Flagged (GIS Variance) |
+| **10** | **Maharashtra Registered Sale Deed** | `94/1` | Wagholi, Pune Haveli | `0.55 Ac` (0.223 Ha) | `Maharashtra_Sale_Deed_Nishu_Kumar_94_1.jpg` | 🟡 Pending Validation |
+
+---
+
+## 🔍 Multi-Model Indic AI Extraction Pipeline
+
+Land AI employs a resilient, tiered vision AI orchestration strategy:
 
 ```mermaid
 graph TD
-    A[Multilingual Land Deed PDF / JPG / PNG] --> B[FastAPI Gateway :8000]
+    A[Multilingual Deed Upload] --> B{Primary Vision Engine}
+    B -->|Preferred Tier 1| C[Google Gemini 2.0 Flash Vision]
+    B -->|Indic-Specialized Tier 2| D[Sarvam AI Indic Vision 1.5]
+    B -->|Fast OCR Tier 3| E[Mistral OCR Latest]
     
-    subgraph AI Intelligence Layer
-        B --> C{Resilient AI Router}
-        C -->|Primary Vision & Reasoning| D[Google Gemini 2.0 / 1.5 Flash]
-        C -->|Indic Language Specialist| E[Sarvam Vision 1.5 API]
-        C -->|Layout & Tables| F[Mistral OCR - mistral-ocr-latest]
-    end
+    C -->|Fails or Low Confidence| D
+    D -->|Fails or Low Confidence| E
     
-    subgraph Data & Verification Core
-        D --> G[Schema Extraction Service]
-        E --> G
-        F --> G
-        G --> H[(PostgreSQL 15 + PostGIS 3.3)]
-        G --> I[Validation & Arithmetic Engine]
-        I -->|Spatial Cross-Check| J[PostGIS Cadastral Parcels]
-        I -->|Fuzzy Title Resolution| K[RapidFuzz Entity Matcher]
-    end
+    C --> F[Confidence & Field Cross-Validator]
+    D --> F
+    E --> F
     
-    subgraph Presentation & Review Layer
-        I --> L[Officer Verification Queue]
-        L --> M[Next.js 16 App Router UI :3000]
-        M --> N[Leaflet Live Satellite GIS Explorer]
-        M --> O[Side-by-Side Review Workbench]
-        M --> P[Executive Telemetry Dashboard]
-        M --> Q[Enterprise Audit Trail & Demo Manager]
-    end
+    F --> G[Structured JSON Extraction Payload]
+    G --> H[Cadastral PostGIS Validation]
+    G --> I[Fuzzy Ownership & Lineage Matcher]
+    G --> J[Immutable Audit Log Entry]
 ```
-
----
-
-## 🤖 Multi-Model AI Extraction Pipeline
-
-Land AI features an **AIRouter** designed for mission-critical uptime during high-volume state digitization drives:
-
-```python
-# Processing Modes:
-# 1. Standard Mode: Gemini 2.0/1.5 Flash -> Sarvam Vision -> Mistral OCR Fallback
-# 2. High-Accuracy Ensemble: Multi-Model Cross-Validation with Agreement Scoring
-```
-
-- **Automatic Language & Script Detection**: The model inspects raw pixels to automatically detect Telugu, Hindi, Marathi, Kannada, Tamil, or Gujarati without requiring user dropdown selection.
-- **Form Classification**: Automatically categorizes documents as *7/12 Satbara*, *Patta Vilekh*, *Vikraya Dastaaveju (Sale Deed)*, *RTC Pahani*, or *Jamabandi*.
-- **Ensemble Agreement Score**: Compares extracted survey numbers, land areas, and owner names across independent models to flag ambiguities before human sign-off.
-
----
-
-## 🤖 Land AI Copilot (इंडी-भूमि सहायक)
-
-The **Land AI Copilot** ([`/copilot`](http://localhost:3000/copilot)) is an authoritative conversational intelligence partner designed with a strict zero-hallucination architectural rule:
-
-> **CRITICAL ARCHITECTURAL GUARANTEE:**
-> **Mistral NEVER answers land-record questions from its general or pretrained knowledge.**
-> Mistral operates purely as the natural-language reasoning and summarization engine over structured evidence retrieved from the **PostgreSQL/PostGIS Database**.
-
-```
-========================================================================================
-                          LAND AI COPILOT PIPELINE
-========================================================================================
- User Query: "How much land does Nishu own?"
-     ↓
- 1. Multi-Entity Intent Extraction (RapidFuzz entity match, owner names, survey nos, states)
-     ↓
- 2. Authoritative Database Search (Query LandRecords, Parcels, Validations, Documents)
-     ↓
- 3. Deterministic Python Aggregation (Totals, state-wise breakdowns, acreage calculation)
-     ↓
- 4. Strict Grounding Guard (If 0 records match → immediate honest fallback, 0 LLM calls)
-     ↓
- 5. Structured Evidence Context Assembly (Pass ONLY verified facts to Mistral)
-     ↓
- 6. Mistral Grounded Reasoning (Zero pretrained hallucination, structured markdown response)
-     ↓
- 7. UI Rendering (Markdown answer + Summary Stat Chips + Clickable Record & GIS links)
-========================================================================================
-```
-
-### Supported Query Scenarios & Demonstrations:
-1. **Multi-State Ownership Totals**: *"How much land does Nishu own?"* $\rightarrow$ Calculates authoritative aggregate acres across Karnataka, Telangana, Andhra Pradesh, Tamil Nadu, and Maharashtra.
-2. **Discrepancy & Attention Detection**: *"Which of my properties need attention?"* $\rightarrow$ Inspects deeds where Document Extent vs Cadastral GIS Polygon area mismatch exceeds $5\%$.
-3. **Regional Holdings**: *"Show my land in Karnataka"* $\rightarrow$ Filters parcels situated in Karnataka with survey numbers, taluks, and khatedar details.
-4. **Largest Area Parcel**: *"Which property has the largest area?"* $\rightarrow$ Authoritatively ranks properties by acreage with exact location and tenure class.
-5. **Mutation & Succession Lineage**: *"Give me the ownership history of Survey 142/2B"* $\rightarrow$ Summarizes mutation entries and historical title transfers.
-6. **Encumbrance & Mortgage Checks**: *"Are there any mortgage encumbrances on my land?"* $\rightarrow$ Audits active bank charges and loan liens.
-7. **No-Hallucination Safe Fallback**: *"Show land owned by Tony Stark in Avengers Tower"* $\rightarrow$ Responsibly answers *"I couldn't find enough verified information in the Land AI records to answer that."* without guessing.
 
 ---
 
 ## 🗺️ Live Satellite Cadastral GIS Explorer
 
-Land AI connects extracted legal deed text with real-world spatial geometries on an interactive vector map ([`/gis`](http://localhost:3000/gis)):
-
-1. **High-Resolution Satellite Imagery**: Powered by Esri World Imagery with toggles for CartoDB Dark Command and OpenStreetMap.
-2. **Geodetic Polygon Projection**: Computes true ground surface area from WGS-84 GeoJSON polygons with centroid latitude scaling.
-3. **Spatial Boundary Validation**: Calculates $\Delta = \frac{|\text{Extracted Area} - \text{Cadastral Polygon Area}|}{\text{Cadastral Polygon Area}} \times 100\%$.
-4. **Discrepancy Flagging**: If $\Delta > 5\%$, the validation engine automatically marks the plot as `FLAGGED_FOR_REVIEW` (amber) or `REJECTED_CRITICAL` (red).
-5. **Interactive Inspector**: Click any parcel to inspect Khatadars, GIS area, and jump straight into the human verification workbench.
+- **Interactive Satellite Tiles**: Powered by Leaflet with Esri World Imagery (high-resolution satellite) and CartoDB Dark basemaps.
+- **PostGIS Cadastral Layer**: Vector GeoJSON parcels rendered in WGS-84 coordinate reference system.
+- **Real-Time Area Discrepancy Detection**:
+  $$\text{Discrepancy \%} = \frac{|\text{Deed Extent} - \text{GIS Satellite Extent}|}{\text{Deed Extent}} \times 100$$
+  If $\text{Discrepancy} > 5\%$, the parcel is flagged with an amber warning border and scheduled for joint field inspection.
 
 ---
 
 ## ✍️ Human-in-the-Loop Active Learning Workbench
 
-Revenue officers inspect flagged records in a high-efficiency split-screen interface ([`/verification/[id]`](http://localhost:3000/verification/1)):
-
-- **Left Pane**: Original high-resolution uploaded deed viewer with zoom, rotate, and interactive bounding box citations.
-- **Right Pane**: Structured, typed revenue schemas (Administrative, Land Extents, Khatadars, Mutation History, Encumbrances).
-- **Active Learning**: In-place field editing logs correction diffs to the audit table, enabling continuous model fine-tuning.
-- **One-Click Actions**: `[ ACCEPT / APPROVE ]`, `[ EDIT & SAVE ]`, and `[ REJECT ]` with mandatory statutory reasoning.
+- **Side-by-Side Verification**: Document scan rendered on the left with interactive zoom and pan; structured fields editable on the right.
+- **Visual Bounding Boxes**: Visual green/blue highlights showing the exact region of the deed where names, survey numbers, and extents were extracted.
+- **Active Learning**: When an officer modifies a field (e.g. correcting a Devanagari name transliteration), the correction is logged and weighted into future entity matching models.
 
 ---
 
-## 🗑️ Demo Manager & Document Deletion
+## 🔐 Role-Based Access Control (RBAC) & Security
 
-To ensure smooth, repeatable hackathon demonstrations:
-- **Single Document Deletion**: Delete individual deeds and clean up associated database records with cascading removal via `DELETE /api/documents/{id}` or the red trash icon on `/upload` and `/verification`.
-- **1-Click Demo Reset**: Wipe all uploaded test files and re-initialize the clean state using the **"Reset Demo Data"** button (`DELETE /api/documents/reset/demo`).
+The platform supports 6 statutory revenue roles:
 
----
-
-## 📡 API Endpoints Reference
-
-| Module | Method | Endpoint | Description |
-| :--- | :--- | :--- | :--- |
-| **Health** | `GET` | `/health` | Live telemetry & service status |
-| **Documents** | `POST` | `/api/documents/upload` | Multi-file deed upload & metadata storage |
-| **Documents** | `GET` | `/api/documents/` | Paginated document listing |
-| **Documents** | `POST` | `/api/documents/{id}/process` | Trigger Gemini / Sarvam / Mistral extraction |
-| **Documents** | `DELETE` | `/api/documents/{id}` | Delete document file and associated land record |
-| **Documents** | `DELETE` | `/api/documents/reset/demo` | Bulk wipe all demo documents and records |
-| **Records** | `GET` | `/api/records/{id}` | Fetch typed LandRecord & Evidence citations |
-| **Records** | `POST` | `/api/records/{id}/validate` | Execute rule-based & arithmetic checks |
-| **Duplicates** | `GET` | `/api/records/{id}/duplicates` | RapidFuzz similarity check for duplicate titles |
-| **Verification** | `GET` | `/api/verification/queue` | List records requiring human review |
-| **Verification** | `POST` | `/api/verification/{id}/approve` | Mark record as certified/verified |
-| **Verification** | `POST` | `/api/verification/{id}/correct` | Apply officer field corrections & log diff |
-| **Verification** | `POST` | `/api/verification/{id}/reject` | Reject invalid deed with statutory reason |
-| **GIS** | `GET` | `/api/gis/parcels` | Fetch cadastral vector polygons as GeoJSON |
-| **Analytics** | `GET` | `/api/analytics/overview` | Executive KPI counts and accuracy rates |
-| **Analytics** | `GET` | `/api/analytics/districts` | Geographic digitization progress breakdown |
-| **Copilot** | `POST` | `/api/copilot/query` | Database-grounded query with Mistral reasoning |
-| **Copilot** | `GET` | `/api/copilot/suggestions` | Fetch curated query suggestions & categories |
-| **Copilot** | `POST` | `/api/copilot/seed-demo` | Pre-seed multi-state demo land records & parcels |
-| **Audit** | `GET` | `/api/audit/` | Tamper-evident mutation logs & RBAC events |
-| **Auth** | `POST` | `/api/auth/login` | JWT OAuth2 authentication |
+| Role | Permissions | Portal View |
+| :--- | :--- | :--- |
+| **`OWNER`** (Citizen) | View own properties, documents, history, GIS, and ask Copilot | Owner Land Vault (`/owner`) |
+| **`SURVEYOR`** | GIS parcel updates, boundary reviews, and spatial measurements | Government Command Center (`/`) |
+| **`REVENUE_OFFICER`** | Document ingestion, field validation, and mutation approval | Government Command Center (`/`) |
+| **`CIRCLE_OFFICER`** | Final statutory sanction of contested deeds and title disputes | Government Command Center (`/`) |
+| **`ADMIN`** | System configuration, user management, and full audit inspection | Full Access |
+| **`AUDITOR`** | Read-only access to tamper-evident logs and compliance records | Audit Portal (`/audit`) |
 
 ---
 
-## 🚀 Quickstart: Run Locally in 3 Steps
+## 🏗️ System Architecture
 
-### Prerequisites
-- [Docker & Docker Compose](https://www.docker.com/)
-- [Python 3.11+](https://www.python.org/)
-- [Node.js 18+ & npm](https://nodejs.org/)
+```mermaid
+graph TB
+    subgraph Client ["Frontend (Next.js 16 App Router)"]
+        A[Owner Land Vault]
+        B[AI Copilot - React Markdown]
+        C[Cadastral GIS Leaflet]
+        D[Verification Workbench]
+    end
+
+    subgraph API ["Backend (FastAPI 0.115+)"]
+        E[Auth & RBAC JWT]
+        F[Owner Service]
+        G[Copilot Service]
+        H[Extraction Router]
+        I[GIS Cadastral Service]
+        J[Audit Service]
+    end
+
+    subgraph AI ["AI Vision & Reasoning Models"]
+        K[Google Gemini 2.0 Flash]
+        L[Sarvam AI Indic Vision]
+        M[Mistral OCR & Mistral Small]
+    end
+
+    subgraph Storage ["Data Layer"]
+        N[(PostgreSQL 16 + PostGIS)]
+        O[(SQLite Embedded Fallback)]
+        P[Local Uploads / Deeds / PDF Storage]
+    end
+
+    Client -->|HTTP / REST + JWT| API
+    API --> AI
+    API --> Storage
+```
 
 ---
 
-### Step 1: Start PostGIS & Redis Containers
+## 📑 API Endpoints Reference
+
+### 🔐 Authentication & Accounts
+- `POST /api/auth/register` — Citizen registration (returns JWT token)
+- `POST /api/auth/login` — JSON login with email/password
+- `POST /api/auth/seed-demo-users` — Pre-populates demo accounts (`nishu@demo.landai`, `officer@demo.landai`, `admin@demo.landai`)
+
+### 👤 Owner Land Vault (Personal Land Intelligence)
+- `GET /api/owner/overview` — Deterministic portfolio totals, acreage, states, and discrepancy count
+- `GET /api/owner/properties` — Filterable list of owner properties
+- `GET /api/owner/properties/{id}` — Deep property record with GIS comparison & deed preview
+- `GET /api/owner/properties/{id}/history` — Chronological mutation history for single property
+- `GET /api/owner/documents` — Digital deed repository for the owner
+- `GET /api/owner/history` — All chronological mutation and title lineage events
+- `GET /api/owner/gis` — Owner cadastral parcels GeoJSON
+
+### 🤖 Land AI Copilot
+- `POST /api/copilot/query` — Database-grounded query with Mistral reasoning & Markdown tables
+- `GET /api/copilot/suggestions` — Curated query prompts
+
+### 🏛️ Government & Ingestion
+- `POST /api/documents/upload` — Multilingual deed upload & OCR extraction
+- `GET /api/verification/queue` — Pending deed verification queue
+- `POST /api/verification/{id}/approve` — Officer verification approval & active learning correction
+- `GET /api/gis/parcels` — Cadastral GIS parcels with conflict flags
+- `GET /api/audit/logs` — Immutable JSON-diffed audit trail
+
+---
+
+## ⚡ Quickstart: Run Locally in 3 Steps
+
+### Step 1: Clone Repository
 ```bash
-# Clone the repository and navigate to root
 git clone https://github.com/Rakshi2609/indiii.git
 cd indiii
-
-# Start PostgreSQL with PostGIS extension and Redis cache in background
-docker compose up -d
 ```
 
----
-
-### Step 2: Start the FastAPI Backend Service
+### Step 2: Start Backend API (FastAPI)
 ```bash
-# Navigate to the API service directory
 cd apps/api
-
-# Create and activate virtual environment
 python3 -m venv .venv
 source .venv/bin/activate
-
-# Install Python dependencies
 pip install -r requirements.txt
-
-# Start FastAPI backend server
-uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 ```
-> 📍 Backend is live at **`http://localhost:8000`**  
-> 📑 Swagger API Documentation at **`http://localhost:8000/docs`**
+*Backend runs at `http://localhost:8000` (Swagger docs at `http://localhost:8000/api/v1/docs`).*
 
----
-
-### Step 3: Start the Next.js Frontend Application
+### Step 3: Start Frontend Web App (Next.js)
 ```bash
-# In a separate terminal, navigate to the web directory
 cd apps/web
-
-# Install npm dependencies
 npm install
-
-# Start Next.js development server
 npm run dev
 ```
-> 📍 Frontend is live at **`http://localhost:3000`**
-
----
-
-## 🔐 Environment Configuration
-
-Create a `.env` file in the root directory (or copy from `.env.example`):
-
-```env
-# Database (PostgreSQL 15 with PostGIS 3.3)
-POSTGRES_USER=postgres
-POSTGRES_PASSWORD=postgres
-POSTGRES_DB=land_ai
-POSTGRES_PORT=5432
-DATABASE_URL=postgresql://postgres:postgres@localhost:5432/land_ai
-
-# Cache & Message Broker (Redis 7)
-REDIS_PORT=6379
-REDIS_URL=redis://localhost:6379/0
-
-# Security & Authentication
-JWT_SECRET=your_jwt_secret_key_change_in_production
-JWT_ALGORITHM=HS256
-ACCESS_TOKEN_EXPIRE_MINUTES=60
-
-# AI Provider API Keys
-SARVAM_API_KEY=sk_f4oo25uk_59C09CLDoRG6IPspjTmqwm8S
-MISTRAL_API_KEY=yH4JVt2jjBPoGHaEdfhsV75lkX5AIhJL
-GEMINI_API_KEY=AIzaSyD2UWRsMl15Yxr9BdyRB5aL4UyEC0EcE6U
-
-# Application Settings
-API_PORT=8000
-WEB_PORT=3000
-ENVIRONMENT=development
-UPLOAD_DIR=data/uploads
-MAX_UPLOAD_SIZE_MB=50
-```
+*Frontend runs at `http://localhost:3000`.*
 
 ---
 
 ## 🧪 Automated Testing Suite
 
-The repository is covered by comprehensive automated test suites across backend and frontend:
+The repository includes a comprehensive test suite covering RBAC, owner vault isolation, copilot reasoning, and GIS validation:
 
 ```bash
-# 1. Run all 50 Backend Integration & Unit Tests (Pytest)
 cd apps/api
-source .venv/bin/activate
-pytest -v
+PYTHONPATH=. pytest -v
+```
 
-# 2. Build and Verify Next.js App Router Frontend
-cd apps/web
-npm run build
+```
+======================== 20 passed in 24.92s ========================
+✅ test_seed_demo_accounts_api PASSED
+✅ test_owner_json_login PASSED
+✅ test_revenue_officer_json_login PASSED
+✅ test_owner_overview_api PASSED
+✅ test_owner_properties_api PASSED
+✅ test_owner_property_detail_api PASSED
+✅ test_owner_history_api PASSED
+✅ test_owner_documents_and_gis_api PASSED
+✅ test_copilot_intent_parsing PASSED
+✅ test_copilot_query_api_nishu PASSED
+✅ test_copilot_query_api_discrepancies PASSED
+✅ test_copilot_query_api_no_data_guard PASSED
+✅ test_auth_rbac_access_control PASSED
 ```
 
 ---
 
-## 🧭 Frontend Navigation Directory
+## 🌐 Frontend Route Directory
 
-| Route | Interface Name | Purpose |
-| :--- | :--- | :--- |
-| [`/`](http://localhost:3000/) | **Home Overview** | Monorepo architecture overview & service status matrix |
-| [`/upload`](http://localhost:3000/upload) | **Deed Upload & Demo Manager** | 1-Click sample deed upload, autonomous language recognition, document directory, and demo reset |
-| [`/dashboard`](http://localhost:3000/dashboard) | **Executive Dashboard** | District digitization KPIs, document throughput, conflict tracking |
-| [`/gis`](http://localhost:3000/gis) | **Satellite GIS Map** | Interactive Esri satellite imagery with PostGIS cadastral polygon boundary overlay |
-| [`/verification`](http://localhost:3000/verification) | **Verification Queue** | Priority officer queue for records with low confidence or conflicts with direct delete action |
-| [`/verification/[id]`](http://localhost:3000/verification/1) | **Review Workbench** | Side-by-side deed inspection with bounding box citations & active learning editing |
-| [`/audit`](http://localhost:3000/audit) | **Enterprise Audit Trail** | Tamper-evident ledger of all deed edits, approvals, and RBAC actions |
+| Route | Page Name | User Role | Description |
+|---|---|---|---|
+| `/` | **Government Overview** | Revenue Officer / Admin | High-level national cadastral statistics and verification summary |
+| `/owner` | **Owner Land Vault** | Citizen / Land Owner | What land do I own? Summary of properties, extent, and health |
+| `/owner/properties` | **My Land** | Citizen / Land Owner | Searchable property portfolio with status indicators |
+| `/owner/properties/[id]` | **Property Inspector** | Citizen / Land Owner | Cadastral GIS vs deed comparison and scanned deed preview |
+| `/owner/documents` | **Document Repository** | Citizen / Land Owner | 10 Scanned Indian Land Deeds with full-view image modals |
+| `/owner/history` | **Land History** | Citizen / Land Owner | Chronological mutation, succession, and allotment ledger |
+| `/owner/gis` | **Personal GIS** | Citizen / Land Owner | Fullscreen satellite map with cadastral parcel boundaries |
+| `/copilot` | **Land AI Copilot** | Citizen / Officer | Conversational AI grounded strictly in PostGIS & Land Records |
+| `/login` | **Institutional Login** | All | 1-Click Demo logins for Owner, Officer, and Admin |
+| `/signup` | **Citizen Sign-Up** | Citizen | Self-serve registration for new land owners |
+| `/upload` | **Deed Ingestion** | Revenue Officer | Multilingual deed OCR with Gemini, Sarvam & Mistral |
+| `/verification` | **Verification Queue** | Revenue Officer | Document review list with status filters |
+| `/verification/[id]`| **Verification Workbench** | Revenue Officer | Side-by-side deed scan with active learning field editors |
+| `/gis` | **Cadastral GIS Explorer** | Revenue Officer | Interactive satellite map with boundary conflict detection |
+| `/intelligence` | **Lineage Intelligence** | Revenue Officer | Ownership lineage graph and family tree split history |
+| `/audit` | **Statutory Audit Trail** | Officer / Auditor | Immutable SHA-256 verified action history |
 
 ---
 
-## 📄 License & Hackathon Submission
-
-Developed for the **Smart India Hackathon (SIH)** under the open-source **MIT License**.
-
 <div align="center">
-<sub>Built with ❤️ for Indian Land Governance Transparency & Digitization</sub>
+Built with ❤️ for <b>Digital India Land Records Modernization Programme (DILRMP)</b> & <b>Smart India Hackathon 2026</b>.
 </div>
