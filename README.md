@@ -25,6 +25,7 @@
 
 - [The Problem & Domain Context](#-the-problem--domain-context)
 - [Key Features & Highlights](#-key-features--highlights)
+- [Sample Land Revenue Documents Repository](#-sample-land-revenue-documents-repository)
 - [System Architecture](#-system-architecture)
 - [Multi-Model AI Extraction Pipeline](#-multi-model-ai-extraction-pipeline)
 - [Live Satellite Cadastral GIS Explorer](#-live-satellite-cadastral-gis-explorer)
@@ -63,8 +64,32 @@ In India today, **over 66% of all civil litigation** is tied to land and propert
 | **Demo-Friendly Repository Manager** | 1-Click single deed deletion and bulk demo reset to clear all test records instantly during presentations. |
 | **Enterprise Side Navigation** | Palantir/Linear grade floating collapsible sidebar with `⌘K` command search, Indic sub-labels, AI engine status indicator, and RBAC switcher. |
 | **Enterprise RBAC & Audit Trail** | 6 statutory revenue roles with tamper-evident, JSON-diffed audit logging for every deed mutation. |
+| **Comprehensive Sample Datasets** | Ready-to-use Indian revenue documents across 7 states in both PDF and 200 DPI scanned JPEG formats. |
 
 ---
+
+## 📁 Sample Land Revenue Documents Repository
+
+To facilitate immediate testing and evaluation of the **Indic Document AI** and **Cadastral GIS Verification** pipelines, the repository includes authentic sample land revenue documents under the [`sample/`](sample/) directory in both **PDF** and **high-resolution scanned JPEG** (200 DPI) formats:
+
+| # | Document Type & State | PDF File | Scanned Image | Key Metadata & Revenue Attributes |
+| :--- | :--- | :--- | :--- | :--- |
+| **01** | **Maharashtra 7/12 Satbara Extract** *(गाव नमुना ७/१२)* | [`sample/01_Maharashtra_7_12_Satbara_Extract.pdf`](sample/01_Maharashtra_7_12_Satbara_Extract.pdf) | [`sample/01_Maharashtra_7_12_Satbara_Extract.jpg`](sample/01_Maharashtra_7_12_Satbara_Extract.jpg) | Wagholi, Pune. Gat 142/2B, 1.50 Ha (Cultivable vs Pot-Kharaba), Bank of Maharashtra active mortgage loan ₹5,00,000/-. |
+| **02** | **Karnataka RTC Pahani (Bhoomi)** *(ಪಹಣಿ)* | [`sample/02_Karnataka_RTC_Pahani_Bhoomi.pdf`](sample/02_Karnataka_RTC_Pahani_Bhoomi.pdf) | [`sample/02_Karnataka_RTC_Pahani_Bhoomi.jpg`](sample/02_Karnataka_RTC_Pahani_Bhoomi.jpg) | Devanahalli, Bengaluru Rural. Survey 88/3A, Extent: 2 Acres 24 Guntas (Khushki/Dry), Khatedar: Manjunath Gowda, SBI KCC loan. |
+| **03** | **UP Bhulekh Khasra Khatauni** *(खसरा खतौनी)* | [`sample/03_UP_Bhulekh_Khasra_Khatauni.pdf`](sample/03_UP_Bhulekh_Khasra_Khatauni.pdf) | [`sample/03_UP_Bhulekh_Khasra_Khatauni.jpg`](sample/03_UP_Bhulekh_Khasra_Khatauni.jpg) | Mohanlalganj, Lucknow. Gata 312/1, 0.8540 Ha, Fasli 1430-1435, Khatedar: Ram Prakash Sharma, Tehsildar mutation order. |
+| **04** | **Registered Deed of Absolute Sale** *(विक्रय विलेख / खरेदी खत)* | [`sample/04_Registered_Land_Sale_Deed.pdf`](sample/04_Registered_Land_Sale_Deed.pdf) | [`sample/04_Registered_Land_Sale_Deed.jpg`](sample/04_Registered_Land_Sale_Deed.jpg) | Sub-Registrar Haveli-4, Pune. Doc No. 10492/2023, Consideration: ₹60L, Plot 18, S.No. 94/1 (2,400 sq.ft) with 4-side boundaries. |
+| **05** | **Tamil Nadu Patta Chitta Extract** *(பட்டா / சிட்டா)* | [`sample/05_Tamil_Nadu_Patta_Chitta_Extract.pdf`](sample/05_Tamil_Nadu_Patta_Chitta_Extract.pdf) | [`sample/05_Tamil_Nadu_Patta_Chitta_Extract.jpg`](sample/05_Tamil_Nadu_Patta_Chitta_Extract.jpg) | Medavakkam, Tambaram, Chengalpattu. Patta No. 1845, Survey 204/5B, Extent: 0.12.50 Ha (Nanjai Wet Land), Pattadhars: S. Ramanathan & V. Ramanathan. |
+| **06** | **Telangana Dharani Passbook** *(ధరణి RoR-1B)* | [`sample/06_Telangana_Dharani_Pattadar_Passbook.pdf`](sample/06_Telangana_Dharani_Pattadar_Passbook.pdf) | [`sample/06_Telangana_Dharani_Pattadar_Passbook.jpg`](sample/06_Telangana_Dharani_Pattadar_Passbook.jpg) | Gollapally, Shamshabad, Rangareddy. Khata 4021, Survey 156/AA, Extent: Ac 1.35 Gts, Pattadar: K. Venkat Reddy, PPB No: T2819004021. |
+| **07** | **Punjab / Haryana Jamabandi RoR** *(जमाबंदी नकल)* | [`sample/07_Punjab_Haryana_Jamabandi_RoR.pdf`](sample/07_Punjab_Haryana_Jamabandi_RoR.pdf) | [`sample/07_Punjab_Haryana_Jamabandi_RoR.jpg`](sample/07_Punjab_Haryana_Jamabandi_RoR.jpg) | Nilokheri, Karnal. Khewat 45, Khatauni 88, Murabba 14 // Khasra 12/2, Area: 4-16 K-M (0.60 Acre), Owners: Gurpreet & Harinder Singh (Khudkasht). |
+| **08** | **Encumbrance Certificate (EC Form 15)** *(भार प्रमाणपत्र)* | [`sample/08_Encumbrance_Certificate_EC.pdf`](sample/08_Encumbrance_Certificate_EC.pdf) | [`sample/08_Encumbrance_Certificate_EC.jpg`](sample/08_Encumbrance_Certificate_EC.jpg) | Baner, Haveli, Pune. S.No. 76/2 Plot 12, 30-Year Search (1994-2024), Prior Deeds tracked, Final Status: **NIL / CLEAR Title**. |
+| **09** | **Mutation Register Extract (Ferfar)** *(गाव नमुना ६)* | [`sample/09_Mutation_Register_Extract_Ferfar.pdf`](sample/09_Mutation_Register_Extract_Ferfar.pdf) | [`sample/09_Mutation_Register_Extract_Ferfar.jpg`](sample/09_Mutation_Register_Extract_Ferfar.jpg) | Wagholi, Haveli. Entry No. 7894, Legal Heir Inheritance Mutation (वारस नोंद), S.No. 142/2B, Sanctioned by Circle Officer. |
+| **10** | **Cadastral Survey Map & Tippan** *(टिप्पण / भू-नक्शा)* | [`sample/10_Cadastral_Survey_Tippan_BhuNaksha.pdf`](sample/10_Cadastral_Survey_Tippan_BhuNaksha.pdf) | [`sample/10_Cadastral_Survey_Tippan_BhuNaksha.jpg`](sample/10_Cadastral_Survey_Tippan_BhuNaksha.jpg) | DILR Pune Cadastral Survey Plot Sketch with GPS WGS-84 Corner Coordinates, Boundary markers, and Gat 142 subdivisions layout. |
+
+### How to Test with Sample Documents:
+1. Navigate to the **Deed Upload Interface** at [`http://localhost:3000/upload`](http://localhost:3000/upload).
+2. Drag and drop any sample PDF or JPG from the `sample/` directory or select via file picker.
+3. Click **"Process Document"** to run the multimodal Indic AI extraction (Gemini / Sarvam / Mistral).
+4. Review extracted fields, spatial area cross-check, and evidence bounding boxes in the **Verification Workbench** at [`http://localhost:3000/verification`](http://localhost:3000/verification).
 
 ## 🏗️ System Architecture
 
