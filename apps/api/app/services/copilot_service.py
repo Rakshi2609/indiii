@@ -1006,24 +1006,53 @@ class LandAICopilotService:
             }
         ]
 
+        # Map of survey number to Nishu's generated deed images
+        nishu_deed_map = {
+            "88/3A": ("Karnataka_RTC_Pahani_Nishu_Kumar_88_3A.jpg", "Karnataka RTC Pahani (Form 16) - Survey 88/3A (Nishu Kumar).jpg"),
+            "104/1": ("Karnataka_RTC_Pahani_Nishu_Kumar_104_1.jpg", "Karnataka Bhoomi RTC Pahani - Survey 104/1 (Nishu Kumar).jpg"),
+            "215/2": ("Karnataka_Mutation_Extract_Nishu_Kumar_215_2.jpg", "Karnataka Mutation Register 12 - Survey 215/2 (Nishu Kumar).jpg"),
+            "156/AA": ("Telangana_Dharani_Passbook_Nishu_Kumar_156_AA.jpg", "Telangana Dharani Pattadar Passbook - Survey 156/AA (Nishu Kumar).jpg"),
+            "78/B": ("Telangana_Sale_Deed_Nishu_Kumar_78_B.jpg", "Telangana Registered Sale Deed - Survey 78/B (Nishu Kumar).jpg"),
+            "412/3": ("Andhra_MeeSeva_Adangal_Nishu_Kumar_412_3.jpg", "Andhra Pradesh MeeSeva Adangal/Pahani - Survey 412/3 (Nishu Kumar).jpg"),
+            "189/1A": ("Andhra_Registered_Deed_Nishu_Kumar_189_1A.jpg", "Andhra Pradesh Registered Sale Deed - Survey 189/1A (Nishu Kumar).jpg"),
+            "204/5B": ("TamilNadu_Patta_Chitta_Nishu_Kumar_204_5B.jpg", "Tamil Nadu e-Sevai Patta Chitta - Survey 204/5B (Nishu Kumar).jpg"),
+            "142/2B": ("Maharashtra_7_12_Satbara_Nishu_Kumar_142_2B.jpg", "Maharashtra 7/12 Satbara Extract - Gat 142/2B (Nishu Kumar).jpg"),
+            "94/1": ("Maharashtra_Sale_Deed_Nishu_Kumar_94_1.jpg", "Maharashtra Registered Sale Deed - Gat 94/1 (Nishu Kumar).jpg"),
+        }
+
         for item in demo_records_data:
-            clean_s = item['survey_number'].replace('/', '_').replace('-', '_')
-            fname = f"demo_seed_{clean_s}.pdf"
+            s_num = item['survey_number']
+            if s_num in nishu_deed_map:
+                fname, orig_name = nishu_deed_map[s_num]
+                mtype = "image/jpeg"
+                fsize = 185000
+            else:
+                clean_s = s_num.replace('/', '_').replace('-', '_')
+                fname = f"demo_seed_{clean_s}.pdf"
+                orig_name = f"{item['state']}_Deed_{clean_s}.pdf"
+                mtype = "application/pdf"
+                fsize = 45000
 
             # Check if Document already exists
             doc = db.query(Document).filter(Document.filename == fname).first()
             if not doc:
                 doc = Document(
                     filename=fname,
-                    original_name=f"{item['state']}_Deed_{clean_s}.pdf",
+                    original_name=orig_name,
                     file_path=f"data/uploads/{fname}",
-                    file_size=45000,
-                    mime_type="application/pdf",
+                    file_size=fsize,
+                    mime_type=mtype,
                     status=DocumentStatus.COMPLETED
                 )
                 db.add(doc)
                 db.commit()
                 db.refresh(doc)
+            else:
+                doc.original_name = orig_name
+                doc.mime_type = mtype
+                doc.file_path = f"data/uploads/{fname}"
+                doc.file_size = fsize
+                db.commit()
 
             # Check if LandRecord already exists for this document
             rec = db.query(LandRecord).filter(LandRecord.document_id == doc.id).first()

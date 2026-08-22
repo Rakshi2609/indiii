@@ -158,6 +158,32 @@ export default function OwnerDocumentsPage() {
                   </Badge>
                 </div>
 
+                {/* Document Image Thumbnail Preview */}
+                <div className="relative rounded-xl overflow-hidden border border-slate-800 bg-slate-950 aspect-[16/9] group">
+                  <img
+                    src={`/sample/deeds/${doc.filename}`}
+                    alt={doc.original_name}
+                    className="w-full h-full object-cover object-top transition-transform duration-300 group-hover:scale-105"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = `http://localhost:8000/api/documents/${doc.id}/file`;
+                    }}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/20 to-transparent flex items-end justify-between p-2">
+                    <span className="text-[10px] font-semibold text-emerald-400 bg-slate-900/90 px-1.5 py-0.5 rounded border border-slate-700">
+                      {doc.linked_state || "Registered Deed"}
+                    </span>
+                    <a
+                      href={`/sample/deeds/${doc.filename}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-[10px] text-slate-300 hover:text-white bg-slate-800/90 px-1.5 py-0.5 rounded border border-slate-600 flex items-center gap-1"
+                    >
+                      <ExternalLink className="h-2.5 w-2.5" />
+                      <span>Full Scan</span>
+                    </a>
+                  </div>
+                </div>
+
                 {/* Linked Record Details */}
                 {doc.linked_survey && (
                   <div className="rounded-xl bg-slate-950/70 border border-slate-800 p-3 text-xs space-y-1">
