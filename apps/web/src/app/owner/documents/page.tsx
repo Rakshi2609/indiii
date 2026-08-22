@@ -93,11 +93,11 @@ export default function OwnerDocumentsPage() {
 
         <div className="flex items-center gap-3">
           <Link
-            href="/upload"
+            href="/copilot"
             className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 px-4 py-2.5 text-xs font-semibold text-white shadow-lg hover:from-indigo-500 hover:to-purple-500 transition-all"
           >
-            <FileUp className="h-4 w-4" />
-            <span>Upload New Deed</span>
+            <Sparkles className="h-4 w-4" />
+            <span>Search Deeds with Copilot</span>
           </Link>
         </div>
       </div>

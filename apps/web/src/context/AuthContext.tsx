@@ -19,6 +19,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<boolean>;
+  signup: (fullName: string, email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   demoLogin: (role: "OWNER" | "REVENUE_OFFICER" | "ADMIN") => Promise<void>;
   logout: () => void;
 }
@@ -29,6 +30,7 @@ const AuthContext = createContext<AuthContextType>({
   isAuthenticated: false,
   isLoading: true,
   login: async () => false,
+  signup: async () => ({ success: false }),
   demoLogin: async () => {},
   logout: () => {},
 });
@@ -103,6 +105,49 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const signup = async (fullName: string, email: string, password: string): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const res = await fetch("http://localhost:8000/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          full_name: fullName,
+          email: email,
+          password: password,
+          role: "OWNER"
+        }),
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        return {
+          success: false,
+          error: errorData.detail || "Registration failed. An account with this email may already exist."
+        };
+      }
+
+      const data = await res.json();
+      const userObj: UserSession = {
+        id: data.user.id,
+        email: data.user.email,
+        full_name: data.user.full_name || data.user.email,
+        role: data.user.role as UserRole,
+        is_superuser: data.user.is_superuser || false,
+      };
+
+      setToken(data.access_token);
+      setUser(userObj);
+      localStorage.setItem("land_ai_token", data.access_token);
+      localStorage.setItem("land_ai_user", JSON.stringify(userObj));
+
+      router.push("/owner");
+      return { success: true };
+    } catch (e: any) {
+      console.error("Signup failed:", e);
+      return { success: false, error: e.message || "Network error. Please try again." };
+    }
+  };
+
   const demoLogin = async (role: "OWNER" | "REVENUE_OFFICER" | "ADMIN") => {
     let email = "nishu@demo.landai";
     if (role === "REVENUE_OFFICER") email = "officer@demo.landai";
@@ -127,6 +172,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         isAuthenticated: !!user,
         isLoading,
         login,
+        signup,
         demoLogin,
         logout,
       }}

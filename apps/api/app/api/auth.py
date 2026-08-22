@@ -194,24 +194,24 @@ def seed_demo_accounts(
     }
 
 
-@router.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED, summary="Register a provisioned user")
+@router.post("/register", response_model=Token, status_code=status.HTTP_201_CREATED, summary="Register a citizen owner account")
 def register_user(
     user_in: UserCreate,
     db: Annotated[Session, Depends(get_db)]
-) -> UserResponse:
-    """Register a provisioned user account."""
+) -> Token:
+    """Register a new citizen/owner account and return an active access token."""
     existing_user = db.query(User).filter(User.email == user_in.email).first()
     if existing_user:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="A user with this email address already exists."
+            detail="An account with this email address already exists."
         )
 
     user = User(
         email=user_in.email,
         hashed_password=get_password_hash(user_in.password),
-        full_name=user_in.full_name,
-        role=user_in.role,
+        full_name=user_in.full_name or user_in.email.split("@")[0].capitalize(),
+        role=user_in.role or UserRole.OWNER,
         is_active=True,
         is_superuser=False
     )
@@ -219,7 +219,36 @@ def register_user(
     db.commit()
     db.refresh(user)
 
-    return UserResponse.model_validate(user)
+    # If owner, associate unassigned or matching records
+    if user.role == UserRole.OWNER:
+        try:
+            records = db.query(LandRecord).all()
+            for r in records:
+                if r.owner_user_id is None:
+                    r.owner_user_id = user.id
+            db.commit()
+        except Exception as e:
+            logger.warning(f"Error associating records to new user: {e}")
+
+    access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    role_val = user.role.value if hasattr(user.role, "value") else str(user.role)
+    token = create_access_token(
+        subject=user.id,
+        expires_delta=access_token_expires,
+        extra_claims={
+            "email": user.email,
+            "role": role_val,
+            "full_name": user.full_name,
+            "is_superuser": user.is_superuser
+        }
+    )
+
+    return Token(
+        access_token=token,
+        token_type="bearer",
+        expires_in=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
+        user=UserResponse.model_validate(user)
+    )
 
 
 @router.get("/me", response_model=UserResponse, summary="Get current logged in user")

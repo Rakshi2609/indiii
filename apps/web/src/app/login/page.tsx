@@ -200,6 +200,14 @@ export default function LoginPage() {
             </Button>
           </form>
 
+          {/* Citizen Sign Up Link */}
+          <div className="text-center text-xs text-slate-400 pt-1">
+            <span>New Citizen / Land Owner? </span>
+            <Link href="/signup" className="text-emerald-400 font-semibold hover:underline">
+              Create Land Vault
+            </Link>
+          </div>
+
           {/* Quick Demo Access Bar */}
           <div className="pt-3 border-t border-slate-800/80 space-y-2.5">
             <div className="flex items-center justify-between text-[11px] text-slate-400 font-semibold uppercase tracking-wider">

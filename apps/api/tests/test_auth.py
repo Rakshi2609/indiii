@@ -29,10 +29,11 @@ def test_register_and_login_flow(client):
     }
     reg_response = client.post("/api/auth/register", json=register_payload)
     assert reg_response.status_code == 201
-    user_data = reg_response.json()
-    assert user_data["email"] == "land.officer@landai.gov.in"
-    assert user_data["role"] == "LAND_OFFICER"
-    assert "id" in user_data
+    token_data = reg_response.json()
+    assert "access_token" in token_data
+    assert token_data["user"]["email"] == "land.officer@landai.gov.in"
+    assert token_data["user"]["role"] == "LAND_OFFICER"
+    assert "id" in token_data["user"]
 
     # 2. Login via OAuth2 password form
     login_data = {
@@ -41,13 +42,13 @@ def test_register_and_login_flow(client):
     }
     login_response = client.post("/api/auth/login", data=login_data)
     assert login_response.status_code == 200
-    token_data = login_response.json()
-    assert "access_token" in token_data
-    assert token_data["token_type"] == "bearer"
-    assert token_data["user"]["role"] == "LAND_OFFICER"
+    login_token_data = login_response.json()
+    assert "access_token" in login_token_data
+    assert login_token_data["token_type"] == "bearer"
+    assert login_token_data["user"]["role"] == "LAND_OFFICER"
 
     # 3. Retrieve profile using Bearer token
-    headers = {"Authorization": f"Bearer {token_data['access_token']}"}
+    headers = {"Authorization": f"Bearer {login_token_data['access_token']}"}
     me_response = client.get("/api/auth/me", headers=headers)
     assert me_response.status_code == 200
     me_data = me_response.json()
@@ -87,7 +88,7 @@ def test_all_rbac_roles_supported(client):
             }
         )
         assert res.status_code == 201
-        assert res.json()["role"] == role.value
+        assert res.json()["user"]["role"] == role.value
 
 from fastapi import Depends
 from app.api.deps import require_roles

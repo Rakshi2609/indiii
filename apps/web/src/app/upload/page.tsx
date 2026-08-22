@@ -28,9 +28,12 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useAuth } from "@/context/AuthContext";
 
 export default function DocumentUploadPage() {
   const router = useRouter();
+  const { user, demoLogin } = useAuth();
+  const isOwnerUser = user?.role === "OWNER";
   const [file, setFile] = useState<File | null>(null);
   const [processingMode, setProcessingMode] = useState("high_accuracy");
   const [uploading, setUploading] = useState(false);
@@ -310,6 +313,43 @@ export default function DocumentUploadPage() {
             </Link>
           </div>
         </div>
+
+        {/* Citizen Role Notification (Tracking Only) */}
+        {isOwnerUser && (
+          <div className="rounded-2xl border border-indigo-500/40 bg-gradient-to-r from-indigo-950/40 via-slate-900/60 to-purple-950/40 p-5 space-y-3">
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex items-start gap-3">
+                <div className="p-2 rounded-xl bg-indigo-500/20 text-indigo-300 shrink-0 mt-0.5">
+                  <Lock className="h-5 w-5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-white">
+                    Citizen &amp; Land Owner Access Mode
+                  </h3>
+                  <p className="text-xs text-slate-300 mt-1 leading-relaxed">
+                    Citizen accounts are configured for <strong>Tracking, Spatial Monitoring &amp; AI Inquiries</strong>. Document uploading and ingestion workflows are reserved for authorized Revenue Officers &amp; Village Administrative Officers (VAO).
+                  </p>
+                </div>
+              </div>
+              <Link
+                href="/owner"
+                className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-400 hover:text-emerald-300 shrink-0 bg-emerald-950/40 border border-emerald-500/30 rounded-xl px-3 py-1.5"
+              >
+                Go to My Vault →
+              </Link>
+            </div>
+            <div className="pt-2 border-t border-slate-800/80 flex items-center justify-between text-xs text-slate-400">
+              <span>Need to test officer document ingestion?</span>
+              <button
+                type="button"
+                onClick={() => demoLogin("REVENUE_OFFICER")}
+                className="text-indigo-300 hover:text-white font-semibold underline"
+              >
+                Switch to Demo Revenue Officer
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* 1-Click Quick Sample Loaders */}
         <Card className="bg-slate-900/60 border-slate-800">
