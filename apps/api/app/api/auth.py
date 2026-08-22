@@ -74,21 +74,27 @@ def ensure_demo_users_seeded(db: Session):
             user.is_active = True
             db.commit()
 
-        # If Nishu, link all records where "Nishu" appears in owners_data or records
+        # If Nishu, link ONLY records where "Nishu" appears in owners_data or document name
         if acc["email"] == "nishu@demo.landai":
             try:
                 records = db.query(LandRecord).all()
                 for r in records:
-                    # If Nishu is in owners_data, link to this user
                     is_nishu = False
                     if r.owners_data:
                         for o in r.owners_data:
-                            name = (o.get("name") or "").lower()
+                            name = (o.get("name_english") or o.get("name") or o.get("name_indic") or "").lower()
                             if "nishu" in name:
                                 is_nishu = True
                                 break
-                    if is_nishu or r.owner_user_id is None:
+                    if not is_nishu and r.document:
+                        doc_text = f"{r.document.filename} {r.document.original_name}".lower()
+                        if "nishu" in doc_text:
+                            is_nishu = True
+
+                    if is_nishu:
                         r.owner_user_id = user.id
+                    elif r.owner_user_id == user.id:
+                        r.owner_user_id = None
                 db.commit()
             except Exception as e:
                 logger.warning(f"Error linking records to Nishu: {e}")
@@ -219,12 +225,24 @@ def register_user(
     db.commit()
     db.refresh(user)
 
-    # If owner, associate unassigned or matching records
-    if user.role == UserRole.OWNER:
+    # If owner, associate records explicitly matching the user's name or document
+    if user.role == UserRole.OWNER and user.full_name:
         try:
+            target = user.full_name.lower().strip()
             records = db.query(LandRecord).all()
             for r in records:
-                if r.owner_user_id is None:
+                is_match = False
+                if r.owners_data:
+                    for o in r.owners_data:
+                        oname = str(o.get("name_english") or o.get("name") or o.get("name_indic") or "").lower()
+                        if target in oname or oname in target:
+                            is_match = True
+                            break
+                if not is_match and r.document:
+                    doc_text = f"{r.document.filename} {r.document.original_name}".lower()
+                    if target in doc_text:
+                        is_match = True
+                if is_match:
                     r.owner_user_id = user.id
             db.commit()
         except Exception as e:

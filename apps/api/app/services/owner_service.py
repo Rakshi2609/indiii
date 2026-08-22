@@ -37,42 +37,51 @@ class OwnerService:
         from app.api.auth import ensure_demo_users_seeded
         ensure_demo_users_seeded(db)
 
-        # 1. Primary Query: Foreign key linkage
-        records = db.query(LandRecord).filter(LandRecord.owner_user_id == user.id).all()
+        target_name = (user.full_name or "").strip().lower()
+        user_email_prefix = user.email.split("@")[0].lower()
+        is_nishu_user = "nishu" in user_email_prefix or "nishu" in target_name
 
-        # 2. Secondary Query: Fuzzy owner name matching across owners_data if record not directly linked
-        if not records and user.full_name:
-            all_records = db.query(LandRecord).all()
-            target_name = user.full_name.strip().lower()
-            matched = []
-            for r in all_records:
-                is_match = False
-                if r.owners_data:
-                    for o in r.owners_data:
-                        oname = str(o.get("name") or "").strip().lower()
-                        if target_name in oname or oname in target_name:
+        all_records = db.query(LandRecord).all()
+        matched: List[LandRecord] = []
+
+        for r in all_records:
+            is_match = False
+
+            # 1. Direct explicit foreign key match
+            if r.owner_user_id == user.id:
+                is_match = True
+
+            # 2. Check owners_data explicitly
+            if not is_match and r.owners_data:
+                for o in r.owners_data:
+                    oname = str(o.get("name_english") or o.get("name") or o.get("name_indic") or "").strip().lower()
+                    if is_nishu_user:
+                        if "nishu" in oname:
                             is_match = True
                             break
-                        if fuzz.token_set_ratio(target_name, oname) >= 80:
-                            is_match = True
-                            break
-                if is_match:
-                    # Link record to this user for future queries
+                    elif target_name and (target_name in oname or oname in target_name or fuzz.token_set_ratio(target_name, oname) >= 80):
+                        is_match = True
+                        break
+
+            # 3. Check document filename or original name
+            if not is_match and r.document:
+                doc_text = f"{r.document.filename} {r.document.original_name}".lower()
+                if is_nishu_user:
+                    if "nishu" in doc_text:
+                        is_match = True
+                elif target_name and target_name in doc_text:
+                    is_match = True
+
+            if is_match:
+                if r.owner_user_id != user.id:
                     r.owner_user_id = user.id
-                    matched.append(r)
-            if matched:
-                db.commit()
-                records = matched
+                matched.append(r)
+            else:
+                if r.owner_user_id == user.id:
+                    r.owner_user_id = None
 
-        # If user is Nishu / Demo Owner and records still unlinked, retrieve all Nishu holdings
-        if not records and ("nishu" in user.email.lower() or "nishu" in (user.full_name or "").lower()):
-            all_records = db.query(LandRecord).all()
-            for r in all_records:
-                r.owner_user_id = user.id
-            db.commit()
-            records = all_records
-
-        return records
+        db.commit()
+        return matched
 
     def get_owner_overview(self, db: Session, user: User) -> OwnerOverviewResponse:
         """Compute deterministic dashboard metrics across the owner's land portfolio."""
