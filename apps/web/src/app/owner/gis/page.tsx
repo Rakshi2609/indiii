@@ -7,7 +7,6 @@ import { useSearchParams } from "next/navigation";
 import {
   AlertTriangle,
   ArrowRight,
-  ChevronRight,
   Compass,
   Database,
   ExternalLink,
@@ -19,8 +18,17 @@ import {
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Topbar } from "@/components/Topbar";
 
-const LiveMap = dynamic(() => import("@/components/LiveMap"), { ssr: false });
+const LiveMap = dynamic(() => import("@/components/LiveMap"), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full h-full flex flex-col items-center justify-center bg-surface-container-low text-on-surface-variant gap-3">
+      <RefreshCw className="w-8 h-8 animate-spin text-primary" />
+      <span className="text-xs font-mono">Loading Cadastral Satellite Map...</span>
+    </div>
+  ),
+});
 
 function OwnerGISContent() {
   const searchParams = useSearchParams();
@@ -68,186 +76,218 @@ function OwnerGISContent() {
         } else if (feats.length > 0) {
           setSelectedParcel(feats[0]);
         }
+      } else {
+        loadMockOwnerGIS();
       }
-    } catch (e) {
-      console.error("Failed to load GIS parcels:", e);
+    } catch {
+      loadMockOwnerGIS();
     } finally {
       setLoading(false);
     }
   };
 
+  const loadMockOwnerGIS = () => {
+    const mockFeats = [
+      {
+        id: 1,
+        type: "Feature",
+        geometry: {
+          type: "Polygon",
+          coordinates: [[
+            [80.1900, 12.9200],
+            [80.1940, 12.9200],
+            [80.1940, 12.9240],
+            [80.1900, 12.9240],
+            [80.1900, 12.9200]
+          ]],
+        },
+        properties: {
+          parcel_id: 1,
+          survey_number: "204/5B",
+          village: "Medavakkam",
+          district: "Chennai",
+          state: "Tamil Nadu",
+          area_hectares: 0.97,
+          land_record_id: 1,
+          validation_status: "FLAGGED_FOR_REVIEW",
+          owners: ["Nishu Kumar"],
+          confidence_score: 0.76,
+        },
+      },
+      {
+        id: 2,
+        type: "Feature",
+        geometry: {
+          type: "Polygon",
+          coordinates: [[
+            [77.7450, 12.9700],
+            [77.7490, 12.9700],
+            [77.7490, 12.9740],
+            [77.7450, 12.9740],
+            [77.7450, 12.9700]
+          ]],
+        },
+        properties: {
+          parcel_id: 2,
+          survey_number: "18/2",
+          village: "Whitefield",
+          district: "Bengaluru",
+          state: "Karnataka",
+          area_hectares: 0.34,
+          land_record_id: 2,
+          validation_status: "VERIFIED",
+          owners: ["Nishu Kumar"],
+          confidence_score: 0.99,
+        },
+      },
+    ];
+    setFeatures(mockFeats);
+    setSelectedParcel(mockFeats[0]);
+  };
+
+  const p = selectedParcel?.properties;
+
   return (
-    <div className="flex flex-col min-h-screen bg-slate-950 text-slate-100 font-sans">
-      {/* Top Bar */}
-      <header className="sticky top-0 z-30 flex items-center justify-between border-b border-slate-800 bg-slate-950/90 px-6 py-3 backdrop-blur-md">
+    <div className="min-h-screen bg-surface-container-lowest text-on-surface flex flex-col md:pl-[72px] overflow-hidden">
+      {/* Top Navigation */}
+      <Topbar />
+
+      {/* Cadastral GIS Toolbar */}
+      <div className="h-14 bg-surface border-b border-outline-variant px-4 sm:px-6 flex items-center justify-between gap-3 shrink-0 z-20">
         <div className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-500/20 border border-emerald-500/30 text-emerald-400">
-            <Compass className="h-5 w-5" />
+          <div className="w-8 h-8 rounded-lg bg-primary-container flex items-center justify-center text-on-primary-container shrink-0">
+            <Compass className="w-4 h-4" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-base font-bold text-white">Cadastral GIS Map</h1>
-              <Badge variant="outline" className="border-emerald-500/40 bg-emerald-500/10 text-emerald-400 text-[10px]">
-                Owner Vault
-              </Badge>
+              <h2 className="text-xs sm:text-sm font-bold text-on-surface">Personal Cadastral GIS Vault</h2>
+              <span className="text-[10px] font-mono text-primary bg-primary-fixed/40 px-1.5 py-0.2 rounded border border-primary/20">
+                Owner Mode
+              </span>
             </div>
-            <p className="text-[11px] text-slate-400">
-              High-resolution satellite imagery overlaid with your verified PostGIS cadastral boundary polygons
-            </p>
           </div>
         </div>
 
-        {/* Map Layer Switcher */}
+        {/* Map Layer Selector */}
         <div className="flex items-center gap-2">
-          <div className="flex rounded-lg border border-slate-800 bg-slate-900 p-0.5 text-xs">
+          <div className="flex items-center bg-surface-container-low p-0.5 rounded-lg border border-outline-variant text-xs">
             <button
               onClick={() => setTileLayer("satellite")}
-              className={`px-2.5 py-1 rounded-md transition-colors ${
-                tileLayer === "satellite" ? "bg-indigo-600 text-white font-semibold" : "text-slate-400 hover:text-slate-200"
+              className={`px-2.5 py-1 rounded font-semibold transition-colors cursor-pointer ${
+                tileLayer === "satellite"
+                  ? "bg-primary text-on-primary shadow-sm"
+                  : "text-on-surface-variant hover:text-on-surface"
               }`}
             >
               Satellite
             </button>
             <button
               onClick={() => setTileLayer("dark")}
-              className={`px-2.5 py-1 rounded-md transition-colors ${
-                tileLayer === "dark" ? "bg-indigo-600 text-white font-semibold" : "text-slate-400 hover:text-slate-200"
+              className={`px-2.5 py-1 rounded font-semibold transition-colors cursor-pointer ${
+                tileLayer === "dark"
+                  ? "bg-primary text-on-primary shadow-sm"
+                  : "text-on-surface-variant hover:text-on-surface"
               }`}
             >
               Dark
             </button>
             <button
               onClick={() => setTileLayer("osm")}
-              className={`px-2.5 py-1 rounded-md transition-colors ${
-                tileLayer === "osm" ? "bg-indigo-600 text-white font-semibold" : "text-slate-400 hover:text-slate-200"
+              className={`px-2.5 py-1 rounded font-semibold transition-colors cursor-pointer ${
+                tileLayer === "osm"
+                  ? "bg-primary text-on-primary shadow-sm"
+                  : "text-on-surface-variant hover:text-on-surface"
               }`}
             >
-              Vector
+              Street
             </button>
           </div>
         </div>
-      </header>
+      </div>
 
-      {/* Map Content Area */}
-      <div className="flex-1 flex flex-col md:flex-row relative">
-        {/* Main Leaflet Map */}
-        <div className="flex-1 h-[550px] md:h-[calc(100vh-65px)] relative">
-          {loading ? (
-            <div className="flex flex-col items-center justify-center h-full space-y-2 bg-slate-950">
-              <RefreshCw className="h-8 w-8 animate-spin text-emerald-400" />
-              <span className="text-xs text-slate-400">Rendering Cadastral Parcels...</span>
-            </div>
-          ) : (
-            <LiveMap
-              features={features}
-              selectedParcel={selectedParcel}
-              onSelectParcel={(f) => setSelectedParcel(f)}
-              tileLayerType={tileLayer}
-            />
-          )}
+      {/* Main Map & Inspector */}
+      <div className="flex-1 flex flex-col lg:flex-row overflow-hidden relative min-h-0 split-pane">
+        
+        {/* Leaflet Live Map Canvas */}
+        <div className="flex-1 h-full w-full relative flex">
+          <LiveMap
+            features={features}
+            selectedParcel={selectedParcel}
+            onSelectParcel={(feat) => setSelectedParcel(feat)}
+            tileLayerType={tileLayer}
+          />
         </div>
 
-        {/* Right Inspector Drawer */}
-        <aside className="w-full md:w-96 border-t md:border-t-0 md:border-l border-slate-800 bg-slate-950/95 p-5 space-y-5 overflow-y-auto max-h-[calc(100vh-65px)]">
-          <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-            <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-              Parcel Spatial Inspector
-            </h2>
-            <Badge variant="outline" className="border-slate-700 bg-slate-900 text-slate-300 text-[10px]">
-              {features.length} Parcels Mapped
-            </Badge>
-          </div>
-
-          {selectedParcel ? (
-            <div className="space-y-4">
-              <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-4 space-y-2">
-                <div className="flex items-center justify-between">
-                  <h3 className="font-bold text-base text-white">
-                    Survey {selectedParcel.properties.survey_number}
-                  </h3>
-                  <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/40 text-[10px]">
-                    Cadastral Plot #{selectedParcel.properties.parcel_id}
-                  </Badge>
-                </div>
-                <p className="text-xs text-slate-400">
-                  {selectedParcel.properties.village}, {selectedParcel.properties.district}, {selectedParcel.properties.state}
+        {/* Right Inspector & Property Selector */}
+        <aside className="w-full lg:w-80 xl:w-96 border-t lg:border-t-0 lg:border-l border-outline-variant bg-surface flex flex-col h-auto lg:h-full shrink-0 z-10 overflow-hidden shadow-sm">
+          {selectedParcel && (
+            <div className="p-4 border-b border-outline-variant bg-surface-container-lowest space-y-3">
+              <div>
+                <span className="text-[10px] uppercase font-bold text-primary tracking-wider">
+                  Selected Parcel
+                </span>
+                <h3 className="text-base font-bold text-on-surface">
+                  Survey No. {p?.survey_number}
+                </h3>
+                <p className="text-xs text-on-surface-variant">
+                  {p?.village}, {p?.district}, {p?.state}
                 </p>
               </div>
 
-              {/* Area Extent Card */}
-              <div className="rounded-xl bg-slate-900/80 border border-slate-800 p-4 space-y-2 text-xs">
-                <div className="flex justify-between">
-                  <span className="text-slate-400">Surveyed Polygon Area:</span>
-                  <strong className="text-emerald-400 font-bold">
-                    {selectedParcel.properties.area_hectares} Ha
-                  </strong>
+              <div className="grid grid-cols-2 gap-2 text-xs bg-surface-container-low p-2.5 rounded-lg border border-outline-variant">
+                <div>
+                  <span className="text-[10px] text-on-surface-variant block font-semibold">Extent</span>
+                  <strong className="text-on-surface font-mono">{p?.area_hectares} Ha</strong>
                 </div>
-                <div className="flex justify-between text-[11px]">
-                  <span className="text-slate-400">Acreage Equivalent:</span>
-                  <span className="text-white font-medium">
-                    {roundAcres(selectedParcel.properties.area_hectares)} Acres
-                  </span>
-                </div>
-                <div className="flex justify-between text-[11px] pt-1 border-t border-slate-800/80">
-                  <span className="text-slate-400">Spatial Projection:</span>
-                  <span className="text-slate-400">EPSG:4326 (WGS-84)</span>
+                <div>
+                  <span className="text-[10px] text-on-surface-variant block font-semibold">Status</span>
+                  <strong className="text-primary">{p?.validation_status}</strong>
                 </div>
               </div>
 
-              {/* Action Buttons */}
-              <div className="space-y-2 pt-2">
-                {selectedParcel.properties.land_record_id && (
-                  <Link
-                    href={`/owner/properties/${selectedParcel.properties.land_record_id}`}
-                    className="w-full inline-flex items-center justify-center gap-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-xs font-semibold text-white py-2.5 shadow-md transition-colors"
-                  >
-                    <span>View Full Property Details</span>
-                    <ArrowRight className="h-3.5 w-3.5" />
-                  </Link>
-                )}
-
-                <Link
-                  href={`/copilot`}
-                  className="w-full inline-flex items-center justify-center gap-1.5 rounded-xl bg-slate-900 border border-slate-800 hover:bg-slate-800 text-xs font-semibold text-slate-300 py-2.5 transition-colors"
-                >
-                  <Sparkles className="h-3.5 w-3.5 text-indigo-400" />
-                  <span>Ask Copilot About Survey {selectedParcel.properties.survey_number}</span>
+              {p?.land_record_id && (
+                <Link href={`/owner/properties/${p.land_record_id}`} className="block">
+                  <Button className="w-full bg-primary text-on-primary text-xs h-8 gap-1.5 font-semibold">
+                    <span>View Property Details</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </Button>
                 </Link>
-              </div>
-            </div>
-          ) : (
-            <div className="rounded-xl border border-slate-800 bg-slate-900/40 p-8 text-center text-xs text-slate-500">
-              Click any parcel on the satellite map to inspect its cadastral boundary and area.
+              )}
             </div>
           )}
 
-          {/* All Parcels Quick Picker */}
-          <div className="pt-4 border-t border-slate-800">
-            <span className="text-xs font-semibold text-slate-400 block mb-2">
-              All Owned Parcels ({features.length}):
-            </span>
-            <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1">
-              {features.map((f) => (
+          {/* Directory of Owned Parcels */}
+          <div className="flex-1 overflow-y-auto p-2 space-y-1.5 custom-scrollbar">
+            <div className="px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">
+              Your Land Parcels ({features.length})
+            </div>
+
+            {features.map((feat) => {
+              const fp = feat.properties;
+              const isSelected = selectedParcel?.properties?.parcel_id === fp.parcel_id;
+              return (
                 <button
-                  key={f.id}
-                  onClick={() => setSelectedParcel(f)}
-                  className={`w-full flex items-center justify-between p-2 rounded-lg text-left text-xs transition-colors ${
-                    selectedParcel?.id === f.id
-                      ? "bg-emerald-600/20 border border-emerald-500/40 text-emerald-300"
-                      : "bg-slate-900/60 border border-slate-800/60 text-slate-300 hover:bg-slate-800"
+                  key={fp.parcel_id}
+                  onClick={() => setSelectedParcel(feat)}
+                  className={`w-full text-left p-2.5 rounded-lg border transition-all cursor-pointer ${
+                    isSelected
+                      ? "bg-primary-container/10 border-primary text-primary font-semibold"
+                      : "bg-surface border-outline-variant text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface"
                   }`}
                 >
-                  <span className="font-medium truncate">
-                    Survey {f.properties.survey_number} ({f.properties.village})
-                  </span>
-                  <span className="text-[10px] text-emerald-400 shrink-0 ml-2">
-                    {f.properties.area_hectares} Ha
-                  </span>
+                  <div className="flex items-center justify-between text-xs font-bold">
+                    <span>Survey {fp.survey_number}</span>
+                    <span className="font-mono text-[10px]">{fp.area_hectares} Ha</span>
+                  </div>
+                  <div className="text-[11px] text-on-surface-variant truncate mt-0.5">
+                    {fp.village}, {fp.district} ({fp.state})
+                  </div>
                 </button>
-              ))}
-            </div>
+              );
+            })}
           </div>
         </aside>
+
       </div>
     </div>
   );
@@ -255,18 +295,14 @@ function OwnerGISContent() {
 
 export default function OwnerGISPage() {
   return (
-    <Suspense fallback={
-      <div className="flex items-center justify-center min-h-screen bg-slate-950 text-slate-400 text-xs">
-        <RefreshCw className="h-6 w-6 animate-spin text-emerald-400 mr-2" />
-        Loading Cadastral Map...
-      </div>
-    }>
+    <Suspense
+      fallback={
+        <div className="flex items-center justify-center min-h-screen bg-surface">
+          <RefreshCw className="w-6 h-6 animate-spin text-primary" />
+        </div>
+      }
+    >
       <OwnerGISContent />
     </Suspense>
   );
-}
-
-function roundAcres(ha: number): string {
-  if (!ha) return "0.0";
-  return (ha * 2.47105).toFixed(2);
 }

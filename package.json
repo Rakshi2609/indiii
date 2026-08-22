@@ -11,5 +11,9 @@
     "dev:web": "npm --workspace=apps/web run dev",
     "build:web": "npm --workspace=apps/web run build",
     "lint:web": "npm --workspace=apps/web run lint"
+  },
+  "optionalDependencies": {
+    "@tailwindcss/oxide-win32-x64-msvc": "^4.3.3",
+    "lightningcss-win32-x64-msvc": "^1.33.0"
   }
 }

@@ -2,24 +2,27 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { 
-  AlertTriangle, 
-  CheckCircle2, 
-  Clock, 
-  FileText, 
-  Filter, 
-  Layers, 
-  RefreshCw, 
-  Search, 
-  ShieldAlert, 
+import {
+  AlertTriangle,
   ArrowRight,
+  CheckCircle2,
+  Clock,
+  Compass,
+  FileCheck2,
+  FileText,
+  Filter,
+  Layers,
+  Loader2,
+  MapPin,
+  RefreshCw,
+  Search,
+  ShieldAlert,
   Sparkles,
   Trash2,
-  Loader2
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Topbar } from "@/components/Topbar";
 
 interface QueueItem {
   record_id: number;
@@ -44,29 +47,6 @@ export default function VerificationQueuePage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [deletingId, setDeletingId] = useState<number | null>(null);
 
-  const handleDeleteQueueItem = async (e: React.MouseEvent, docId: number, recordId: number) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (!confirm(`Are you sure you want to delete Record #${recordId}? This will remove the document and all validation results.`)) {
-      return;
-    }
-    setDeletingId(recordId);
-    try {
-      const res = await fetch(`http://localhost:8000/api/documents/${docId}`, {
-        method: "DELETE"
-      });
-      if (res.ok) {
-        setItems((prev) => prev.filter((item) => item.record_id !== recordId));
-      } else {
-        alert("Failed to delete record from server.");
-      }
-    } catch {
-      setItems((prev) => prev.filter((item) => item.record_id !== recordId));
-    } finally {
-      setDeletingId(null);
-    }
-  };
-
   const fetchQueue = async () => {
     setLoading(true);
     try {
@@ -75,82 +55,83 @@ export default function VerificationQueuePage() {
         const data = await res.json();
         setItems(data.items || []);
       } else {
-        // Fallback sample data for offline / demo mode
-        setItems([
-          {
-            record_id: 1,
-            document_id: 101,
-            filename: "satbara_wagholi_142.pdf",
-            original_name: "Satbara_7_12_Wagholi_Pune.pdf",
-            state: "Maharashtra",
-            district: "Pune",
-            village: "Wagholi",
-            survey_number: "142/2A",
-            overall_confidence_score: 0.76,
-            validation_status: "FLAGGED_FOR_REVIEW",
-            total_issues: 2,
-            critical_issues: 0,
-            created_at: new Date().toISOString()
-          },
-          {
-            record_id: 2,
-            document_id: 102,
-            filename: "sale_deed_haveli.pdf",
-            original_name: "Registered_Deed_Haveli_4512.pdf",
-            state: "Maharashtra",
-            district: "Pune",
-            village: "Haveli",
-            survey_number: "88/1",
-            overall_confidence_score: 0.94,
-            validation_status: "VERIFIED_CLEAR",
-            total_issues: 0,
-            critical_issues: 0,
-            created_at: new Date(Date.now() - 3600000).toISOString()
-          },
-          {
-            record_id: 3,
-            document_id: 103,
-            filename: "rtc_pahani_bangalore.pdf",
-            original_name: "RTC_Pahani_Survey_204.pdf",
-            state: "Karnataka",
-            district: "Bengaluru Rural",
-            village: "Devanahalli",
-            survey_number: "204",
-            overall_confidence_score: 0.62,
-            validation_status: "REJECTED_CRITICAL",
-            total_issues: 3,
-            critical_issues: 1,
-            created_at: new Date(Date.now() - 7200000).toISOString()
-          }
-        ]);
+        loadMockQueue();
       }
     } catch {
-      // Mock fallback
-      setItems([
-        {
-          record_id: 1,
-          document_id: 101,
-          filename: "satbara_wagholi_142.pdf",
-          original_name: "Satbara_7_12_Wagholi_Pune.pdf",
-          state: "Maharashtra",
-          district: "Pune",
-          village: "Wagholi",
-          survey_number: "142/2A",
-          overall_confidence_score: 0.76,
-          validation_status: "FLAGGED_FOR_REVIEW",
-          total_issues: 2,
-          critical_issues: 0,
-          created_at: new Date().toISOString()
-        }
-      ]);
+      loadMockQueue();
     } finally {
       setLoading(false);
     }
   };
 
+  const loadMockQueue = () => {
+    setItems([
+      {
+        record_id: 1,
+        document_id: 101,
+        filename: "satbara_wagholi_142.pdf",
+        original_name: "Satbara_7_12_Wagholi_Pune.pdf",
+        state: "Maharashtra",
+        district: "Pune",
+        village: "Wagholi",
+        survey_number: "142/2A",
+        overall_confidence_score: 0.76,
+        validation_status: "FLAGGED_FOR_REVIEW",
+        total_issues: 2,
+        critical_issues: 0,
+        created_at: new Date().toISOString(),
+      },
+      {
+        record_id: 2,
+        document_id: 102,
+        filename: "sale_deed_haveli.pdf",
+        original_name: "Registered_Deed_Haveli_4512.pdf",
+        state: "Maharashtra",
+        district: "Pune",
+        village: "Haveli",
+        survey_number: "88/1",
+        overall_confidence_score: 0.94,
+        validation_status: "VERIFIED_CLEAR",
+        total_issues: 0,
+        critical_issues: 0,
+        created_at: new Date(Date.now() - 3600000).toISOString(),
+      },
+      {
+        record_id: 3,
+        document_id: 103,
+        filename: "rtc_pahani_bangalore.pdf",
+        original_name: "RTC_Pahani_Survey_204.pdf",
+        state: "Karnataka",
+        district: "Bengaluru Rural",
+        village: "Devanahalli",
+        survey_number: "204",
+        overall_confidence_score: 0.62,
+        validation_status: "REJECTED_CRITICAL",
+        total_issues: 3,
+        critical_issues: 1,
+        created_at: new Date(Date.now() - 7200000).toISOString(),
+      },
+    ]);
+  };
+
   useEffect(() => {
     fetchQueue();
   }, []);
+
+  const handleDeleteQueueItem = async (e: React.MouseEvent, docId: number, recordId: number) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!confirm(`Are you sure you want to delete Record #${recordId}?`)) return;
+    setDeletingId(recordId);
+    try {
+      await fetch(`http://localhost:8000/api/documents/${docId}`, { method: "DELETE" });
+      setItems((prev) => prev.filter((item) => item.record_id !== recordId));
+    } catch {
+      setItems((prev) => prev.filter((item) => item.record_id !== recordId));
+    } finally {
+      setDeletingId(null);
+    }
+  };
 
   const filteredItems = items.filter((item) => {
     const matchesSearch =
@@ -165,168 +146,171 @@ export default function VerificationQueuePage() {
     return matchesSearch;
   });
 
-  const getStatusBadge = (status: string, score: number) => {
-    if (status.includes("MANUAL") || status.includes("CORRECTED")) {
-      return <Badge variant="verified">Officer Verified</Badge>;
-    }
-    if (score >= 0.90 && status === "VERIFIED_CLEAR") {
-      return <Badge variant="verified">Clear (AI 90%+)</Badge>;
-    }
-    if (status === "REJECTED_CRITICAL" || score < 0.70) {
-      return <Badge variant="destructive">Critical Review</Badge>;
-    }
-    return <Badge variant="warning">Flagged ({Math.round(score * 100)}%)</Badge>;
-  };
-
   return (
-    <div className="min-vh-screen bg-slate-950 text-slate-100 p-6 sm:p-10 font-sans">
-      <div className="max-w-7xl mx-auto space-y-8">
+    <div className="min-h-screen bg-surface-container-lowest text-on-surface flex flex-col md:pl-[72px]">
+      {/* Top Navigation */}
+      <Topbar />
+
+      {/* Main Content Canvas */}
+      <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-6">
+        
         {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800 pb-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-outline-variant pb-5">
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <Sparkles className="w-5 h-5 text-emerald-400" />
-              <span className="text-xs uppercase tracking-widest text-emerald-400 font-semibold">
-                Officer Workbench
+              <Sparkles className="w-4 h-4 text-primary" />
+              <span className="text-[10px] uppercase tracking-widest text-primary font-bold">
+                Officer Verification Workbench
               </span>
             </div>
-            <h1 className="text-3xl font-bold tracking-tight text-white">
-              Human Verification & Review Queue
+            <h1 className="text-2xl sm:text-3xl font-bold text-on-surface tracking-tight">
+              Human Verification &amp; Review Queue
             </h1>
-            <p className="text-slate-400 text-sm mt-1">
-              Review AI-extracted land revenue records, resolve cadastral conflicts, and verify ownership deeds.
+            <p className="text-xs sm:text-sm text-on-surface-variant mt-0.5">
+              Review AI-extracted land revenue records, resolve cadastral conflicts, and approve ownership deeds.
             </p>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <Button
               variant="outline"
               size="sm"
               onClick={fetchQueue}
-              className="border-slate-700 bg-slate-900 text-slate-200 hover:bg-slate-800"
+              className="text-xs font-semibold gap-1.5"
             >
-              <RefreshCw className={`w-4 h-4 mr-2 ${loading ? "animate-spin" : ""}`} />
-              Refresh
+              <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />
+              <span>Refresh Queue</span>
             </Button>
-            <Link href="/">
-              <Button size="sm" variant="secondary">
-                Monorepo Dashboard
+            <Link href="/upload">
+              <Button size="sm" className="bg-primary text-on-primary text-xs font-semibold">
+                Upload New Deed
               </Button>
             </Link>
           </div>
         </div>
 
-        {/* Filter Controls */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* Filter & Search Bar */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           <div className="relative md:col-span-2">
-            <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+            <Search className="absolute left-3 top-2.5 h-4 w-4 text-on-surface-variant" />
             <input
               type="text"
               placeholder="Search by Survey Number, Village, District, or Document..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-slate-900 border border-slate-800 rounded-lg pl-9 pr-4 py-2 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              className="w-full bg-surface border border-outline-variant rounded-lg pl-9 pr-4 py-2 text-xs text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:ring-2 focus:ring-primary"
             />
           </div>
 
           <div className="flex gap-2">
-            {["ALL", "FLAGGED", "VERIFIED"].map((status) => (
-              <Button
-                key={status}
-                size="sm"
-                variant={filterStatus === status ? "default" : "outline"}
-                onClick={() => setFilterStatus(status)}
-                className={`flex-1 text-xs ${
-                  filterStatus === status
-                    ? "bg-emerald-600 text-white"
-                    : "border-slate-800 bg-slate-900 text-slate-300 hover:bg-slate-800"
+            {["ALL", "FLAGGED", "VERIFIED"].map((st) => (
+              <button
+                key={st}
+                onClick={() => setFilterStatus(st)}
+                className={`flex-1 py-1.5 rounded-lg text-xs font-semibold transition-colors border ${
+                  filterStatus === st
+                    ? "bg-primary text-on-primary border-primary"
+                    : "bg-surface text-on-surface-variant border-outline-variant hover:bg-surface-container"
                 }`}
               >
-                {status}
-              </Button>
+                {st}
+              </button>
             ))}
           </div>
         </div>
 
-        {/* Queue Items Table / Cards */}
+        {/* Queue Items List */}
         <div className="space-y-3">
           {loading ? (
-            <div className="text-center py-16 text-slate-500">
-              <RefreshCw className="w-8 h-8 mx-auto animate-spin mb-3 text-emerald-500" />
-              <p>Loading verification queue...</p>
+            <div className="text-center py-16 text-on-surface-variant space-y-2">
+              <RefreshCw className="w-7 h-7 mx-auto animate-spin text-primary" />
+              <p className="text-xs">Loading verification queue...</p>
             </div>
           ) : filteredItems.length === 0 ? (
-            <div className="text-center py-16 border border-dashed border-slate-800 rounded-xl bg-slate-900/40">
-              <CheckCircle2 className="w-10 h-10 mx-auto text-emerald-400 mb-2" />
-              <h3 className="text-base font-semibold text-white">No records awaiting verification</h3>
-              <p className="text-xs text-slate-400 mt-1">All extracted records meet validation confidence thresholds.</p>
+            <div className="text-center py-16 border border-dashed border-outline-variant rounded-xl bg-surface p-6 space-y-2">
+              <CheckCircle2 className="w-8 h-8 mx-auto text-[#15803D]" />
+              <h3 className="text-sm font-bold text-on-surface">No records awaiting verification</h3>
+              <p className="text-xs text-on-surface-variant">All extracted deeds meet automated confidence thresholds.</p>
             </div>
           ) : (
             filteredItems.map((item) => (
-              <Card
+              <div
                 key={item.record_id}
-                className="bg-slate-900/70 border-slate-800 hover:border-slate-700 transition-all shadow-sm"
+                className="bg-surface rounded-xl border border-outline-variant p-4 sm:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm hover:shadow-md transition-shadow"
               >
-                <CardContent className="p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-3">
-                      <FileText className="w-5 h-5 text-emerald-400 shrink-0" />
-                      <span className="font-semibold text-white text-base">
-                        Survey No. {item.survey_number}
-                      </span>
-                      <span className="text-slate-400 text-sm">
-                        • {item.village}, {item.district}, {item.state}
-                      </span>
-                      {getStatusBadge(item.validation_status, item.overall_confidence_score)}
+                <div className="space-y-2 min-w-0">
+                  <div className="flex flex-wrap items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-lg bg-primary-container/15 text-primary flex items-center justify-center shrink-0">
+                      <FileText className="w-4 h-4" />
                     </div>
-
-                    <div className="flex flex-wrap items-center gap-4 text-xs text-slate-400">
-                      <span>Document: <strong className="text-slate-300">{item.original_name}</strong></span>
-                      <span>Confidence Score: <strong className={`${item.overall_confidence_score < 0.85 ? 'text-amber-400' : 'text-emerald-400'}`}>{(item.overall_confidence_score * 100).toFixed(1)}%</strong></span>
-                      {item.total_issues > 0 && (
-                        <span className="flex items-center gap-1 text-amber-400">
-                          <AlertTriangle className="w-3.5 h-3.5" />
-                          {item.total_issues} flagged conflict(s)
-                        </span>
-                      )}
-                      {item.critical_issues > 0 && (
-                        <span className="flex items-center gap-1 text-red-400">
-                          <ShieldAlert className="w-3.5 h-3.5" />
-                          {item.critical_issues} critical
-                        </span>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="shrink-0 flex items-center gap-2">
-                    <Link href={`/verification/${item.record_id}`}>
-                      <Button className="bg-emerald-600 hover:bg-emerald-500 text-white gap-2 text-xs">
-                        Open Workspace
-                        <ArrowRight className="w-3.5 h-3.5" />
-                      </Button>
-                    </Link>
-
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={(e) => handleDeleteQueueItem(e, item.document_id, item.record_id)}
-                      disabled={deletingId === item.record_id}
-                      className="h-8 w-8 p-0 text-slate-500 hover:text-red-400 hover:bg-red-950/30 transition-colors"
-                      title="Delete Record"
+                    <span className="font-bold text-sm text-on-surface">
+                      Survey No. {item.survey_number}
+                    </span>
+                    <span className="text-xs text-on-surface-variant">
+                      • {item.village}, {item.district}, {item.state}
+                    </span>
+                    <Badge
+                      variant={
+                        item.validation_status.includes("VERIFIED")
+                          ? "verified"
+                          : item.validation_status.includes("REJECTED")
+                          ? "destructive"
+                          : "warning"
+                      }
+                      className="text-[10px]"
                     >
-                      {deletingId === item.record_id ? (
-                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                      ) : (
-                        <Trash2 className="w-3.5 h-3.5" />
-                      )}
-                    </Button>
+                      {item.validation_status}
+                    </Badge>
                   </div>
-                </CardContent>
-              </Card>
+
+                  <div className="flex flex-wrap items-center gap-3 text-xs text-on-surface-variant pl-10">
+                    <span>Doc: <strong className="text-on-surface">{item.original_name}</strong></span>
+                    <span>•</span>
+                    <span>
+                      Confidence:{" "}
+                      <strong className={item.overall_confidence_score < 0.85 ? "text-error" : "text-[#15803D]"}>
+                        {(item.overall_confidence_score * 100).toFixed(0)}%
+                      </strong>
+                    </span>
+                    {item.total_issues > 0 && (
+                      <>
+                        <span>•</span>
+                        <span className="text-[#C2410C] font-semibold flex items-center gap-1">
+                          <AlertTriangle className="w-3 h-3" />
+                          {item.total_issues} conflict(s)
+                        </span>
+                      </>
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 shrink-0 self-end md:self-center">
+                  <Link href={`/verification/${item.record_id}`}>
+                    <Button size="sm" className="bg-primary text-on-primary text-xs font-semibold gap-1.5">
+                      <span>Open Workspace</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </Button>
+                  </Link>
+
+                  <button
+                    onClick={(e) => handleDeleteQueueItem(e, item.document_id, item.record_id)}
+                    disabled={deletingId === item.record_id}
+                    className="p-2 text-on-surface-variant hover:text-error hover:bg-surface-container rounded-lg transition-colors cursor-pointer"
+                    title="Delete Record"
+                  >
+                    {deletingId === item.record_id ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Trash2 className="w-4 h-4" />
+                    )}
+                  </button>
+                </div>
+              </div>
             ))
           )}
         </div>
-      </div>
+
+      </main>
     </div>
   );
 }

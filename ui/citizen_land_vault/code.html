@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+
+<html class="h-full antialiased dark:bg-background bg-background" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Citizen Dashboard - LAND AI</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "surface-variant": "#e1e3dd",
+                      "on-tertiary-fixed": "#3c0613",
+                      "secondary-fixed-dim": "#c5c7c3",
+                      "surface-dim": "#d8dbd5",
+                      "secondary-container": "#dee0dc",
+                      "on-secondary-fixed": "#191c1a",
+                      "on-primary-fixed-variant": "#12512c",
+                      "on-primary-container": "#87c695",
+                      "on-error-container": "#93000a",
+                      "outline": "#717970",
+                      "on-secondary-fixed-variant": "#444845",
+                      "on-secondary-container": "#606360",
+                      "surface-bright": "#f8faf4",
+                      "inverse-on-surface": "#eff2eb",
+                      "secondary": "#5c5f5c",
+                      "on-background": "#191c19",
+                      "tertiary-fixed": "#ffd9dc",
+                      "surface-container-lowest": "#ffffff",
+                      "on-tertiary-container": "#f79eaa",
+                      "surface": "#f8faf4",
+                      "on-tertiary-fixed-variant": "#73323d",
+                      "on-surface-variant": "#404941",
+                      "error-container": "#ffdad6",
+                      "background": "#f8faf4",
+                      "inverse-surface": "#2e312d",
+                      "outline-variant": "#c0c9be",
+                      "surface-container": "#ecefe9",
+                      "on-error": "#ffffff",
+                      "primary-fixed-dim": "#96d5a3",
+                      "on-tertiary": "#ffffff",
+                      "inverse-primary": "#96d5a3",
+                      "on-surface": "#191c19",
+                      "tertiary": "#591d28",
+                      "surface-container-low": "#f2f4ee",
+                      "tertiary-fixed-dim": "#ffb2bb",
+                      "primary-container": "#14532d",
+                      "secondary-fixed": "#e1e3df",
+                      "primary": "#003b1b",
+                      "on-secondary": "#ffffff",
+                      "primary-fixed": "#b1f2be",
+                      "tertiary-container": "#75333e",
+                      "surface-container-high": "#e7e9e3",
+                      "surface-tint": "#2e6a41",
+                      "error": "#ba1a1a",
+                      "surface-container-highest": "#e1e3dd",
+                      "on-primary-fixed": "#00210d",
+                      "on-primary": "#ffffff"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.125rem",
+                      "lg": "0.25rem",
+                      "xl": "0.5rem",
+                      "full": "0.75rem"
+              },
+              "spacing": {
+                      "unit-md": "16px",
+                      "sidebar-width": "250px",
+                      "container-margin": "24px",
+                      "unit-lg": "24px",
+                      "gutter": "16px",
+                      "topbar-height": "64px",
+                      "unit-xs": "4px",
+                      "unit-xl": "32px",
+                      "unit-sm": "8px"
+              },
+              "fontFamily": {
+                      "label-md": [
+                              "Manrope"
+                      ],
+                      "display-lg": [
+                              "Manrope"
+                      ],
+                      "headline-lg": [
+                              "Manrope"
+                      ],
+                      "body-md": [
+                              "Manrope"
+                      ],
+                      "headline-lg-mobile": [
+                              "Manrope"
+                      ],
+                      "headline-sm": [
+                              "Manrope"
+                      ],
+                      "headline-md": [
+                              "Manrope"
+                      ],
+                      "body-lg": [
+                              "Manrope"
+                      ],
+                      "title-lg": [
+                              "Manrope"
+                      ],
+                      "label-sm": [
+                              "Manrope"
+                      ]
+              },
+              "fontSize": {
+                      "label-md": [
+                              "12px",
+                              {
+                                      "lineHeight": "16px",
+                                      "letterSpacing": "0.02em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "display-lg": [
+                              "48px",
+                              {
+                                      "lineHeight": "56px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "headline-lg": [
+                              "32px",
+                              {
+                                      "lineHeight": "40px",
+                                      "letterSpacing": "-0.01em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "body-md": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "headline-lg-mobile": [
+                              "28px",
+                              {
+                                      "lineHeight": "36px",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "headline-sm": [
+                              "20px",
+                              {
+                                      "lineHeight": "28px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "headline-md": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "body-lg": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "title-lg": [
+                              "18px",
+                              {
+                                      "lineHeight": "26px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "label-sm": [
+                              "10px",
+                              {
+                                      "lineHeight": "14px",
+                                      "letterSpacing": "0.05em",
+                                      "fontWeight": "700"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+      </script>
+</head>
+<body class="font-body-md text-on-surface bg-background antialiased selection:bg-primary-container/20 h-full flex flex-col">
+<!-- TopNavBar -->
+<nav class="bg-surface/95 dark:bg-inverse-surface/95 h-[64px] fixed top-0 right-0 left-0 md:left-[250px] z-40 border-b border-outline-variant dark:border-outline backdrop-blur-md shadow-sm flex items-center justify-between px-unit-lg w-full md:w-auto">
+<div class="flex items-center gap-4">
+<button class="md:hidden p-2 text-on-surface-variant hover:text-primary rounded-md transition-colors">
+<span class="material-symbols-outlined">menu</span>
+</button>
+<div class="hidden md:flex items-center space-x-unit-md text-label-md font-label-md">
+<!-- No specific active state mapping provided in TopNavBar for this page intent, rendering inactive -->
+<a class="text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-primary-fixed-dim transition-all" href="#">Explorer</a>
+<a class="text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-primary-fixed-dim transition-all" href="#">District View</a>
+<a class="text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-primary-fixed-dim transition-all" href="#">State Stats</a>
+</div>
+</div>
+<!-- Search Bar (on_left in JSON, but typical placement is center/right in top nav, honoring JSON order conceptually) -->
+<div class="hidden md:flex flex-1 max-w-md mx-unit-lg items-center relative">
+<span class="material-symbols-outlined absolute left-3 text-on-surface-variant text-lg">search</span>
+<input class="w-full bg-surface-container-high border-none rounded-full py-2 pl-10 pr-4 text-body-md text-on-surface focus:ring-2 focus:ring-primary focus:bg-surface transition-all placeholder:text-on-surface-variant" placeholder="Search records... ⌘K" type="text"/>
+</div>
+<div class="flex items-center gap-unit-md">
+<button class="text-on-surface-variant hover:text-primary transition-colors flex items-center justify-center">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="text-on-surface-variant hover:text-primary transition-colors flex items-center justify-center">
+<span class="material-symbols-outlined">find_replace</span>
+</button>
+<div class="h-8 w-[1px] bg-outline-variant hidden md:block"></div>
+<button class="hidden md:flex items-center justify-center bg-primary text-on-primary px-4 py-2 rounded-lg text-label-md font-label-md hover:bg-primary-container transition-colors">
+                Officer Portal
+            </button>
+<div class="w-8 h-8 rounded-full bg-surface-container-highest overflow-hidden border border-outline-variant cursor-pointer hover:ring-2 ring-primary transition-all">
+<img alt="User profile" class="w-full h-full object-cover" data-alt="A small, professional avatar image of an Indian government officer or civilian land owner. Soft, neutral lighting, corporate aesthetic, isolated against a subtle light background. Highly detailed, realistic portrait suitable for enterprise software UI." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCoDeOoeCHFXE85jmiTN6ZzgWen7oBE-KCvos0Upj7Vv8Bnbi-xPN3Dmjb64VtEElU5f-cKmusgPEpHmt_9HgwvO9SUX-3RxRBsO3pz6cHUJaGgccbeMwWkIuxTEoeP_kNdgbk6hOuGRSKib6wxiA2E4PvBMFIzJ4mGLxUMSvAGEUk-x5e5ICsV926ssv_AfizmX8EG5vRQI5fqUqBclyhhxmWSn9VZh0bEm61M654UpZXByU2M7TnX1A"/>
+</div>
+</div>
+</nav>
+<!-- SideNavBar -->
+<aside class="hidden md:flex bg-surface dark:bg-inverse-surface w-[250px] h-full fixed left-0 top-0 border-r border-outline-variant dark:border-outline shadow-sm flex-col py-unit-lg z-50">
+<!-- Brand -->
+<div class="px-unit-lg mb-unit-xl flex items-center gap-3">
+<div class="w-10 h-10 rounded overflow-hidden bg-primary-container flex-shrink-0 flex items-center justify-center p-1">
+<img alt="LAND AI Logo" class="w-full h-full object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAJC_iuQSS2N5cVKCazp-4-98YFt-eSA3LTVJjhdqc9zA-f3ttgk_hPMrP0im6wpfGRZh60GcXjJRRqLG8kbJOn8-CAN9T-lsU3IWM_lTUsaTKsJjzYIyNBRYzPuzak0mBpTrLoA-g14dOgGVpL784HD38N13QYn4_7OFeAjS-73ztizQ-vkLJZvpiLN2OgWLzI7ABnYoQ0idURHyyl6Dj1e3fyto3ZkopHtN71tlGbbYlhClrPoO3LeQ"/>
+</div>
+<div>
+<h1 class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed">LAND AI</h1>
+<p class="font-label-sm text-label-sm text-on-surface-variant">इंडी-भूमि</p>
+</div>
+</div>
+<!-- CTA -->
+<div class="px-unit-lg mb-unit-lg">
+<button class="w-full bg-primary text-on-primary py-2.5 rounded-lg font-label-md text-label-md hover:bg-primary-container transition-colors shadow-sm flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[18px]">verified</span>
+                Verify Record
+            </button>
+</div>
+<!-- Navigation Tabs -->
+<nav class="flex-1 px-unit-sm space-y-1">
+<!-- Active State logic: Dashboard is the best fit for "Owner Land Vault" / "My Land" -->
+<a class="text-primary dark:text-primary-fixed-dim font-bold border-l-4 border-primary dark:border-primary-fixed-dim bg-primary-container/10 flex items-center gap-3 px-3 py-2.5 rounded-r-lg font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">dashboard</span>
+                Dashboard
+            </a>
+<a class="text-on-surface-variant dark:text-surface-variant hover:text-primary hover:bg-surface-container-high dark:hover:bg-surface-container-highest transition-colors flex items-center gap-3 px-3 py-2.5 rounded-r-lg font-label-md text-label-md border-l-4 border-transparent" href="#">
+<span class="material-symbols-outlined">description</span>
+                Land Records
+            </a>
+<a class="text-on-surface-variant dark:text-surface-variant hover:text-primary hover:bg-surface-container-high dark:hover:bg-surface-container-highest transition-colors flex items-center gap-3 px-3 py-2.5 rounded-r-lg font-label-md text-label-md border-l-4 border-transparent" href="#">
+<span class="material-symbols-outlined">map</span>
+                GIS Mapping
+            </a>
+<a class="text-on-surface-variant dark:text-surface-variant hover:text-primary hover:bg-surface-container-high dark:hover:bg-surface-container-highest transition-colors flex items-center gap-3 px-3 py-2.5 rounded-r-lg font-label-md text-label-md border-l-4 border-transparent" href="#">
+<span class="material-symbols-outlined">fact_check</span>
+                Verifications
+            </a>
+<a class="text-on-surface-variant dark:text-surface-variant hover:text-primary hover:bg-surface-container-high dark:hover:bg-surface-container-highest transition-colors flex items-center gap-3 px-3 py-2.5 rounded-r-lg font-label-md text-label-md border-l-4 border-transparent" href="#">
+<span class="material-symbols-outlined">history_edu</span>
+                Audit Ledger
+            </a>
+<a class="text-on-surface-variant dark:text-surface-variant hover:text-primary hover:bg-surface-container-high dark:hover:bg-surface-container-highest transition-colors flex items-center gap-3 px-3 py-2.5 rounded-r-lg font-label-md text-label-md border-l-4 border-transparent" href="#">
+<span class="material-symbols-outlined">smart_toy</span>
+                AI Copilot
+            </a>
+</nav>
+<!-- Footer Tabs -->
+<div class="px-unit-sm mt-auto pt-4 border-t border-outline-variant space-y-1">
+<a class="text-on-surface-variant dark:text-surface-variant hover:text-primary hover:bg-surface-container-high dark:hover:bg-surface-container-highest transition-colors flex items-center gap-3 px-3 py-2.5 rounded-r-lg font-label-md text-label-md border-l-4 border-transparent" href="#">
+<span class="material-symbols-outlined">settings</span>
+                Settings
+            </a>
+<a class="text-on-surface-variant dark:text-surface-variant hover:text-primary hover:bg-surface-container-high dark:hover:bg-surface-container-highest transition-colors flex items-center gap-3 px-3 py-2.5 rounded-r-lg font-label-md text-label-md border-l-4 border-transparent" href="#">
+<span class="material-symbols-outlined">help</span>
+                Support
+            </a>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="flex-1 md:ml-[250px] mt-[64px] p-container-margin md:p-unit-xl bg-surface-container-lowest min-h-screen">
+<!-- Header Section -->
+<header class="mb-unit-xl">
+<div class="flex items-center gap-2 text-label-md font-label-md text-on-surface-variant mb-2">
+<a class="hover:text-primary transition-colors flex items-center" href="#"><span class="material-symbols-outlined text-[16px] mr-1">home</span> Home</a>
+<span class="material-symbols-outlined text-[16px]">chevron_right</span>
+<span class="text-on-surface">Owner Land Vault</span>
+</div>
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+<div>
+<h2 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface mb-1">My Land</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">Your verified land portfolio in one place.</p>
+</div>
+<div class="flex gap-2">
+<button class="bg-surface-container-high text-on-surface px-4 py-2 rounded-lg font-label-md text-label-md hover:bg-outline-variant transition-colors flex items-center gap-2 border border-outline-variant">
+<span class="material-symbols-outlined text-[18px]">download</span> Export Report
+                    </button>
+</div>
+</div>
+</header>
+<!-- KPI Cards Grid -->
+<div class="grid grid-cols-2 md:grid-cols-5 gap-unit-md mb-unit-xl">
+<!-- Total Properties -->
+<div class="bg-surface p-unit-md rounded-xl border border-outline-variant shadow-[0_2px_4px_rgba(23,32,27,0.04)] flex flex-col justify-between h-full relative overflow-hidden">
+<div class="absolute top-0 right-0 p-3 opacity-10">
+<span class="material-symbols-outlined text-4xl text-primary">real_estate_agent</span>
+</div>
+<h3 class="font-label-md text-label-md text-on-surface-variant mb-2 z-10 relative">Total Properties</h3>
+<div class="font-display-lg text-headline-lg md:text-display-lg text-on-surface z-10 relative">8</div>
+</div>
+<!-- Total Area -->
+<div class="bg-surface p-unit-md rounded-xl border border-outline-variant shadow-[0_2px_4px_rgba(23,32,27,0.04)] flex flex-col justify-between h-full relative overflow-hidden">
+<div class="absolute top-0 right-0 p-3 opacity-10">
+<span class="material-symbols-outlined text-4xl text-primary">aspect_ratio</span>
+</div>
+<h3 class="font-label-md text-label-md text-on-surface-variant mb-2 z-10 relative">Total Area</h3>
+<div class="font-display-lg text-headline-lg md:text-display-lg text-on-surface flex items-baseline gap-1 z-10 relative">
+                    15.20 <span class="font-label-sm text-label-sm text-on-surface-variant">Acres</span>
+</div>
+</div>
+<!-- States -->
+<div class="bg-surface p-unit-md rounded-xl border border-outline-variant shadow-[0_2px_4px_rgba(23,32,27,0.04)] flex flex-col justify-between h-full relative overflow-hidden">
+<div class="absolute top-0 right-0 p-3 opacity-10">
+<span class="material-symbols-outlined text-4xl text-primary">public</span>
+</div>
+<h3 class="font-label-md text-label-md text-on-surface-variant mb-2 z-10 relative">States</h3>
+<div class="font-display-lg text-headline-lg md:text-display-lg text-on-surface z-10 relative">5</div>
+</div>
+<!-- Verified -->
+<div class="bg-surface p-unit-md rounded-xl border border-outline-variant shadow-[0_2px_4px_rgba(23,32,27,0.04)] flex flex-col justify-between h-full relative overflow-hidden">
+<div class="absolute top-0 right-0 p-3 opacity-10">
+<span class="material-symbols-outlined text-4xl text-[#15803D]">verified_user</span>
+</div>
+<h3 class="font-label-md text-label-md text-on-surface-variant mb-2 z-10 relative flex items-center gap-1">
+                    Verified
+                </h3>
+<div class="font-display-lg text-headline-lg md:text-display-lg text-[#15803D] z-10 relative flex items-center gap-2">
+                    6
+                    <span class="material-symbols-outlined text-[24px]" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+</div>
+<!-- Requires Attention -->
+<div class="bg-error-container/20 p-unit-md rounded-xl border border-error-container shadow-[0_2px_4px_rgba(23,32,27,0.04)] flex flex-col justify-between h-full relative overflow-hidden">
+<div class="absolute top-0 right-0 p-3 opacity-10">
+<span class="material-symbols-outlined text-4xl text-error">warning</span>
+</div>
+<h3 class="font-label-md text-label-md text-error mb-2 z-10 relative">Requires Attention</h3>
+<div class="font-display-lg text-headline-lg md:text-display-lg text-error z-10 relative flex items-center gap-2">
+                    2
+                    <span class="material-symbols-outlined text-[24px]" style="font-variation-settings: 'FILL' 1;">error</span>
+</div>
+</div>
+</div>
+<!-- Property Health Alert Banner -->
+<div class="mb-unit-xl bg-[#FFF7ED] dark:bg-[#431407] border border-[#F97316] rounded-xl p-unit-md flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-[0_2px_4px_rgba(23,32,27,0.04)]">
+<div class="flex items-start md:items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-[#FFEDD5] text-[#EA580C] flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">warning</span>
+</div>
+<div>
+<h4 class="font-headline-sm text-headline-sm text-[#9A3412] dark:text-[#FDBA74]">Action Required: 2 Properties</h4>
+<p class="font-body-md text-body-md text-[#C2410C] dark:text-[#FED7AA] mt-1">
+                        Survey No. 204/5B shows GIS variance. Survey No. 112/A is pending manual validation.
+                    </p>
+</div>
+</div>
+<button class="bg-[#EA580C] text-white px-4 py-2 rounded-lg font-label-md text-label-md hover:bg-[#C2410C] transition-colors whitespace-nowrap self-stretch md:self-auto">
+                Review Discrepancies
+            </button>
+</div>
+<!-- Main Content Area: Portfolio Grid & Copilot -->
+<div class="flex flex-col xl:flex-row gap-unit-xl">
+<!-- Portfolio Grid Section -->
+<section class="flex-1">
+<div class="flex items-center justify-between mb-unit-md border-b border-outline-variant pb-2">
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Your Land Portfolio</h3>
+<div class="flex items-center gap-2">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Sort by</span>
+<select class="bg-transparent border-none text-body-md font-label-md text-primary focus:ring-0 cursor-pointer pr-8 py-0">
+<option>Verification Status</option>
+<option>Area (High to Low)</option>
+<option>Recent Updates</option>
+</select>
+</div>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-unit-md">
+<!-- Property Card 1 (Attention Required) -->
+<div class="bg-surface rounded-xl border border-outline-variant shadow-[0_2px_4px_rgba(23,32,27,0.04)] overflow-hidden flex flex-col transition-shadow hover:shadow-[0_8px_24px_rgba(23,32,27,0.12)]">
+<!-- Header -->
+<div class="p-unit-sm bg-[#FFF7ED] border-b border-outline-variant flex justify-between items-center px-unit-md">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[#EA580C]">agriculture</span>
+<span class="font-label-md text-label-md text-on-surface">Agricultural Land</span>
+</div>
+<span class="px-2 py-1 bg-[#FFEDD5] text-[#C2410C] border border-[#FDBA74] rounded font-label-sm text-label-sm flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">warning</span> LOW CONFIDENCE
+                            </span>
+</div>
+<!-- Body -->
+<div class="p-unit-md flex-1 grid grid-cols-2 gap-y-4 gap-x-2">
+<div class="col-span-2 flex items-baseline gap-2 mb-2">
+<span class="font-headline-sm text-headline-sm text-on-surface">Sur. No: 204/5B</span>
+<span class="font-body-md text-body-md text-on-surface-variant">| Patta: 14892</span>
+</div>
+<div>
+<p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-1">Location</p>
+<p class="font-body-md text-body-md text-on-surface">Medavakkam, Chennai</p>
+<p class="font-body-md text-body-md text-on-surface-variant">Tamil Nadu</p>
+</div>
+<div>
+<p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-1">Area</p>
+<p class="font-headline-sm text-headline-sm text-on-surface">2.40 <span class="font-body-md text-body-md text-on-surface-variant">Acres</span></p>
+</div>
+<div class="col-span-2 mt-2 p-3 bg-surface-container rounded-lg border border-outline-variant flex items-start gap-2">
+<span class="material-symbols-outlined text-error text-[18px] mt-0.5">map</span>
+<div>
+<p class="font-label-md text-label-md text-on-surface">GIS Variance Detected</p>
+<p class="font-body-md text-body-md text-on-surface-variant text-sm mt-0.5">On-ground boundaries overlap with adjacent parcel 204/5C by 0.12 Acres.</p>
+</div>
+</div>
+</div>
+<!-- Footer -->
+<div class="p-unit-sm px-unit-md border-t border-outline-variant bg-surface-container-lowest flex justify-between items-center">
+<button class="text-primary hover:text-primary-container font-label-md text-label-md transition-colors flex items-center gap-1">
+                                View Lineage <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</button>
+<button class="bg-[#EA580C] text-white px-3 py-1.5 rounded font-label-md text-label-md hover:bg-[#C2410C] transition-colors">
+                                Resolve Issue
+                            </button>
+</div>
+</div>
+<!-- Property Card 2 (Verified) -->
+<div class="bg-surface rounded-xl border border-outline-variant shadow-[0_2px_4px_rgba(23,32,27,0.04)] overflow-hidden flex flex-col transition-shadow hover:shadow-[0_8px_24px_rgba(23,32,27,0.12)]">
+<!-- Header -->
+<div class="p-unit-sm bg-[#F0FDF4] border-b border-outline-variant flex justify-between items-center px-unit-md">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[#15803D]">home_work</span>
+<span class="font-label-md text-label-md text-on-surface">Commercial Plot</span>
+</div>
+<span class="px-2 py-1 bg-[#DCFCE7] text-[#15803D] border border-[#86EFAC] rounded font-label-sm text-label-sm flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">verified</span> APPROVED
+                            </span>
+</div>
+<!-- Body -->
+<div class="p-unit-md flex-1 grid grid-cols-2 gap-y-4 gap-x-2">
+<div class="col-span-2 flex items-baseline gap-2 mb-2">
+<span class="font-headline-sm text-headline-sm text-on-surface">Sur. No: 18/2</span>
+<span class="font-body-md text-body-md text-on-surface-variant">| Patta: 8832</span>
+</div>
+<div>
+<p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-1">Location</p>
+<p class="font-body-md text-body-md text-on-surface">Whitefield, Bangalore</p>
+<p class="font-body-md text-body-md text-on-surface-variant">Karnataka</p>
+</div>
+<div>
+<p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-1">Area</p>
+<p class="font-headline-sm text-headline-sm text-on-surface">0.85 <span class="font-body-md text-body-md text-on-surface-variant">Acres</span></p>
+</div>
+<div class="col-span-2 mt-2 p-3 bg-surface-container rounded-lg border border-outline-variant flex items-center gap-2">
+<span class="material-symbols-outlined text-[#15803D] text-[18px]">satellite_alt</span>
+<p class="font-label-md text-label-md text-on-surface">GIS Boundaries Verified</p>
+<span class="ml-auto text-on-surface-variant font-body-md text-sm">Match: 99.8%</span>
+</div>
+</div>
+<!-- Footer -->
+<div class="p-unit-sm px-unit-md border-t border-outline-variant bg-surface-container-lowest flex justify-between items-center">
+<button class="text-primary hover:text-primary-container font-label-md text-label-md transition-colors flex items-center gap-1">
+                                View Lineage <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</button>
+<button class="text-on-surface-variant hover:text-on-surface px-3 py-1.5 rounded font-label-md text-label-md transition-colors border border-outline-variant">
+                                Download PDF
+                            </button>
+</div>
+</div>
+<!-- Property Card 3 (AI Extracted) -->
+<div class="bg-surface rounded-xl border border-outline-variant shadow-[0_2px_4px_rgba(23,32,27,0.04)] overflow-hidden flex flex-col transition-shadow hover:shadow-[0_8px_24px_rgba(23,32,27,0.12)]">
+<!-- Header -->
+<div class="p-unit-sm bg-[#EEF2FF] border-b border-outline-variant flex justify-between items-center px-unit-md">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[#4338CA]">landscape</span>
+<span class="font-label-md text-label-md text-on-surface">Residential Plot</span>
+</div>
+<span class="px-2 py-1 bg-[#E0E7FF] text-[#4338CA] border border-[#A5B4FC] rounded font-label-sm text-label-sm flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">auto_awesome</span> AI EXTRACTED
+                            </span>
+</div>
+<!-- Body -->
+<div class="p-unit-md flex-1 grid grid-cols-2 gap-y-4 gap-x-2">
+<div class="col-span-2 flex items-baseline gap-2 mb-2">
+<span class="font-headline-sm text-headline-sm text-on-surface">Sur. No: 45/A</span>
+<span class="font-body-md text-body-md text-on-surface-variant">| Sale Deed: 2019</span>
+</div>
+<div>
+<p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-1">Location</p>
+<p class="font-body-md text-body-md text-on-surface">Hinjawadi, Pune</p>
+<p class="font-body-md text-body-md text-on-surface-variant">Maharashtra</p>
+</div>
+<div>
+<p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-1">Area</p>
+<p class="font-headline-sm text-headline-sm text-on-surface">0.15 <span class="font-body-md text-body-md text-on-surface-variant">Acres</span></p>
+</div>
+<div class="col-span-2 mt-2 p-3 bg-surface-container rounded-lg border border-outline-variant flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[18px]">pending_actions</span>
+<p class="font-label-md text-label-md text-on-surface">Pending Officer Verification</p>
+</div>
+</div>
+<!-- Footer -->
+<div class="p-unit-sm px-unit-md border-t border-outline-variant bg-surface-container-lowest flex justify-between items-center">
+<button class="text-primary hover:text-primary-container font-label-md text-label-md transition-colors flex items-center gap-1">
+                                View Lineage <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</button>
+<button class="text-on-surface-variant hover:text-on-surface px-3 py-1.5 rounded font-label-md text-label-md transition-colors border border-outline-variant">
+                                Review AI Data
+                            </button>
+</div>
+</div>
+</div>
+</section>
+<!-- AI Copilot Sidebar Widget -->
+<aside class="w-full xl:w-[320px] shrink-0">
+<div class="bg-surface rounded-xl border border-outline-variant shadow-[0_2px_4px_rgba(23,32,27,0.04)] sticky top-[88px] overflow-hidden">
+<div class="p-unit-md bg-gradient-to-br from-primary-container to-primary text-on-primary">
+<div class="flex items-center gap-2 mb-3">
+<span class="material-symbols-outlined text-[24px]">smart_toy</span>
+<h3 class="font-headline-sm text-headline-sm">Land Records Copilot</h3>
+</div>
+<p class="font-body-md text-body-md opacity-90">Instant answers regarding your property lineage, disputes, or GIS boundaries.</p>
+</div>
+<div class="p-unit-md bg-surface-container-lowest">
+<div class="space-y-3 mb-4">
+<button class="w-full text-left p-3 rounded-lg border border-outline-variant hover:bg-surface-container-high transition-colors text-body-md font-body-md text-on-surface flex items-start gap-2">
+<span class="material-symbols-outlined text-primary text-[18px] mt-0.5">chat_bubble</span>
+<span>"Why does Survey No. 204/5B have a GIS variance?"</span>
+</button>
+<button class="w-full text-left p-3 rounded-lg border border-outline-variant hover:bg-surface-container-high transition-colors text-body-md font-body-md text-on-surface flex items-start gap-2">
+<span class="material-symbols-outlined text-primary text-[18px] mt-0.5">chat_bubble</span>
+<span>"How do I resolve a pending validation?"</span>
+</button>
+<button class="w-full text-left p-3 rounded-lg border border-outline-variant hover:bg-surface-container-high transition-colors text-body-md font-body-md text-on-surface flex items-start gap-2">
+<span class="material-symbols-outlined text-primary text-[18px] mt-0.5">chat_bubble</span>
+<span>"Summarize the lineage for plot 18/2."</span>
+</button>
+</div>
+<div class="relative mt-auto">
+<input class="w-full bg-surface-container border border-outline-variant rounded-lg py-3 pl-3 pr-10 text-body-md text-on-surface focus:ring-2 focus:ring-primary focus:border-transparent transition-all placeholder:text-on-surface-variant" placeholder="Ask a custom question..." type="text"/>
+<button class="absolute right-2 top-1/2 -translate-y-1/2 text-primary hover:text-primary-container p-1 rounded-md transition-colors">
+<span class="material-symbols-outlined">send</span>
+</button>
+</div>
+</div>
+</div>
+</aside>
+</div>
+</main>
+</body></html>

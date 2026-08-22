@@ -4,25 +4,26 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50",
+  "inline-flex items-center justify-center whitespace-nowrap rounded-lg text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:pointer-events-none disabled:opacity-50 cursor-pointer",
   {
     variants: {
       variant: {
         default:
-          "bg-emerald-600 text-white shadow hover:bg-emerald-700 active:bg-emerald-800",
+          "bg-primary text-on-primary hover:bg-primary/90 shadow-sm",
         destructive:
-          "bg-red-600 text-white shadow-sm hover:bg-red-700",
+          "bg-error text-on-error hover:bg-error/90 shadow-sm",
         outline:
-          "border border-slate-200 bg-white shadow-sm hover:bg-slate-100 hover:text-slate-900 dark:border-slate-800 dark:bg-slate-950 dark:hover:bg-slate-800",
+          "border border-outline-variant bg-surface text-on-surface hover:bg-surface-container-high",
         secondary:
-          "bg-slate-100 text-slate-900 shadow-sm hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-50",
-        ghost: "hover:bg-slate-100 hover:text-slate-900 dark:hover:bg-slate-800",
-        link: "text-emerald-600 underline-offset-4 hover:underline",
+          "bg-surface-container-high text-on-surface hover:bg-surface-container-highest border border-outline-variant",
+        ghost: "hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface",
+        link: "text-primary underline-offset-4 hover:underline",
+        accent: "bg-[#EA580C] text-white hover:bg-[#C2410C]",
       },
       size: {
         default: "h-9 px-4 py-2",
         sm: "h-8 rounded-md px-3 text-xs",
-        lg: "h-10 rounded-md px-8",
+        lg: "h-11 rounded-lg px-8 text-base",
         icon: "h-9 w-9",
       },
     },

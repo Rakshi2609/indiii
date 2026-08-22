@@ -65,11 +65,18 @@ export default function LiveMap({
     mapInstanceRef.current = map;
 
     // Invalidate size on mount to ensure tiles load immediately
-    setTimeout(() => {
-      map.invalidateSize();
+    const timer = setTimeout(() => {
+      if (mapInstanceRef.current) {
+        try {
+          map.invalidateSize();
+        } catch {
+          // ignore unmounted error
+        }
+      }
     }, 200);
 
     return () => {
+      clearTimeout(timer);
       map.remove();
       mapInstanceRef.current = null;
     };
