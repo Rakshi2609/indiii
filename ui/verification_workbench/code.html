@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>LAND AI - Verification Workbench</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-variant": "#e1e3dd",
+                        "on-tertiary-fixed": "#3c0613",
+                        "secondary-fixed-dim": "#c5c7c3",
+                        "surface-dim": "#d8dbd5",
+                        "secondary-container": "#dee0dc",
+                        "on-secondary-fixed": "#191c1a",
+                        "on-primary-fixed-variant": "#12512c",
+                        "on-primary-container": "#87c695",
+                        "on-error-container": "#93000a",
+                        "outline": "#717970",
+                        "on-secondary-fixed-variant": "#444845",
+                        "on-secondary-container": "#606360",
+                        "surface-bright": "#f8faf4",
+                        "inverse-on-surface": "#eff2eb",
+                        "secondary": "#5c5f5c",
+                        "on-background": "#191c19",
+                        "tertiary-fixed": "#ffd9dc",
+                        "surface-container-lowest": "#ffffff",
+                        "on-tertiary-container": "#f79eaa",
+                        "surface": "#f8faf4",
+                        "on-tertiary-fixed-variant": "#73323d",
+                        "on-surface-variant": "#404941",
+                        "error-container": "#ffdad6",
+                        "background": "#f8faf4",
+                        "inverse-surface": "#2e312d",
+                        "outline-variant": "#c0c9be",
+                        "surface-container": "#ecefe9",
+                        "on-error": "#ffffff",
+                        "primary-fixed-dim": "#96d5a3",
+                        "on-tertiary": "#ffffff",
+                        "inverse-primary": "#96d5a3",
+                        "on-surface": "#191c19",
+                        "tertiary": "#591d28",
+                        "surface-container-low": "#f2f4ee",
+                        "tertiary-fixed-dim": "#ffb2bb",
+                        "primary-container": "#14532d",
+                        "secondary-fixed": "#e1e3df",
+                        "primary": "#003b1b",
+                        "on-secondary": "#ffffff",
+                        "primary-fixed": "#b1f2be",
+                        "tertiary-container": "#75333e",
+                        "surface-container-high": "#e7e9e3",
+                        "surface-tint": "#2e6a41",
+                        "error": "#ba1a1a",
+                        "surface-container-highest": "#e1e3dd",
+                        "on-primary-fixed": "#00210d",
+                        "on-primary": "#ffffff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "unit-md": "16px",
+                        "sidebar-width": "250px",
+                        "container-margin": "24px",
+                        "unit-lg": "24px",
+                        "gutter": "16px",
+                        "topbar-height": "64px",
+                        "unit-xs": "4px",
+                        "unit-xl": "32px",
+                        "unit-sm": "8px"
+                    },
+                    "fontFamily": {
+                        "label-md": ["Manrope"],
+                        "display-lg": ["Manrope"],
+                        "headline-lg": ["Manrope"],
+                        "body-md": ["Manrope"],
+                        "headline-lg-mobile": ["Manrope"],
+                        "headline-sm": ["Manrope"],
+                        "headline-md": ["Manrope"],
+                        "body-lg": ["Manrope"],
+                        "title-lg": ["Manrope"],
+                        "label-sm": ["Manrope"]
+                    },
+                    "fontSize": {
+                        "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "600" }],
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "headline-lg-mobile": ["28px", { "lineHeight": "36px", "fontWeight": "700" }],
+                        "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "title-lg": ["18px", { "lineHeight": "26px", "fontWeight": "600" }],
+                        "label-sm": ["10px", { "lineHeight": "14px", "letterSpacing": "0.05em", "fontWeight": "700" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .split-pane {
+            height: calc(100vh - 64px);
+        }
+        .ai-highlight {
+            position: absolute;
+            background-color: rgba(79, 70, 229, 0.2);
+            border: 2px solid #4F46E5;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+        }
+        .ai-highlight:hover, .ai-highlight.active {
+            background-color: rgba(79, 70, 229, 0.4);
+            box-shadow: 0 0 8px rgba(79, 70, 229, 0.6);
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #c0c9be;
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #717970;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md antialiased overflow-hidden">
+<!-- SideNavBar -->
+<nav class="w-[250px] h-full fixed left-0 top-0 bg-surface dark:bg-inverse-surface border-r border-outline-variant dark:border-outline shadow-sm flex flex-col py-unit-lg z-50">
+<div class="px-unit-lg mb-8">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-lg bg-primary-container flex items-center justify-center text-on-primary-container">
+<span class="material-symbols-outlined font-bold">domain</span>
+</div>
+<div>
+<h1 class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed">LAND AI</h1>
+<p class="font-label-md text-label-md text-on-surface-variant">इंडी-भूमि</p>
+</div>
+</div>
+</div>
+<div class="flex-1 px-3 space-y-1 overflow-y-auto custom-scrollbar">
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-high transition-colors font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span>Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-high transition-colors font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined">description</span>
+<span>Land Records</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-high transition-colors font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined">map</span>
+<span>GIS Mapping</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-primary font-bold border-l-4 border-primary bg-primary-container/10 font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">fact_check</span>
+<span>Verifications</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-high transition-colors font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined">history_edu</span>
+<span>Audit Ledger</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-high transition-colors font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined">smart_toy</span>
+<span>AI Copilot</span>
+</a>
+</div>
+<div class="px-unit-lg mt-auto pt-6 border-t border-outline-variant/30">
+<button class="w-full flex items-center justify-center gap-2 bg-primary text-on-primary py-2.5 rounded-lg font-label-md text-label-md shadow hover:bg-primary/90 transition-colors mb-4">
+<span class="material-symbols-outlined text-[18px]">verified</span>
+<span>Verify Record</span>
+</button>
+<div class="space-y-1">
+<a class="flex items-center gap-3 px-4 py-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high transition-colors font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span>Settings</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high transition-colors font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined">help</span>
+<span>Support</span>
+</a>
+</div>
+</div>
+</nav>
+<!-- Main Content Area -->
+<div class="ml-[250px] flex flex-col h-screen">
+<!-- TopNavBar -->
+<header class="h-[64px] bg-surface/95 dark:bg-inverse-surface/95 border-b border-outline-variant dark:border-outline backdrop-blur-md shadow-sm flex items-center justify-between px-unit-lg w-full z-40 shrink-0">
+<div class="flex items-center gap-6">
+<!-- Search -->
+<div class="relative hidden lg:flex items-center">
+<span class="material-symbols-outlined absolute left-3 text-on-surface-variant text-sm">search</span>
+<input class="bg-surface-container-low border border-outline-variant rounded-full pl-10 pr-4 py-1.5 text-sm w-64 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all font-body-md" placeholder="Search records (⌘K)" type="text"/>
+</div>
+<nav class="hidden md:flex items-center gap-1">
+<a class="px-3 py-4 text-on-surface-variant hover:text-primary transition-all font-label-md text-label-md" href="#">Explorer</a>
+<a class="px-3 py-4 text-on-surface-variant hover:text-primary transition-all font-label-md text-label-md" href="#">District View</a>
+<a class="px-3 py-4 text-on-surface-variant hover:text-primary transition-all font-label-md text-label-md" href="#">State Stats</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<button class="text-on-surface-variant hover:text-primary transition-colors p-1.5 rounded-full hover:bg-surface-container-high">
+<span class="material-symbols-outlined">find_replace</span>
+</button>
+<button class="text-on-surface-variant hover:text-primary transition-colors p-1.5 rounded-full hover:bg-surface-container-high relative">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-1 right-1 w-2 h-2 bg-error rounded-full"></span>
+</button>
+<div class="h-6 w-px bg-outline-variant mx-1"></div>
+<button class="font-label-md text-label-md text-primary font-semibold hover:underline">Officer Portal</button>
+<img alt="User profile" class="w-8 h-8 rounded-full border border-outline-variant object-cover" data-alt="A professional headshot of a government officer in uniform, set against a neutral, well-lit studio background. The lighting is soft and corporate, conveying trust and authority." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDzomQwiM1j9oSZ7VoWpRjUdtE6yKnF4_in749RdkwgfoaJSRaXMV1u7yni9s8OHUz2eYMBt0XQSoEN9lTMl_PpTwp8-uyG1da99pIxU-dzM6IegFis2IrgxoVLS3r1VnShRgOWQk_OdxBFhdHJb5IVjpVL8U8oJCsTbRXtP6uyCBJhE8-rv4ZqM2XvSGBYXPF3PCN-7G2WGqgNML3ELKjyfhrBNX6Bx-Z0ihlOAlrp5MNqc8LOa5XvrA"/>
+</div>
+</header>
+<!-- Workbench Split Pane -->
+<main class="flex-1 flex overflow-hidden split-pane bg-surface-container-lowest">
+<!-- Left Pane: Document Viewer -->
+<section class="w-1/2 flex flex-col border-r border-outline-variant bg-surface-container-low relative">
+<!-- Toolbar -->
+<div class="h-12 bg-surface border-b border-outline-variant flex items-center justify-between px-4 shrink-0">
+<div class="flex items-center gap-2">
+<span class="font-label-md text-label-md text-on-surface-variant px-2 py-1 bg-surface-container-highest rounded">ID: DOC-2023-891A</span>
+<span class="text-xs text-on-surface-variant ml-2">7/12 Utara • Scanned PDF</span>
+</div>
+<div class="flex items-center gap-1 bg-surface-container p-1 rounded-lg border border-outline-variant">
+<button class="p-1.5 text-on-surface-variant hover:text-primary hover:bg-surface-container-high rounded" title="Zoom In"><span class="material-symbols-outlined text-[18px]">zoom_in</span></button>
+<button class="p-1.5 text-on-surface-variant hover:text-primary hover:bg-surface-container-high rounded" title="Zoom Out"><span class="material-symbols-outlined text-[18px]">zoom_out</span></button>
+<div class="w-px h-4 bg-outline-variant mx-1"></div>
+<button class="p-1.5 text-on-surface-variant hover:text-primary hover:bg-surface-container-high rounded" title="Pan"><span class="material-symbols-outlined text-[18px]">pan_tool</span></button>
+<button class="p-1.5 text-on-surface-variant hover:text-primary hover:bg-surface-container-high rounded" title="Rotate"><span class="material-symbols-outlined text-[18px]">rotate_right</span></button>
+<div class="w-px h-4 bg-outline-variant mx-1"></div>
+<button class="p-1.5 text-primary bg-primary-container/10 rounded flex items-center gap-1 px-2" title="Toggle Evidence">
+<span class="material-symbols-outlined text-[18px]">visibility</span>
+<span class="text-[10px] font-bold">Overlays</span>
+</button>
+</div>
+</div>
+<!-- Viewer Canvas -->
+<div class="flex-1 relative overflow-auto custom-scrollbar p-6 flex justify-center items-start bg-surface-container-low">
+<!-- The Document (Mock) -->
+<div class="relative w-full max-w-2xl bg-white shadow-sm border border-outline-variant p-8 min-h-[800px]">
+<!-- Document Header -->
+<div class="text-center mb-8 border-b-2 border-on-surface pb-4">
+<h2 class="font-headline-sm text-headline-sm font-bold uppercase tracking-wide">Government of Maharashtra</h2>
+<h3 class="font-title-lg text-title-lg mt-2">Village Form VII / XII</h3>
+</div>
+<!-- Content -->
+<div class="grid grid-cols-2 gap-8 text-sm">
+<div>
+<p class="mb-2"><span class="font-semibold text-on-surface-variant">Village:</span> Pune Rural</p>
+<p class="mb-2"><span class="font-semibold text-on-surface-variant">Taluka:</span> Haveli</p>
+<p class="mb-2"><span class="font-semibold text-on-surface-variant">District:</span> Pune</p>
+</div>
+<div class="text-right relative">
+<p class="mb-2 relative inline-block">
+<span class="font-semibold text-on-surface-variant">Survey No / Gat No:</span>
+<span class="font-mono text-base ml-2">204/5B</span>
+<!-- Evidence Overlay -->
+</p><div class="ai-highlight active w-full h-full left-0 top-0 -m-1 p-1 rounded" onclick="highlightMatch('survey-no')"></div>
+<p></p>
+</div>
+</div>
+<div class="mt-8 border border-outline-variant">
+<table class="w-full text-left border-collapse text-sm">
+<thead class="bg-surface-container">
+<tr>
+<th class="border-b border-r border-outline-variant p-2 font-semibold">Occupant Name</th>
+<th class="border-b border-outline-variant p-2 font-semibold">Area (Hectares)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="border-b border-r border-outline-variant p-2 relative">
+                                            Shri. Ramesh Narayan Patil
+                                            <div class="ai-highlight w-full h-full left-0 top-0 -m-1 p-1" onclick="highlightMatch('owner-name')"></div>
+</td>
+<td class="border-b border-outline-variant p-2 relative">
+                                            1.25
+                                            <div class="ai-highlight w-full h-full left-0 top-0 -m-1 p-1" onclick="highlightMatch('area')"></div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Watermark/Stamp -->
+<div class="absolute bottom-12 right-12 opacity-20 transform -rotate-12 border-4 border-error text-error font-bold p-2 text-xl">
+                            DIGITALLY SIGNED
+                        </div>
+</div>
+</div>
+</section>
+<!-- Right Pane: Inspector Panel -->
+<section class="w-1/2 flex flex-col bg-surface-container-lowest overflow-y-auto custom-scrollbar">
+<!-- Panel Header -->
+<div class="sticky top-0 bg-surface-container-lowest/90 backdrop-blur-md z-10 border-b border-outline-variant p-4 flex items-center justify-between">
+<div>
+<h2 class="font-headline-sm text-headline-sm font-bold text-on-surface">Verification Inspector</h2>
+<p class="font-body-md text-sm text-on-surface-variant mt-1">Review AI extractions against legal standards.</p>
+</div>
+<div class="flex items-center gap-2">
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-surface-container border border-outline-variant text-on-surface-variant">
+<span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span> PROCESSING
+                        </span>
+</div>
+</div>
+<div class="p-4 space-y-6">
+<!-- AI Extraction Module -->
+<div class="bg-white rounded-xl border border-outline-variant shadow-sm overflow-hidden">
+<div class="bg-surface-container-low px-4 py-3 border-b border-outline-variant flex items-center justify-between">
+<div class="flex items-center gap-2 text-primary font-semibold">
+<span class="material-symbols-outlined text-[20px]">smart_toy</span>
+<span class="font-title-lg text-sm">AI Extraction Results</span>
+</div>
+<span class="text-xs text-on-surface-variant bg-surface-container px-2 py-0.5 rounded">Model: Vision-v2.1</span>
+</div>
+<div class="p-4 space-y-4">
+<!-- Field 1 -->
+<div class="flex items-start justify-between group p-2 hover:bg-surface-bright rounded-lg transition-colors border border-transparent hover:border-outline-variant/50 cursor-pointer" id="card-survey-no">
+<div class="flex-1">
+<div class="flex items-center gap-2">
+<span class="font-label-md text-xs text-on-surface-variant uppercase tracking-wider">Survey / Gat No.</span>
+<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-[#E0E7FF] text-[#3730A3]">97% Conf</span>
+</div>
+<div class="font-mono text-base font-medium mt-1">204/5B</div>
+</div>
+<button class="opacity-0 group-hover:opacity-100 transition-opacity text-primary hover:bg-primary-container/10 p-1.5 rounded flex items-center gap-1 text-xs font-semibold">
+<span class="material-symbols-outlined text-[16px]">visibility</span> Evidence
+                                </button>
+</div>
+<hr class="border-outline-variant/30"/>
+<!-- Field 2 -->
+<div class="flex items-start justify-between group p-2 hover:bg-surface-bright rounded-lg transition-colors border border-transparent hover:border-outline-variant/50 cursor-pointer" id="card-owner-name">
+<div class="flex-1">
+<div class="flex items-center gap-2">
+<span class="font-label-md text-xs text-on-surface-variant uppercase tracking-wider">Occupant Name</span>
+<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-[#E0E7FF] text-[#3730A3]">94% Conf</span>
+</div>
+<div class="font-body-md text-base mt-1">Shri. Ramesh Narayan Patil</div>
+</div>
+<button class="opacity-0 group-hover:opacity-100 transition-opacity text-primary hover:bg-primary-container/10 p-1.5 rounded flex items-center gap-1 text-xs font-semibold">
+<span class="material-symbols-outlined text-[16px]">visibility</span> Evidence
+                                </button>
+</div>
+</div>
+</div>
+<!-- GIS Validation Module -->
+<div class="bg-white rounded-xl border border-outline-variant shadow-sm overflow-hidden">
+<div class="bg-surface-container-low px-4 py-3 border-b border-outline-variant flex items-center justify-between">
+<div class="flex items-center gap-2 text-on-surface font-semibold">
+<span class="material-symbols-outlined text-[20px]">map</span>
+<span class="font-title-lg text-sm">GIS Spatial Validation</span>
+</div>
+</div>
+<div class="p-4">
+<div class="flex gap-4">
+<!-- Mini Map placeholder -->
+<div class="w-32 h-32 bg-surface-container rounded-lg border border-outline-variant overflow-hidden relative shrink-0">
+<div class="bg-cover bg-center w-full h-full opacity-80" data-alt="A highly detailed overhead satellite view of agricultural land plots in India. The plots are divided by clear boundaries, with one specific plot highlighted with a glowing green vector outline indicating successful GIS validation. The aesthetic is technical and precise, typical of a government mapping interface." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCxN7Qh1v4z2VBnBgum9cYMmkb0WV4mSOu5HeCEX7oAL4N_ig7JT5Oo6VCals1bOtGesCPTNuD0HIkQF9mbzAEvmu6mKq1OAabLUWaTMxSr8QOqTO14QZLWmLEPzURv9cQQFCdI9BimpRYXpwFC-nlM4-VLkjUKQR3ITfq8pZ3TPVXLJhVb_f4ZrRlUPKkQWh1LmGk3O4CWuEejf5H4y3DR9kX-knm7bvZ6kVRkluYm5yOAkeg1tCA0SA')"></div>
+<div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+<span class="material-symbols-outlined text-primary-container text-4xl opacity-50">my_location</span>
+</div>
+</div>
+<div class="flex-1 flex flex-col justify-center">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-green-600 text-[18px]">check_circle</span>
+<span class="font-semibold text-sm text-green-800">Geometry Matches Record</span>
+</div>
+<div class="text-sm space-y-1 text-on-surface-variant">
+<p class="flex justify-between"><span>Document Area:</span> <span class="font-medium text-on-surface">1.25 Ha</span></p>
+<p class="flex justify-between"><span>Cadastral Area:</span> <span class="font-medium text-on-surface">1.248 Ha</span></p>
+<p class="flex justify-between"><span>Variance:</span> <span class="font-medium text-on-surface">0.16% (Within limits)</span></p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Conflicts / Discrepancies -->
+<div class="bg-[#FEF2F2] rounded-xl border border-[#FCA5A5] shadow-sm overflow-hidden">
+<div class="bg-[#FEE2E2] px-4 py-3 border-b border-[#FCA5A5] flex items-center gap-2 text-[#991B1B] font-semibold">
+<span class="material-symbols-outlined text-[20px]">warning</span>
+<span class="font-title-lg text-sm">Potential Conflict Detected</span>
+</div>
+<div class="p-4">
+<p class="text-sm text-[#7F1D1D] mb-3">The extracted occupant name has a partial mismatch with the historical ledger data.</p>
+<div class="bg-white rounded p-3 border border-[#FECACA] text-sm flex gap-4">
+<div class="flex-1">
+<span class="text-xs text-on-surface-variant block mb-1">Current Doc (AI)</span>
+<span class="font-medium">Ramesh Narayan Patil</span>
+</div>
+<div class="flex-1 border-l border-[#FECACA] pl-4">
+<span class="text-xs text-on-surface-variant block mb-1">Ledger (Database)</span>
+<span class="font-medium text-[#991B1B] line-through">Ramesh N. Patil</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Footer Action Area -->
+<div class="mt-auto sticky bottom-0 bg-surface border-t border-outline-variant p-4 flex items-center justify-between shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+<button class="px-4 py-2 text-error hover:bg-error-container/20 font-semibold rounded-lg text-sm transition-colors flex items-center gap-1">
+<span class="material-symbols-outlined text-[18px]">block</span> Reject
+                    </button>
+<div class="flex gap-3">
+<button class="px-4 py-2 border border-outline-variant text-on-surface-variant hover:bg-surface-container-high font-semibold rounded-lg text-sm transition-colors">
+                            Request Edit
+                        </button>
+<button class="px-6 py-2 bg-primary text-on-primary hover:bg-primary/90 font-semibold rounded-lg text-sm transition-colors shadow flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">verified</span> Approve Record
+                        </button>
+</div>
+</div>
+</section>
+</main>
+</div>
+<script>
+        // Simple interaction script to demonstrate evidence highlighting
+        function highlightMatch(id) {
+            // Reset UI
+            document.querySelectorAll('.ai-highlight').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('[id^="card-"]').forEach(el => {
+                el.classList.remove('border-primary', 'bg-primary-container/5');
+                el.classList.add('border-transparent');
+            });
+
+            // Highlight new
+            if(id === 'survey-no') {
+                const card = document.getElementById('card-survey-no');
+                if(card) {
+                    card.classList.remove('border-transparent');
+                    card.classList.add('border-primary', 'bg-primary-container/5');
+                }
+            }
+            // Add more logic for other fields as needed for full interactivity
+        }
+    </script>
+</body></html>

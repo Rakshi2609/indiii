@@ -6,83 +6,58 @@ import {
   AlertTriangle,
   ArrowRight,
   BarChart3,
+  Bot,
   CheckCircle2,
+  ChevronRight,
   Clock,
   Compass,
-  FileCheck,
+  FileCheck2,
   FileText,
+  FileUp,
+  Gavel,
+  History,
   Layers,
   MapPin,
-  PieChart,
+  Maximize2,
   RefreshCw,
+  Scale,
   ShieldAlert,
+  ShieldCheck,
   Sparkles,
   TrendingUp,
-  UploadCloud,
-  UserCheck,
-  Users
+  Users,
+  Zap,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Topbar } from "@/components/Topbar";
 
 interface OverviewMetrics {
   total_documents: number;
   total_documents_processed: number;
   total_documents_pending: number;
-  total_documents_failed: number;
   total_records_extracted: number;
   total_records_verified: number;
-  total_records_flagged: number;
-  total_records_rejected: number;
   fields_requiring_review: number;
   validation_conflicts_count: number;
   critical_conflicts_count: number;
   average_confidence_score: number;
   digitization_progress_pct: number;
-  last_updated: string;
 }
 
-interface DistrictProgress {
-  state: string;
-  district: string;
-  total_records: number;
-  verified_records: number;
-  flagged_records: number;
-  progress_percentage: number;
-  total_area_hectares: number;
-}
-
-export default function DashboardPage() {
+export default function GovernmentCommandCenterPage() {
   const [overview, setOverview] = useState<OverviewMetrics | null>(null);
-  const [districts, setDistricts] = useState<DistrictProgress[]>([]);
-  const [conflicts, setConflicts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchDashboardData = async () => {
     setLoading(true);
     try {
-      const [ovRes, distRes, confRes] = await Promise.all([
-        fetch("http://localhost:8000/api/analytics/overview"),
-        fetch("http://localhost:8000/api/analytics/districts"),
-        fetch("http://localhost:8000/api/analytics/conflicts")
-      ]);
-
-      if (ovRes.ok) {
-        const ovData = await ovRes.json();
-        setOverview(ovData);
+      const res = await fetch("http://localhost:8000/api/analytics/overview");
+      if (res.ok) {
+        const data = await res.json();
+        setOverview(data);
       } else {
         loadMockData();
-      }
-
-      if (distRes.ok) {
-        const distData = await distRes.json();
-        setDistricts(distData.districts || []);
-      }
-
-      if (confRes.ok) {
-        const confData = await confRes.json();
-        setConflicts(confData.breakdown || []);
       }
     } catch {
       loadMockData();
@@ -93,58 +68,17 @@ export default function DashboardPage() {
 
   const loadMockData = () => {
     setOverview({
-      total_documents: 128,
-      total_documents_processed: 124,
-      total_documents_pending: 3,
-      total_documents_failed: 1,
-      total_records_extracted: 124,
-      total_records_verified: 106,
-      total_records_flagged: 15,
-      total_records_rejected: 3,
-      fields_requiring_review: 18,
-      validation_conflicts_count: 22,
-      critical_conflicts_count: 2,
-      average_confidence_score: 0.912,
+      total_documents: 1248500,
+      total_documents_processed: 1200000,
+      total_documents_pending: 45230,
+      total_records_extracted: 1200000,
+      total_records_verified: 894000,
+      fields_requiring_review: 12890,
+      validation_conflicts_count: 8401,
+      critical_conflicts_count: 2150,
+      average_confidence_score: 0.945,
       digitization_progress_pct: 85.5,
-      last_updated: new Date().toISOString()
     });
-
-    setDistricts([
-      {
-        state: "Maharashtra",
-        district: "Pune (Haveli/Wagholi)",
-        total_records: 64,
-        verified_records: 58,
-        flagged_records: 6,
-        progress_percentage: 90.6,
-        total_area_hectares: 184.5
-      },
-      {
-        state: "Maharashtra",
-        district: "Satara",
-        total_records: 36,
-        verified_records: 30,
-        flagged_records: 6,
-        progress_percentage: 83.3,
-        total_area_hectares: 112.8
-      },
-      {
-        state: "Karnataka",
-        district: "Bengaluru Rural (Devanahalli)",
-        total_records: 24,
-        verified_records: 18,
-        flagged_records: 6,
-        progress_percentage: 75.0,
-        total_area_hectares: 96.4
-      }
-    ]);
-
-    setConflicts([
-      { issue_type: "RULE", severity: "HIGH", count: 8 },
-      { issue_type: "DB_MATCH", severity: "CRITICAL", count: 2 },
-      { issue_type: "GIS_CONFLICT", severity: "MEDIUM", count: 7 },
-      { issue_type: "RULE", severity: "LOW", count: 5 }
-    ]);
   };
 
   useEffect(() => {
@@ -152,302 +86,378 @@ export default function DashboardPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 font-sans p-6 sm:p-10">
-      <div className="max-w-7xl mx-auto space-y-8">
-        {/* Header Bar */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800 pb-6">
-          <div>
-            <div className="flex items-center gap-2 mb-1.5">
-              <Sparkles className="w-5 h-5 text-emerald-400" />
-              <span className="text-xs uppercase tracking-widest text-emerald-400 font-semibold">
-                Executive Analytics & Telemetry
-              </span>
-            </div>
-            <h1 className="text-3xl font-bold tracking-tight text-white">
-              Land AI Enterprise Dashboard
-            </h1>
-            <p className="text-slate-400 text-sm mt-1">
-              Real-time monitoring of land deed digitization, Sarvam OCR extraction throughput, and cadastral spatial health.
-            </p>
-          </div>
+    <div className="min-h-screen bg-surface-container-lowest text-on-surface flex flex-col md:pl-[72px]">
+      {/* Top Navigation */}
+      <Topbar />
 
-          <div className="flex flex-wrap items-center gap-3">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={fetchDashboardData}
-              className="border-slate-800 bg-slate-900 text-slate-200 hover:bg-slate-800 text-xs"
-            >
-              <RefreshCw className={`w-3.5 h-3.5 mr-1.5 ${loading ? "animate-spin" : ""}`} />
-              Refresh Data
-            </Button>
-            <Link href="/gis">
-              <Button size="sm" variant="outline" className="border-slate-800 bg-slate-900 text-slate-200 gap-1.5 text-xs">
-                <Compass className="w-3.5 h-3.5 text-indigo-400" />
-                GIS Map
-              </Button>
-            </Link>
-            <Link href="/verification">
-              <Button size="sm" className="bg-emerald-600 hover:bg-emerald-500 text-white gap-1.5 text-xs font-semibold">
-                <FileCheck className="w-3.5 h-3.5" />
-                Review Queue
-              </Button>
-            </Link>
+      {/* Main Canvas */}
+      <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-6">
+        
+        {/* Header Breadcrumb & Title */}
+        <div className="space-y-1">
+          <div className="flex items-center gap-2 text-xs font-semibold text-on-surface-variant">
+            <span>Command Center</span>
+            <ChevronRight className="w-3.5 h-3.5 text-outline" />
+            <span className="text-primary font-bold">Overview</span>
           </div>
+          <h1 className="text-2xl sm:text-3xl font-bold text-on-surface tracking-tight">
+            Land Intelligence Command Center
+          </h1>
+          <p className="text-xs sm:text-sm text-on-surface-variant">
+            National / State / District land-record verification overview and cadastral stream telemetry.
+          </p>
         </div>
 
-        {/* 1. TOP STAT CARDS */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {/* Total Documents Card */}
-          <Card className="bg-slate-900/80 border-slate-800">
-            <CardContent className="p-5">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
-                  Total Documents
-                </span>
-                <div className="p-2 rounded-lg bg-blue-950/60 border border-blue-800/60 text-blue-400">
-                  <FileText className="w-4 h-4" />
-                </div>
-              </div>
-              <div className="text-3xl font-bold text-white mt-2">
-                {overview?.total_documents ?? "—"}
-              </div>
-              <div className="flex items-center justify-between text-xs text-slate-400 mt-3 pt-3 border-t border-slate-800/80">
-                <span>Processed: <strong className="text-emerald-400">{overview?.total_documents_processed ?? 0}</strong></span>
-                <span>Pending: <strong className="text-amber-400">{overview?.total_documents_pending ?? 0}</strong></span>
-              </div>
-            </CardContent>
-          </Card>
+        {/* 6 Top Metric KPI Cards */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3.5">
+          
+          {/* Metric 1: Documents Processed */}
+          <div className="bg-surface p-4 rounded-xl border border-outline-variant shadow-[0_2px_4px_rgba(23,32,27,0.04)] flex flex-col justify-between hover:shadow-md transition-shadow">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-[10px] uppercase font-bold text-on-surface-variant tracking-wider">
+                Processed
+              </span>
+              <FileText className="w-4 h-4 text-outline" />
+            </div>
+            <div className="text-2xl font-bold text-on-surface font-mono">1.2M</div>
+            <div className="mt-2 text-primary text-[11px] font-semibold flex items-center gap-1">
+              <TrendingUp className="w-3 h-3" />
+              <span>+12% this week</span>
+            </div>
+          </div>
 
-          {/* Extracted Records Card */}
-          <Card className="bg-slate-900/80 border-slate-800">
-            <CardContent className="p-5">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
-                  Extracted Records
-                </span>
-                <div className="p-2 rounded-lg bg-indigo-950/60 border border-indigo-800/60 text-indigo-400">
-                  <Layers className="w-4 h-4" />
-                </div>
-              </div>
-              <div className="text-3xl font-bold text-white mt-2">
-                {overview?.total_records_extracted ?? "—"}
-              </div>
-              <div className="flex items-center justify-between text-xs text-slate-400 mt-3 pt-3 border-t border-slate-800/80">
-                <span>Mean OCR Score:</span>
-                <strong className="text-emerald-400 font-mono">
-                  {overview?.average_confidence_score ? `${(overview.average_confidence_score * 100).toFixed(1)}%` : "95.0%"}
-                </strong>
-              </div>
-            </CardContent>
-          </Card>
+          {/* Metric 2: Pending Verification */}
+          <div className="bg-surface p-4 rounded-xl border border-outline-variant shadow-[0_2px_4px_rgba(23,32,27,0.04)] flex flex-col justify-between hover:shadow-md transition-shadow">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-[10px] uppercase font-bold text-on-surface-variant tracking-wider">
+                Pending Queue
+              </span>
+              <Clock className="w-4 h-4 text-outline" />
+            </div>
+            <div className="text-2xl font-bold text-on-surface font-mono">45,230</div>
+            <div className="mt-2 text-on-surface-variant text-[11px]">
+              Officer Review Req.
+            </div>
+          </div>
 
-          {/* Verified Land Records Card */}
-          <Card className="bg-slate-900/80 border-slate-800">
-            <CardContent className="p-5">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
-                  Verified Records
-                </span>
-                <div className="p-2 rounded-lg bg-emerald-950/60 border border-emerald-800/60 text-emerald-400">
-                  <CheckCircle2 className="w-4 h-4" />
-                </div>
-              </div>
-              <div className="text-3xl font-bold text-emerald-400 mt-2">
-                {overview?.total_records_verified ?? "—"}
-              </div>
-              <div className="flex items-center justify-between text-xs text-slate-400 mt-3 pt-3 border-t border-slate-800/80">
-                <span>Verification Rate:</span>
-                <strong className="text-emerald-400 font-mono">
-                  {overview?.digitization_progress_pct ?? 0}%
-                </strong>
-              </div>
-            </CardContent>
-          </Card>
+          {/* Metric 3: Spatial Conflicts */}
+          <div className="bg-surface p-4 rounded-xl border border-outline-variant shadow-[0_2px_4px_rgba(23,32,27,0.04)] flex flex-col justify-between relative overflow-hidden hover:shadow-md transition-shadow">
+            <div className="absolute top-0 right-0 w-12 h-12 bg-error/10 rounded-bl-full" />
+            <div className="flex items-center justify-between mb-2 z-10">
+              <span className="text-[10px] uppercase font-bold text-error tracking-wider">
+                GIS Conflicts
+              </span>
+              <MapPin className="w-4 h-4 text-error" />
+            </div>
+            <div className="text-2xl font-bold text-on-surface font-mono z-10">8,401</div>
+            <div className="mt-2 text-error text-[11px] font-semibold flex items-center gap-1 z-10">
+              <AlertTriangle className="w-3 h-3" />
+              <span>Critical Action Req.</span>
+            </div>
+          </div>
 
-          {/* Review Queue / Conflicts Card */}
-          <Card className="bg-slate-900/80 border-slate-800">
-            <CardContent className="p-5">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
-                  Review Queue
-                </span>
-                <div className="p-2 rounded-lg bg-amber-950/60 border border-amber-800/60 text-amber-400">
-                  <AlertTriangle className="w-4 h-4" />
-                </div>
-              </div>
-              <div className="text-3xl font-bold text-amber-400 mt-2">
-                {overview?.fields_requiring_review ?? "—"}
-              </div>
-              <div className="flex items-center justify-between text-xs text-slate-400 mt-3 pt-3 border-t border-slate-800/80">
-                <span>Critical Flags: <strong className="text-red-400">{overview?.critical_conflicts_count ?? 0}</strong></span>
-                <Link href="/verification" className="text-emerald-400 hover:underline flex items-center gap-1 font-semibold">
-                  Inspect <ArrowRight className="w-3 h-3" />
+          {/* Metric 4: Title Conflicts */}
+          <div className="bg-surface p-4 rounded-xl border border-outline-variant shadow-[0_2px_4px_rgba(23,32,27,0.04)] flex flex-col justify-between relative overflow-hidden hover:shadow-md transition-shadow">
+            <div className="absolute top-0 right-0 w-12 h-12 bg-error/10 rounded-bl-full" />
+            <div className="flex items-center justify-between mb-2 z-10">
+              <span className="text-[10px] uppercase font-bold text-error tracking-wider">
+                Title Conflicts
+              </span>
+              <Scale className="w-4 h-4 text-error" />
+            </div>
+            <div className="text-2xl font-bold text-on-surface font-mono z-10">2,150</div>
+            <div className="mt-2 text-error text-[11px] font-semibold flex items-center gap-1 z-10">
+              <AlertTriangle className="w-3 h-3" />
+              <span>Legal Review Req.</span>
+            </div>
+          </div>
+
+          {/* Metric 5: AI Low Confidence */}
+          <div className="bg-surface p-4 rounded-xl border border-outline-variant shadow-[0_2px_4px_rgba(23,32,27,0.04)] flex flex-col justify-between relative overflow-hidden hover:shadow-md transition-shadow">
+            <div className="absolute top-0 right-0 w-12 h-12 bg-[#F59E0B]/10 rounded-bl-full" />
+            <div className="flex items-center justify-between mb-2 z-10">
+              <span className="text-[10px] uppercase font-bold text-[#D97706] tracking-wider">
+                Low Conf.
+              </span>
+              <Bot className="w-4 h-4 text-[#D97706]" />
+            </div>
+            <div className="text-2xl font-bold text-on-surface font-mono z-10">12,890</div>
+            <div className="mt-2 text-[#D97706] text-[11px] font-semibold flex items-center gap-1 z-10">
+              <span>Manual Audit Needed</span>
+            </div>
+          </div>
+
+          {/* Metric 6: Verified Records */}
+          <div className="bg-surface p-4 rounded-xl border border-outline-variant shadow-[0_2px_4px_rgba(23,32,27,0.04)] flex flex-col justify-between hover:shadow-md transition-shadow">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-[10px] uppercase font-bold text-primary tracking-wider">
+                Verified
+              </span>
+              <CheckCircle2 className="w-4 h-4 text-[#15803D]" />
+            </div>
+            <div className="text-2xl font-bold text-[#15803D] font-mono">894K</div>
+            <div className="mt-2 text-primary text-[11px] font-semibold flex items-center gap-1">
+              <CheckCircle2 className="w-3 h-3" />
+              <span>Fully Validated</span>
+            </div>
+          </div>
+
+        </div>
+
+        {/* Main Bento Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          
+          {/* Left Column (1 Col): Critical Verification Queue & Live Activity */}
+          <div className="lg:col-span-1 space-y-6 flex flex-col">
+            
+            {/* Critical Verification Queue Card */}
+            <div className="bg-surface rounded-xl border border-outline-variant shadow-sm flex flex-col overflow-hidden">
+              <div className="p-4 border-b border-outline-variant flex justify-between items-center bg-surface-container-low">
+                <h3 className="text-sm font-bold text-on-surface flex items-center gap-2">
+                  <AlertTriangle className="w-4 h-4 text-error" />
+                  <span>Critical Queue</span>
+                </h3>
+                <Link href="/verification" className="text-primary text-xs font-semibold hover:underline">
+                  View All
                 </Link>
               </div>
-            </CardContent>
-          </Card>
-        </div>
 
-        {/* 2. OVERALL DIGITIZATION PROGRESS BAR */}
-        <Card className="bg-slate-900/70 border-slate-800">
-          <CardContent className="p-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
-              <div>
-                <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                  <TrendingUp className="w-4 h-4 text-emerald-400" />
-                  National Cadastral Digitization Progress
+              <div className="p-2 divide-y divide-outline-variant/60 max-h-[300px] overflow-y-auto custom-scrollbar">
+                
+                {/* Queue Item 1 */}
+                <Link
+                  href="/verification/1"
+                  className="p-3 hover:bg-surface-container-low rounded-lg block transition-colors group cursor-pointer"
+                >
+                  <div className="flex justify-between items-start mb-1">
+                    <span className="text-xs font-bold text-on-surface group-hover:text-primary">
+                      Survey #402/A
+                    </span>
+                    <span className="bg-error-container text-on-error-container px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider border border-error/20">
+                      Title Conflict
+                    </span>
+                  </div>
+                  <p className="text-xs text-on-surface-variant truncate">
+                    Owner mismatch detected in legacy succession record.
+                  </p>
+                  <div className="text-[10px] text-outline mt-1.5 flex items-center gap-1 font-mono">
+                    <Clock className="w-3 h-3" />
+                    <span>2 hrs ago • Haveli, Pune</span>
+                  </div>
+                </Link>
+
+                {/* Queue Item 2 */}
+                <Link
+                  href="/verification/3"
+                  className="p-3 hover:bg-surface-container-low rounded-lg block transition-colors group cursor-pointer"
+                >
+                  <div className="flex justify-between items-start mb-1">
+                    <span className="text-xs font-bold text-on-surface group-hover:text-primary">
+                      Survey #118/B
+                    </span>
+                    <span className="bg-error-container text-on-error-container px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider border border-error/20">
+                      Spatial Conflict
+                    </span>
+                  </div>
+                  <p className="text-xs text-on-surface-variant truncate">
+                    Cadastral boundary overlap with adjacent road reserve.
+                  </p>
+                  <div className="text-[10px] text-outline mt-1.5 flex items-center gap-1 font-mono">
+                    <Clock className="w-3 h-3" />
+                    <span>4 hrs ago • Devanahalli, Bengaluru</span>
+                  </div>
+                </Link>
+
+                {/* Queue Item 3 */}
+                <Link
+                  href="/verification/1"
+                  className="p-3 hover:bg-surface-container-low rounded-lg block transition-colors group cursor-pointer"
+                >
+                  <div className="flex justify-between items-start mb-1">
+                    <span className="text-xs font-bold text-on-surface group-hover:text-primary">
+                      Survey #992/C
+                    </span>
+                    <span className="bg-[#FFEDD5] text-[#C2410C] px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider border border-[#FDBA74]">
+                      Low Confidence
+                    </span>
+                  </div>
+                  <p className="text-xs text-on-surface-variant truncate">
+                    Illegible handwriting in source revenue stamp.
+                  </p>
+                  <div className="text-[10px] text-outline mt-1.5 flex items-center gap-1 font-mono">
+                    <Clock className="w-3 h-3" />
+                    <span>5 hrs ago • Satara Rural</span>
+                  </div>
+                </Link>
+
+              </div>
+            </div>
+
+            {/* Live Processing Activity Stream */}
+            <div className="bg-surface rounded-xl border border-outline-variant shadow-sm flex flex-col overflow-hidden">
+              <div className="p-4 border-b border-outline-variant bg-surface-container-low flex justify-between items-center">
+                <h3 className="text-sm font-bold text-on-surface flex items-center gap-2">
+                  <Zap className="w-4 h-4 text-primary" />
+                  <span>Live Stream Activity</span>
                 </h3>
-                <p className="text-xs text-slate-400 mt-0.5">
-                  Percentage of revenue deeds validated through AI extraction and officer approval
-                </p>
-              </div>
-              <span className="text-xl font-bold text-emerald-400 font-mono">
-                {overview?.digitization_progress_pct ?? 0}% Completed
-              </span>
-            </div>
-
-            {/* Main Progress Track */}
-            <div className="w-full bg-slate-950 rounded-full h-3.5 border border-slate-800 overflow-hidden p-0.5 flex">
-              <div
-                style={{ width: `${overview?.digitization_progress_pct ?? 85}%` }}
-                className="bg-gradient-to-r from-emerald-600 to-emerald-400 h-full rounded-full transition-all duration-500 shadow-sm"
-              />
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* 3. SPLIT VIEW: PENDING VERIFICATION vs ACTIVE VALIDATION CONFLICTS */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Left: Pending Verification Queue Highlights */}
-          <Card className="bg-slate-900/60 border-slate-800 flex flex-col">
-            <CardHeader className="border-b border-slate-800 pb-3 flex flex-row items-center justify-between">
-              <div>
-                <CardTitle className="text-sm font-semibold text-white flex items-center gap-2">
-                  <Clock className="w-4 h-4 text-amber-400" />
-                  Pending Officer Verification
-                </CardTitle>
-                <CardDescription className="text-xs text-slate-400">
-                  Records with low OCR confidence or pending field sign-offs
-                </CardDescription>
-              </div>
-              <Link href="/verification">
-                <Button size="sm" variant="ghost" className="text-xs text-emerald-400 hover:text-emerald-300">
-                  View All
-                </Button>
-              </Link>
-            </CardHeader>
-            <CardContent className="p-4 space-y-3 flex-1">
-              <div className="p-3 rounded-lg bg-slate-950 border border-slate-800 flex items-center justify-between text-xs">
-                <div>
-                  <div className="font-semibold text-white">Survey No. 142/2A • Wagholi</div>
-                  <div className="text-[11px] text-slate-400 mt-0.5">Marginal OCR confidence on area extent</div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Badge variant="warning">74% Conf</Badge>
-                  <Link href="/verification/1">
-                    <Button size="sm" variant="secondary" className="h-7 text-xs px-2.5">
-                      Review
-                    </Button>
-                  </Link>
-                </div>
+                <span className="flex h-2.5 w-2.5 relative">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-primary" />
+                </span>
               </div>
 
-              <div className="p-3 rounded-lg bg-slate-950 border border-slate-800 flex items-center justify-between text-xs">
-                <div>
-                  <div className="font-semibold text-white">Survey No. 204 • Devanahalli</div>
-                  <div className="text-[11px] text-slate-400 mt-0.5">Cadastral GIS boundary discrepancy flagged</div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Badge variant="destructive">Critical</Badge>
-                  <Link href="/verification/3">
-                    <Button size="sm" variant="secondary" className="h-7 text-xs px-2.5">
-                      Review
-                    </Button>
-                  </Link>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+              <div className="p-4 space-y-4 relative">
+                <div className="absolute left-[31px] top-6 bottom-6 w-px bg-outline-variant" />
 
-          {/* Right: Validation Conflicts by Category */}
-          <Card className="bg-slate-900/60 border-slate-800 flex flex-col">
-            <CardHeader className="border-b border-slate-800 pb-3">
-              <CardTitle className="text-sm font-semibold text-white flex items-center gap-2">
-                <ShieldAlert className="w-4 h-4 text-red-400" />
-                Active Validation Conflicts Breakdown
-              </CardTitle>
-              <CardDescription className="text-xs text-slate-400">
-                Rule violations, double registrations, and GIS extent mismatches
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="p-4 space-y-3 flex-1">
-              {conflicts.length > 0 ? (
-                conflicts.map((c, idx) => (
-                  <div
-                    key={idx}
-                    className="p-3 rounded-lg bg-slate-950 border border-slate-800 flex items-center justify-between text-xs"
-                  >
-                    <div className="flex items-center gap-2.5">
-                      <span className="font-mono text-slate-300 font-semibold">{c.issue_type}</span>
-                      <span className="text-slate-500">•</span>
-                      <Badge
-                        variant={c.severity === "CRITICAL" ? "destructive" : c.severity === "HIGH" ? "destructive" : "warning"}
-                        className="text-[10px]"
-                      >
-                        {c.severity}
-                      </Badge>
-                    </div>
-                    <span className="font-bold text-white font-mono">{c.count} instances</span>
+                {/* Activity 1 */}
+                <div className="flex gap-3 relative z-10">
+                  <div className="w-8 h-8 rounded-full bg-[#E0E7FF] border border-[#A5B4FC] flex items-center justify-center text-[#4338CA] shrink-0 mt-0.5">
+                    <Bot className="w-4 h-4" />
                   </div>
-                ))
-              ) : (
-                <div className="text-center py-6 text-slate-500 text-xs">
-                  <CheckCircle2 className="w-6 h-6 mx-auto text-emerald-400 mb-1" />
-                  No open critical conflicts across the registry.
+                  <div>
+                    <div className="text-xs font-bold text-on-surface">AI Extraction Complete</div>
+                    <div className="text-[11px] text-on-surface-variant">Batch #8892 • 450 documents processed</div>
+                  </div>
                 </div>
-              )}
-            </CardContent>
-          </Card>
+
+                {/* Activity 2 */}
+                <div className="flex gap-3 relative z-10">
+                  <div className="w-8 h-8 rounded-full bg-surface-container-high border border-outline-variant flex items-center justify-center text-on-surface-variant shrink-0 mt-0.5">
+                    <FileUp className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <div className="text-xs font-bold text-on-surface">New Ingestion Stream</div>
+                    <div className="text-[11px] text-on-surface-variant">Pune Sub-Registrar uploaded 1,200 scans</div>
+                  </div>
+                </div>
+
+                {/* Activity 3 */}
+                <div className="flex gap-3 relative z-10">
+                  <div className="w-8 h-8 rounded-full bg-[#DCFCE7] border border-[#86EFAC] flex items-center justify-center text-[#15803D] shrink-0 mt-0.5">
+                    <CheckCircle2 className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <div className="text-xs font-bold text-on-surface">Officer Verified &amp; Signed</div>
+                    <div className="text-[11px] text-on-surface-variant">Officer ID-902 approved 54 deeds</div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+          </div>
+
+          {/* Right Column (2 Cols): GIS Conflict Clusters & District Digitization */}
+          <div className="lg:col-span-2 space-y-6 flex flex-col">
+            
+            {/* GIS Conflict Clusters Card */}
+            <div className="bg-surface rounded-xl border border-outline-variant shadow-sm flex flex-col overflow-hidden h-[380px]">
+              <div className="p-4 border-b border-outline-variant flex justify-between items-center bg-surface-container-low z-10">
+                <h3 className="text-sm font-bold text-on-surface flex items-center gap-2">
+                  <Compass className="w-4 h-4 text-on-surface-variant" />
+                  <span>Cadastral GIS Conflict Clusters (Live PostGIS)</span>
+                </h3>
+                <div className="flex gap-2">
+                  <Link href="/gis">
+                    <button className="bg-surface-container-high px-3 py-1 rounded text-xs font-semibold border border-outline-variant hover:bg-surface-container-highest transition-colors cursor-pointer">
+                      Open Full GIS Map
+                    </button>
+                  </Link>
+                </div>
+              </div>
+
+              {/* Interactive GIS Preview */}
+              <div className="flex-1 relative bg-surface-container overflow-hidden">
+                {/* Cadastral Simulated Grid View */}
+                <div className="absolute inset-0 bg-cadastral bg-cover opacity-90" />
+                
+                {/* Cadastral Interactive Parcels */}
+                <div className="absolute inset-0 p-6 flex flex-col justify-between">
+                  <div className="flex justify-end">
+                    <div className="bg-surface/95 backdrop-blur border border-outline-variant p-2.5 rounded-lg shadow-sm flex flex-col gap-1.5 text-[11px]">
+                      <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 rounded-full bg-error" />
+                        <span className="font-semibold">High Conflict Density</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 rounded-full bg-[#F59E0B]" />
+                        <span className="font-semibold">Moderate Density</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 rounded-full bg-[#15803D]" />
+                        <span className="font-semibold">Clear / Verified</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Simulated Conflict Hotspot Overlays */}
+                  <div className="absolute top-[35%] left-[25%] w-16 h-16 bg-error/25 rounded-full animate-pulse border border-error flex items-center justify-center">
+                    <span className="text-[10px] font-bold text-error">142/A</span>
+                  </div>
+                  <div className="absolute top-[55%] left-[58%] w-20 h-20 bg-[#F59E0B]/25 rounded-full animate-pulse border border-[#F59E0B] flex items-center justify-center">
+                    <span className="text-[10px] font-bold text-[#B45309]">204/BLR</span>
+                  </div>
+                  <div className="absolute top-[25%] left-[70%] w-14 h-14 bg-[#15803D]/25 rounded-full border border-[#15803D] flex items-center justify-center">
+                    <span className="text-[10px] font-bold text-[#15803D]">88/1</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* District Progress Card */}
+            <div className="bg-surface rounded-xl border border-outline-variant shadow-sm p-5 space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-bold text-on-surface flex items-center gap-2">
+                  <BarChart3 className="w-4 h-4 text-on-surface-variant" />
+                  <span>District Digitization &amp; Verification Progress</span>
+                </h3>
+                <span className="text-xs font-mono font-bold text-primary">State: Maharashtra &amp; Karnataka</span>
+              </div>
+
+              <div className="space-y-4">
+                {/* District 1: Pune */}
+                <div className="space-y-1.5">
+                  <div className="flex justify-between items-end text-xs">
+                    <span className="font-bold text-on-surface">Pune District (Haveli / Wagholi)</span>
+                    <span className="font-mono text-primary font-bold">85% Complete</span>
+                  </div>
+                  <div className="w-full bg-surface-container-high rounded-full h-2.5 overflow-hidden border border-outline-variant">
+                    <div className="bg-primary h-2.5 rounded-full" style={{ width: "85%" }} />
+                  </div>
+                </div>
+
+                {/* District 2: Nashik */}
+                <div className="space-y-1.5">
+                  <div className="flex justify-between items-end text-xs">
+                    <span className="font-bold text-on-surface">Nashik District (Niphad / Dindori)</span>
+                    <span className="font-mono text-on-surface-variant">62% Complete</span>
+                  </div>
+                  <div className="w-full bg-surface-container-high rounded-full h-2.5 overflow-hidden border border-outline-variant flex">
+                    <div className="bg-primary h-2.5" style={{ width: "62%" }} />
+                    <div className="bg-[#F59E0B] h-2.5" style={{ width: "15%" }} title="Pending Review" />
+                    <div className="bg-error h-2.5" style={{ width: "5%" }} title="Critical Conflicts" />
+                  </div>
+                </div>
+
+                {/* District 3: Bengaluru Rural */}
+                <div className="space-y-1.5">
+                  <div className="flex justify-between items-end text-xs">
+                    <span className="font-bold text-on-surface">Bengaluru Rural (Devanahalli)</span>
+                    <span className="font-mono text-on-surface-variant">40% Complete</span>
+                  </div>
+                  <div className="w-full bg-surface-container-high rounded-full h-2.5 overflow-hidden border border-outline-variant flex">
+                    <div className="bg-primary h-2.5" style={{ width: "40%" }} />
+                    <div className="bg-[#F59E0B] h-2.5" style={{ width: "30%" }} title="Pending Review" />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
         </div>
 
-        {/* 4. DISTRICT DIGITIZATION PROGRESS LIST */}
-        <Card className="bg-slate-900/60 border-slate-800">
-          <CardHeader className="border-b border-slate-800 pb-3">
-            <CardTitle className="text-sm font-semibold text-white flex items-center gap-2">
-              <MapPin className="w-4 h-4 text-emerald-400" />
-              District-Wise Cadastral Digitization Progress
-            </CardTitle>
-            <CardDescription className="text-xs text-slate-400">
-              Coverage metrics and total land area cataloged by revenue jurisdiction
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="p-4 space-y-4">
-            {districts.map((dist, idx) => (
-              <div key={idx} className="space-y-1.5 p-3 rounded-lg bg-slate-950/70 border border-slate-800">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between text-xs gap-1">
-                  <div>
-                    <span className="font-bold text-white text-sm">{dist.district}</span>
-                    <span className="text-slate-400 ml-2 text-xs">({dist.state})</span>
-                  </div>
-                  <div className="flex items-center gap-4 text-slate-400 text-xs">
-                    <span>Total Area: <strong className="text-slate-200">{dist.total_area_hectares} Ha</strong></span>
-                    <span>Records: <strong className="text-emerald-400">{dist.verified_records}</strong> / {dist.total_records}</span>
-                    <span className="font-mono text-emerald-400 font-bold">{dist.progress_percentage}%</span>
-                  </div>
-                </div>
-
-                <div className="w-full bg-slate-900 rounded-full h-2 overflow-hidden flex">
-                  <div
-                    style={{ width: `${dist.progress_percentage}%` }}
-                    className="bg-emerald-500 h-full rounded-full"
-                  />
-                </div>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-      </div>
+      </main>
     </div>
   );
 }

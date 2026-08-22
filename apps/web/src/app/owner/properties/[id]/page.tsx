@@ -30,6 +30,7 @@ import {
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Topbar } from "@/components/Topbar";
 
 interface HistoryEvent {
   id: string;
@@ -154,16 +155,17 @@ export default function PropertyDetailPage() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-slate-950 text-slate-100 p-6 md:p-10 font-sans space-y-8 max-w-6xl w-full mx-auto">
-      
+    <div className="min-h-screen bg-surface-container-lowest text-on-surface flex flex-col md:pl-[72px]">
+      <Topbar />
+      <div className="p-4 sm:p-6 lg:p-8 space-y-6 max-w-6xl w-full mx-auto">
       {/* Top Breadcrumb & Actions Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800/80 pb-4">
-        <div className="flex items-center gap-2 text-xs text-slate-400">
-          <Link href="/owner" className="hover:text-white">Overview</Link>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-outline-variant pb-4">
+        <div className="flex items-center gap-2 text-xs text-on-surface-variant">
+          <Link href="/owner" className="hover:text-primary">Overview</Link>
           <span>/</span>
-          <Link href="/owner/properties" className="hover:text-white">My Land</Link>
+          <Link href="/owner/properties" className="hover:text-primary">My Land</Link>
           <span>/</span>
-          <span className="text-emerald-400 font-semibold">Survey {property.survey_number}</span>
+          <span className="text-primary font-bold">Survey {property.survey_number}</span>
         </div>
 
         <div className="flex items-center gap-2.5">
@@ -473,7 +475,7 @@ export default function PropertyDetailPage() {
           </div>
         )}
       </div>
-
+      </div>
     </div>
   );
 }

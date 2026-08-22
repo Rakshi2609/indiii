@@ -14,17 +14,20 @@ import {
   Search,
   Satellite,
   Map as MapIcon,
+  ShieldCheck,
+  AlertTriangle,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Topbar } from "@/components/Topbar";
 
 // Dynamically import Leaflet LiveMap component (client-side only)
 const LiveMap = dynamic(() => import("@/components/LiveMap"), {
   ssr: false,
   loading: () => (
-    <div className="w-full h-full flex flex-col items-center justify-center bg-[#050912] text-[#8B98AA] gap-3">
-      <RefreshCw className="w-8 h-8 animate-spin text-teal-400" />
-      <span className="text-xs font-mono">Initializing High-Resolution Satellite Tiles...</span>
+    <div className="w-full h-full flex flex-col items-center justify-center bg-surface-container-low text-on-surface-variant gap-3">
+      <RefreshCw className="w-8 h-8 animate-spin text-primary" />
+      <span className="text-xs font-mono">Initializing High-Resolution Cadastral Satellite Tiles...</span>
     </div>
   ),
 });
@@ -51,8 +54,8 @@ interface GeoFeature {
 }
 
 const REGION_PRESETS = [
-  { name: "Wagholi (Pune, MH)", lat: 18.5805, lng: 73.9810, zoom: 15, desc: "Survey 142 Boundary Overlap" },
-  { name: "Guntur City (AP)", lat: 16.3067, lng: 80.4365, zoom: 15, desc: "Telugu Deed Vikraya Dastaaveju" },
+  { name: "Wagholi (Pune, MH)", lat: 18.5805, lng: 73.9810, zoom: 15, desc: "Survey 142 Boundary" },
+  { name: "Guntur City (AP)", lat: 16.3067, lng: 80.4365, zoom: 15, desc: "Telugu Deed Vikraya" },
   { name: "Jaipur Bassi (RJ)", lat: 26.8500, lng: 75.8000, zoom: 15, desc: "Patta Vilekh Lease Plot" },
   { name: "Devanahalli (BLR, KA)", lat: 13.2485, lng: 77.7140, zoom: 15, desc: "Survey 204 RTC Pahani" },
 ];
@@ -65,7 +68,6 @@ export default function GISMapExplorerPage() {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [activeTileLayer, setActiveTileLayer] = useState<"satellite" | "dark" | "osm">("satellite");
 
-  // Fetch GeoJSON features
   const fetchParcels = async () => {
     setLoading(true);
     try {
@@ -255,7 +257,6 @@ export default function GISMapExplorerPage() {
     fetchParcels();
   }, []);
 
-  // Filter features
   const filteredFeatures = useMemo(() => {
     return features.filter((feat) => {
       const p = feat.properties;
@@ -275,30 +276,29 @@ export default function GISMapExplorerPage() {
   const p = selectedParcel?.properties;
 
   return (
-    <div className="flex-1 flex flex-col h-screen bg-[#070B14] text-[#F4F7FA] overflow-hidden">
-      
-      {/* Top Cadastral Command Toolbar */}
-      <header className="h-[60px] border-b border-white/[0.08] bg-[#070B14]/90 backdrop-blur-md px-6 flex items-center justify-between gap-4 shrink-0 z-10">
+    <div className="min-h-screen bg-surface-container-lowest text-on-surface flex flex-col md:pl-[72px] overflow-hidden">
+      {/* Top Navigation */}
+      <Topbar />
+
+      {/* Cadastral GIS Explorer Toolbar */}
+      <div className="h-14 bg-surface border-b border-outline-variant px-4 sm:px-6 flex items-center justify-between gap-3 shrink-0 z-20">
         <div className="flex items-center gap-3">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-teal-500/10 border border-teal-500/20 text-teal-400">
-            <Compass className="h-4 w-4 stroke-[1.75]" />
+          <div className="w-8 h-8 rounded-lg bg-primary-container flex items-center justify-center text-on-primary-container shrink-0">
+            <Compass className="w-4 h-4" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-sm font-semibold text-[#F4F7FA]">Cadastral GIS Intelligence Map</h1>
-              <span className="text-[10px] font-mono text-teal-400 bg-teal-500/10 px-1.5 py-0.5 rounded border border-teal-500/20">
-                LIVE POSTGIS
+              <h2 className="text-xs sm:text-sm font-bold text-on-surface">Cadastral GIS Intelligence Map</h2>
+              <span className="text-[10px] font-mono text-primary bg-primary-fixed/40 px-1.5 py-0.2 rounded border border-primary/20">
+                PostGIS Live
               </span>
             </div>
-            <p className="text-[11px] text-[#8B98AA] leading-none mt-0.5">
-              Interactive high-resolution satellite imagery & WGS-84 cadastral parcel overlay
-            </p>
           </div>
         </div>
 
-        {/* Region Presets */}
-        <div className="hidden md:flex items-center gap-1.5 bg-white/[0.03] p-1 rounded-lg border border-white/[0.06]">
-          <span className="text-[10px] uppercase font-semibold text-[#5F6B7A] px-2 font-mono">Jump:</span>
+        {/* Region Jumps */}
+        <div className="hidden lg:flex items-center gap-1.5 bg-surface-container-low p-1 rounded-lg border border-outline-variant">
+          <span className="text-[10px] font-bold uppercase text-on-surface-variant px-1.5">Jump:</span>
           {REGION_PRESETS.map((preset) => (
             <button
               key={preset.name}
@@ -306,49 +306,45 @@ export default function GISMapExplorerPage() {
                 const matched = features.find((f) => f.properties.village.toLowerCase().includes(preset.name.split(" ")[0].toLowerCase()));
                 if (matched) setSelectedParcel(matched);
               }}
-              className="text-xs px-2.5 py-1 rounded-md text-[#8B98AA] hover:text-[#F4F7FA] hover:bg-white/[0.06] transition-colors whitespace-nowrap"
+              className="text-xs px-2 py-0.5 rounded text-on-surface-variant hover:text-primary hover:bg-surface-container-high transition-colors cursor-pointer"
             >
               {preset.name.split(" ")[0]}
             </button>
           ))}
         </div>
 
-        {/* Tile Layer & View Controls */}
+        {/* Layer Selector */}
         <div className="flex items-center gap-2">
-          {/* Layer Selector */}
-          <div className="flex items-center bg-white/[0.03] p-0.5 rounded-lg border border-white/[0.06] text-xs">
+          <div className="flex items-center bg-surface-container-low p-0.5 rounded-lg border border-outline-variant text-xs">
             <button
               onClick={() => setActiveTileLayer("satellite")}
-              className={`flex items-center gap-1 px-2.5 py-1 rounded-md transition-all ${
+              className={`px-2.5 py-1 rounded font-semibold transition-colors cursor-pointer ${
                 activeTileLayer === "satellite"
-                  ? "bg-teal-500/20 text-teal-300 border border-teal-500/30"
-                  : "text-[#8B98AA] hover:text-white"
+                  ? "bg-primary text-on-primary shadow-sm"
+                  : "text-on-surface-variant hover:text-on-surface"
               }`}
             >
-              <Satellite className="w-3.5 h-3.5" />
-              <span>Satellite</span>
+              Satellite
             </button>
             <button
               onClick={() => setActiveTileLayer("dark")}
-              className={`flex items-center gap-1 px-2.5 py-1 rounded-md transition-all ${
+              className={`px-2.5 py-1 rounded font-semibold transition-colors cursor-pointer ${
                 activeTileLayer === "dark"
-                  ? "bg-teal-500/20 text-teal-300 border border-teal-500/30"
-                  : "text-[#8B98AA] hover:text-white"
+                  ? "bg-primary text-on-primary shadow-sm"
+                  : "text-on-surface-variant hover:text-on-surface"
               }`}
             >
-              <MapIcon className="w-3.5 h-3.5" />
-              <span>Dark Command</span>
+              Dark Command
             </button>
             <button
               onClick={() => setActiveTileLayer("osm")}
-              className={`flex items-center gap-1 px-2.5 py-1 rounded-md transition-all ${
+              className={`px-2.5 py-1 rounded font-semibold transition-colors cursor-pointer ${
                 activeTileLayer === "osm"
-                  ? "bg-teal-500/20 text-teal-300 border border-teal-500/30"
-                  : "text-[#8B98AA] hover:text-white"
+                  ? "bg-primary text-on-primary shadow-sm"
+                  : "text-on-surface-variant hover:text-on-surface"
               }`}
             >
-              <Globe className="w-3.5 h-3.5" />
-              <span>Street</span>
+              Street
             </button>
           </div>
 
@@ -356,18 +352,18 @@ export default function GISMapExplorerPage() {
             size="sm"
             variant="outline"
             onClick={fetchParcels}
-            className="h-8 border-white/[0.08] bg-white/[0.03] text-[#8B98AA] hover:text-white text-xs gap-1.5"
+            className="h-8 text-xs font-semibold gap-1.5"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />
-            <span>Sync</span>
+            <span className="hidden sm:inline">Sync</span>
           </Button>
         </div>
-      </header>
+      </div>
 
-      {/* Main Map Viewport & Right Inspector Panel */}
-      <div className="flex-1 flex overflow-hidden relative min-h-0">
+      {/* Main Map Canvas & Right Inspector */}
+      <div className="flex-1 flex flex-col lg:flex-row overflow-hidden relative min-h-0 split-pane">
         
-        {/* Leaflet Live Map Canvas Container */}
+        {/* Leaflet Live Map Canvas */}
         <div className="flex-1 h-full w-full relative flex">
           <LiveMap
             features={filteredFeatures}
@@ -376,44 +372,42 @@ export default function GISMapExplorerPage() {
             tileLayerType={activeTileLayer}
           />
 
-          {/* Floating Map Legend Overlay */}
-          <div className="absolute top-4 left-4 z-[400] flex flex-col gap-2 pointer-events-none">
-            <div className="bg-[#070B14]/90 backdrop-blur-md border border-white/[0.08] px-3 py-2 rounded-lg shadow-xl text-xs space-y-1 pointer-events-auto max-w-xs">
-              <div className="flex items-center justify-between text-[11px] font-semibold text-[#F4F7FA]">
-                <span>Cadastral Legend</span>
-                <span className="text-[10px] text-teal-400 font-mono">{filteredFeatures.length} Parcels</span>
+          {/* Floating Legend */}
+          <div className="absolute top-4 left-4 z-[400] bg-surface/95 backdrop-blur-md border border-outline-variant p-3 rounded-xl shadow-md text-xs space-y-1.5 max-w-xs">
+            <div className="flex items-center justify-between font-bold text-on-surface">
+              <span>Cadastral Legend</span>
+              <span className="text-[10px] font-mono text-primary">{filteredFeatures.length} Parcels</span>
+            </div>
+            <div className="flex items-center gap-3 text-[11px] text-on-surface-variant pt-1 border-t border-outline-variant">
+              <div className="flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 rounded-sm bg-[#15803D]" />
+                <span>Verified</span>
               </div>
-              <div className="flex items-center gap-4 text-[11px] text-[#8B98AA] pt-1">
-                <div className="flex items-center gap-1.5">
-                  <span className="w-2.5 h-2.5 rounded-sm bg-emerald-500/80 border border-emerald-400" />
-                  <span>Verified</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <span className="w-2.5 h-2.5 rounded-sm bg-amber-500/80 border border-amber-400" />
-                  <span>Flagged</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <span className="w-2.5 h-2.5 rounded-sm bg-red-500/80 border border-red-400" />
-                  <span>Critical</span>
-                </div>
+              <div className="flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 rounded-sm bg-[#F59E0B]" />
+                <span>Flagged</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 rounded-sm bg-error" />
+                <span>Conflict</span>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Right Inspector & Parcel Directory Panel (360px) */}
-        <div className="w-80 xl:w-96 border-l border-white/[0.08] bg-[#070B14]/95 backdrop-blur-xl flex flex-col h-full shrink-0 z-10 overflow-hidden shadow-2xl">
+        {/* Right Inspector & Directory Panel (360px) */}
+        <aside className="w-full lg:w-80 xl:w-96 border-t lg:border-t-0 lg:border-l border-outline-variant bg-surface flex flex-col h-auto lg:h-full shrink-0 z-10 overflow-hidden shadow-sm">
           
-          {/* Search and Filters */}
-          <div className="p-3.5 border-b border-white/[0.08] space-y-2.5">
+          {/* Search & Filter */}
+          <div className="p-3.5 border-b border-outline-variant space-y-2 bg-surface-container-low">
             <div className="relative">
-              <Search className="w-3.5 h-3.5 absolute left-3 top-2.5 text-[#5F6B7A]" />
+              <Search className="w-3.5 h-3.5 absolute left-3 top-2.5 text-on-surface-variant" />
               <input
                 type="text"
                 placeholder="Search survey no, village, owner..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full h-8 pl-8 pr-3 bg-white/[0.03] border border-white/[0.06] rounded-lg text-xs text-[#F4F7FA] placeholder-[#5F6B7A] focus:outline-none"
+                className="w-full h-8 pl-8 pr-3 bg-surface border border-outline-variant rounded-lg text-xs text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:ring-1 focus:ring-primary"
               />
             </div>
 
@@ -422,10 +416,10 @@ export default function GISMapExplorerPage() {
                 <button
                   key={st}
                   onClick={() => setStatusFilter(st)}
-                  className={`flex-1 py-1 rounded-md text-[11px] font-medium transition-all ${
+                  className={`flex-1 py-1 rounded-md text-[11px] font-semibold transition-colors border ${
                     statusFilter === st
-                      ? "bg-teal-500/20 text-teal-300 border border-teal-500/30"
-                      : "text-[#8B98AA] hover:bg-white/[0.04]"
+                      ? "bg-primary text-on-primary border-primary"
+                      : "bg-surface text-on-surface-variant border-outline-variant hover:bg-surface-container"
                   }`}
                 >
                   {st}
@@ -436,16 +430,16 @@ export default function GISMapExplorerPage() {
 
           {/* Selected Parcel Inspector */}
           {selectedParcel && (
-            <div className="p-4 border-b border-white/[0.08] bg-white/[0.02] space-y-3">
+            <div className="p-4 border-b border-outline-variant bg-surface-container-lowest space-y-3">
               <div className="flex items-start justify-between">
                 <div>
-                  <span className="text-[10px] uppercase font-semibold text-teal-400 font-mono">
+                  <span className="text-[10px] uppercase font-bold text-primary tracking-wider">
                     Cadastral Plot Selected
                   </span>
-                  <h3 className="text-base font-bold text-[#F4F7FA]">
+                  <h3 className="text-base font-bold text-on-surface">
                     Survey No. {p?.survey_number}
                   </h3>
-                  <p className="text-xs text-[#8B98AA]">
+                  <p className="text-xs text-on-surface-variant">
                     {p?.village}, {p?.district}, {p?.state}
                   </p>
                 </div>
@@ -463,18 +457,18 @@ export default function GISMapExplorerPage() {
                 </Badge>
               </div>
 
-              <div className="grid grid-cols-2 gap-2 text-xs bg-black/40 p-2.5 rounded-lg border border-white/[0.04]">
+              <div className="grid grid-cols-2 gap-2 text-xs bg-surface-container-low p-2.5 rounded-lg border border-outline-variant">
                 <div>
-                  <span className="text-[10px] text-[#5F6B7A] block">GIS Area</span>
-                  <strong className="text-white font-mono">{p?.area_hectares} Ha</strong>
+                  <span className="text-[10px] text-on-surface-variant block font-semibold">GIS Area</span>
+                  <strong className="text-on-surface font-mono">{p?.area_hectares} Ha</strong>
                 </div>
                 <div>
-                  <span className="text-[10px] text-[#5F6B7A] block">Confidence</span>
-                  <strong className="text-teal-400 font-mono">{Math.round((p?.confidence_score || 1) * 100)}%</strong>
+                  <span className="text-[10px] text-on-surface-variant block font-semibold">Confidence</span>
+                  <strong className="text-primary font-mono">{Math.round((p?.confidence_score || 1) * 100)}%</strong>
                 </div>
-                <div className="col-span-2">
-                  <span className="text-[10px] text-[#5F6B7A] block">Registered Khatadars</span>
-                  <strong className="text-slate-200 truncate block">
+                <div className="col-span-2 pt-1 border-t border-outline-variant/60">
+                  <span className="text-[10px] text-on-surface-variant block font-semibold">Registered Khatadars</span>
+                  <strong className="text-on-surface truncate block">
                     {p?.owners?.length ? p.owners.join(", ") : "—"}
                   </strong>
                 </div>
@@ -482,8 +476,8 @@ export default function GISMapExplorerPage() {
 
               {p?.land_record_id && (
                 <Link href={`/verification/${p.land_record_id}`} className="block">
-                  <Button className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs h-8 gap-1.5">
-                    <span>Inspect Human Verification Workspace</span>
+                  <Button className="w-full bg-primary text-on-primary text-xs h-8 gap-1.5 font-semibold">
+                    <span>Inspect Verification Workspace</span>
                     <ArrowRight className="w-3.5 h-3.5" />
                   </Button>
                 </Link>
@@ -492,8 +486,8 @@ export default function GISMapExplorerPage() {
           )}
 
           {/* Parcel Directory List */}
-          <div className="flex-1 overflow-y-auto p-2 space-y-1.5">
-            <div className="px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-[#5F6B7A] font-mono">
+          <div className="flex-1 overflow-y-auto p-2 space-y-1.5 custom-scrollbar">
+            <div className="px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">
               Parcels Directory ({filteredFeatures.length})
             </div>
 
@@ -504,24 +498,25 @@ export default function GISMapExplorerPage() {
                 <button
                   key={fp.parcel_id}
                   onClick={() => setSelectedParcel(feat)}
-                  className={`w-full text-left p-2.5 rounded-lg border transition-all ${
+                  className={`w-full text-left p-2.5 rounded-lg border transition-all cursor-pointer ${
                     isSelected
-                      ? "bg-teal-500/10 border-teal-500/40 text-white"
-                      : "bg-white/[0.02] border-white/[0.04] text-[#8B98AA] hover:bg-white/[0.05] hover:text-white"
+                      ? "bg-primary-container/10 border-primary text-primary font-semibold"
+                      : "bg-surface border-outline-variant text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface"
                   }`}
                 >
-                  <div className="flex items-center justify-between text-xs font-semibold">
+                  <div className="flex items-center justify-between text-xs font-bold">
                     <span>Survey {fp.survey_number}</span>
-                    <span className="text-[10px] font-mono">{fp.area_hectares} Ha</span>
+                    <span className="font-mono text-[10px]">{fp.area_hectares} Ha</span>
                   </div>
-                  <div className="text-[11px] text-[#5F6B7A] truncate mt-0.5">
+                  <div className="text-[11px] text-on-surface-variant truncate mt-0.5">
                     {fp.village}, {fp.district}
                   </div>
                 </button>
               );
             })}
           </div>
-        </div>
+
+        </aside>
       </div>
     </div>
   );

@@ -1,358 +1,243 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
-  AlertTriangle,
-  BarChart3,
-  Bot,
+  ChevronLeft,
   ChevronRight,
   Compass,
-  Database,
-  ExternalLink,
   FileCheck2,
   FileText,
-  FileUp,
   GitFork,
-  HelpCircle,
   History,
   Layers,
-  Lock,
   LogOut,
-  MapPin,
   Menu,
-  PanelLeftClose,
-  PanelLeftOpen,
-  Search,
-  Shield,
-  ShieldCheck,
+  Settings,
   Sparkles,
   User,
   X,
-  Zap
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 
 export function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
-  const { user, logout, isAuthenticated } = useAuth();
+  const { user, logout } = useAuth();
   const [isExpanded, setIsExpanded] = useState(false);
-  const [isHovered, setIsHovered] = useState(false);
-  const [searchModalOpen, setSearchModalOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  const sidebarRef = useRef<HTMLDivElement>(null);
+  const [isPinned, setIsPinned] = useState(false);
+  const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
 
-  // Hotkey listener for Cmd+K / Ctrl+K - must run unconditionally before any early returns
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
-        e.preventDefault();
-        setSearchModalOpen((prev) => !prev);
-      }
-      if (e.key === "Escape") {
-        setSearchModalOpen(false);
-      }
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, []);
-
-  // If on login or signup page, hide sidebar completely
-  if (pathname === "/login" || pathname === "/signup") {
+  // If on landing, login or signup page, do not render sidebar
+  if (pathname === "/" || pathname === "/login" || pathname === "/signup") {
     return null;
   }
 
   const isOwnerMode = user?.role === "OWNER" || pathname.startsWith("/owner");
 
-  // Owner Portal Navigation Items
-  const ownerNavItems = [
-    { name: "Overview", href: "/owner", icon: Layers, labelIndic: "अवलोकन" },
-    { name: "My Land", href: "/owner/properties", icon: MapPin, labelIndic: "मेरी भूमि" },
-    { name: "Land History", href: "/owner/history", icon: History, labelIndic: "वंशावली" },
-    { name: "Documents", href: "/owner/documents", icon: FileText, labelIndic: "दस्तावेज़" },
-    { name: "GIS Map", href: "/owner/gis", icon: Compass, labelIndic: "मानचित्र" },
-    { 
-      name: "Ask Land AI", 
-      href: "/copilot", 
-      icon: Sparkles, 
-      labelIndic: "सहायक",
-      badge: "AI" 
-    },
-  ];
+  const navItems = isOwnerMode
+    ? [
+        { name: "Dashboard", href: "/owner", icon: Layers, badge: null },
+        { name: "Land Records", href: "/owner/properties", icon: FileText, badge: null },
+        { name: "GIS Mapping", href: "/owner/gis", icon: Compass, badge: null },
+        { name: "Verifications", href: "/verification", icon: FileCheck2, badge: "2" },
+        { name: "Audit Ledger", href: "/owner/history", icon: History, badge: null },
+        { name: "AI Copilot", href: "/copilot", icon: Sparkles, badge: "AI" },
+      ]
+    : [
+        { name: "Dashboard", href: "/dashboard", icon: Layers, badge: null },
+        { name: "Land Records", href: "/upload", icon: FileText, badge: null },
+        { name: "GIS Mapping", href: "/gis", icon: Compass, badge: null },
+        { name: "Verifications", href: "/verification", icon: FileCheck2, badge: "3" },
+        { name: "Audit Ledger", href: "/audit", icon: History, badge: null },
+        { name: "AI Copilot", href: "/copilot", icon: Sparkles, badge: "AI" },
+      ];
 
-  // Government / Officer Navigation Items
-  const govtNavItems = [
-    { name: "Overview", href: "/", icon: Layers, labelIndic: "अवलोकन" },
-    { 
-      name: "Land Copilot", 
-      href: "/copilot", 
-      icon: Sparkles, 
-      labelIndic: "सहायक",
-      badge: "AI" 
-    },
-    { name: "Upload & Extract", href: "/upload", icon: FileUp, labelIndic: "दस्तावेज़" },
-    { name: "Dashboard", href: "/dashboard", icon: BarChart3, labelIndic: "डैशबोर्ड" },
-    { name: "Cadastral GIS", href: "/gis", icon: Compass, labelIndic: "मानचित्र" },
-    { 
-      name: "Intelligence", 
-      href: "/intelligence", 
-      icon: GitFork, 
-      labelIndic: "वंशावली",
-      badge: "NEW" 
-    },
-    { 
-      name: "Verification", 
-      href: "/verification", 
-      icon: FileCheck2, 
-      labelIndic: "सत्यापन",
-      badge: "3" 
-    },
-    { name: "Audit Trail", href: "/audit", icon: ShieldCheck, labelIndic: "ऑडिट" },
-  ];
+  const isActive = (path: string) => {
+    if (path === "/owner" && pathname === "/owner") return true;
+    if (path === "/dashboard" && pathname === "/dashboard") return true;
+    if (path !== "/owner" && path !== "/dashboard" && pathname.startsWith(path)) return true;
+    return false;
+  };
 
-  const currentNavItems = isOwnerMode ? ownerNavItems : govtNavItems;
-
-  const quickSearchRecords = isOwnerMode ? [
-    { title: "My Land Portfolio Overview", href: "/owner", type: "Portfolio" },
-    { title: "All Verified Properties List", href: "/owner/properties", type: "Land Vault" },
-    { title: "Chronological Title Lineage & History", href: "/owner/history", type: "History Timeline" },
-    { title: "Original Uploaded Deeds & Documents", href: "/owner/documents", type: "Documents" },
-    { title: "Personal Cadastral GIS Map", href: "/owner/gis", type: "GIS Map" },
-    { title: "Ask Land AI Copilot (Mistral DB Grounded)", href: "/copilot", type: "AI Chatbot" },
-  ] : [
-    { title: "Land AI Copilot (Mistral DB Grounded Chat)", href: "/copilot", type: "AI Chatbot" },
-    { title: "Survey No. 142/2A • Wagholi, Pune (Maharashtra)", href: "/verification/1", type: "Cadastral Record" },
-    { title: "Land Ownership Lineage Graph & Timeline (10 Acres Split)", href: "/intelligence", type: "Lineage Graph" },
-    { title: "Sale Deed • Guntur City, Andhra Pradesh (Telugu)", href: "/verification/4", type: "Deed Extract" },
-    { title: "Cadastral GIS Conflict Map (Survey 142)", href: "/gis", type: "Spatial Map" },
-    { title: "Upload New Multilingual Deed (Sarvam / Gemini)", href: "/upload", type: "Document Action" },
-    { title: "System Audit Logs & Security Events", href: "/audit", type: "Audit Log" },
-    { title: "FastAPI Interactive Swagger Specs", href: "http://localhost:8000/docs", isExternal: true, type: "API Docs" },
-  ];
-
-  const openState = isExpanded || isHovered;
-
-  const filteredSearchRecords = quickSearchRecords.filter(item =>
-    item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    item.type.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const showExpanded = isExpanded || isPinned;
 
   return (
     <>
-      {/* Search Modal (Cmd+K) */}
-      {searchModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-start justify-center pt-20 bg-black/70 backdrop-blur-sm p-4 animate-in fade-in duration-150">
-          <div className="relative w-full max-w-xl bg-slate-900 border border-slate-700/80 rounded-2xl shadow-2xl overflow-hidden">
-            <div className="flex items-center px-4 py-3.5 border-b border-slate-800 bg-slate-950/60">
-              <Search className="h-5 w-5 text-indigo-400 mr-3 shrink-0" />
-              <input
-                type="text"
-                autoFocus
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search survey numbers, deeds, owners, or navigation..."
-                className="w-full bg-transparent text-sm text-slate-100 placeholder-slate-500 focus:outline-none"
-              />
-              <button
-                onClick={() => setSearchModalOpen(false)}
-                className="p-1 text-slate-400 hover:text-slate-200 rounded-lg hover:bg-slate-800 text-xs"
-              >
-                <kbd className="px-1.5 py-0.5 bg-slate-800 border border-slate-700 rounded text-[10px] text-slate-400">ESC</kbd>
-              </button>
-            </div>
-            
-            <div className="max-h-80 overflow-y-auto p-2 divide-y divide-slate-800/40">
-              <div className="px-2 py-1.5 text-[10px] font-semibold tracking-wider text-slate-400 uppercase">
-                {isOwnerMode ? "Owner Land Vault Quick Access" : "Authoritative Cadastral Records & Actions"}
-              </div>
-              {filteredSearchRecords.map((item, idx) => (
-                <div
-                  key={idx}
-                  onClick={() => {
-                    setSearchModalOpen(false);
-                    if (item.isExternal) {
-                      window.open(item.href, "_blank");
-                    } else {
-                      router.push(item.href);
-                    }
-                  }}
-                  className="flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-800/80 cursor-pointer transition-colors group"
-                >
-                  <div className="flex items-center gap-2.5">
-                    <div className="h-7 w-7 rounded-lg bg-slate-800 flex items-center justify-center text-slate-400 group-hover:text-indigo-400 group-hover:bg-indigo-950/40 transition-colors">
-                      <MapPin className="h-3.5 w-3.5" />
-                    </div>
-                    <div>
-                      <div className="text-xs font-medium text-slate-200 group-hover:text-white">
-                        {item.title}
-                      </div>
-                      <div className="text-[10px] text-slate-500">{item.type}</div>
-                    </div>
-                  </div>
-                  <ChevronRight className="h-4 w-4 text-slate-600 group-hover:text-slate-300 transition-transform group-hover:translate-x-0.5" />
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Floating Desktop Sidebar */}
+      {/* Desktop Expandable Sidebar (High Z-Index, Floats Over Canvas Without Resizing Page) */}
       <aside
-        ref={sidebarRef}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
-        className={`fixed top-0 left-0 h-full z-40 flex flex-col bg-slate-950/95 border-r border-slate-800/90 backdrop-blur-xl transition-all duration-300 ease-in-out shadow-2xl ${
-          openState ? "w-64" : "w-[68px]"
+        onMouseEnter={() => setIsExpanded(true)}
+        onMouseLeave={() => {
+          if (!isPinned) setIsExpanded(false);
+        }}
+        className={`hidden md:flex bg-surface fixed left-0 top-0 h-full border-r border-outline-variant transition-all duration-300 ease-in-out flex-col py-4 z-50 select-none ${
+          showExpanded
+            ? "w-[260px] shadow-[0_16px_40px_rgba(0,0,0,0.18)] backdrop-blur-xl bg-surface/98"
+            : "w-[72px] shadow-sm bg-surface"
         }`}
       >
         {/* Brand Header */}
-        <div className="flex items-center justify-between h-16 px-4 border-b border-slate-800/80">
-          <Link href={isOwnerMode ? "/owner" : "/"} className="flex items-center gap-3 overflow-hidden">
-            <div className={`h-9 w-9 shrink-0 rounded-xl flex items-center justify-center text-white shadow-md ${
-              isOwnerMode
-                ? "bg-gradient-to-br from-emerald-500 to-teal-600 shadow-emerald-500/20"
-                : "bg-gradient-to-br from-indigo-500 to-purple-600 shadow-indigo-500/20"
-            }`}>
-              {isOwnerMode ? <MapPin className="h-5 w-5" /> : <Sparkles className="h-5 w-5" />}
+        <div className="px-3.5 mb-5 flex items-center justify-between">
+          <Link
+            href={isOwnerMode ? "/owner" : "/dashboard"}
+            className="flex items-center gap-3 overflow-hidden"
+          >
+            <div className="w-10 h-10 rounded-xl bg-primary-container flex-shrink-0 flex items-center justify-center text-on-primary-container shadow-sm">
+              <span className="font-bold text-lg text-white font-mono">L</span>
             </div>
-            {openState && (
-              <div className="flex flex-col min-w-0">
-                <div className="flex items-center gap-1.5">
-                  <span className="font-bold text-sm text-white tracking-tight">LAND AI</span>
-                  <span className="text-[10px] font-medium text-indigo-400 bg-indigo-500/10 px-1 py-0.2 rounded border border-indigo-500/30">
-                    {isOwnerMode ? "Vault" : "इंडी-भूमि"}
-                  </span>
-                </div>
-                <span className="text-[10px] text-slate-400 truncate">
-                  {isOwnerMode ? "Owner Intelligence Portal" : "Land Records & GIS"}
-                </span>
+            {showExpanded && (
+              <div className="min-w-0 transition-opacity duration-200">
+                <h1 className="text-base font-extrabold text-primary tracking-tight leading-tight truncate">
+                  LAND AI
+                </h1>
+                <p className="text-[10px] font-bold text-on-surface-variant leading-none truncate">
+                  इंडी-भूमि
+                </p>
               </div>
             )}
           </Link>
 
-          {openState && (
+          {/* Pin/Collapse Toggle Button */}
+          {showExpanded && (
             <button
-              onClick={() => setIsExpanded(!isExpanded)}
-              className="text-slate-400 hover:text-slate-200 p-1 rounded-lg hover:bg-slate-800 transition-colors"
-              title={isExpanded ? "Collapse Sidebar" : "Pin Sidebar"}
+              onClick={() => setIsPinned(!isPinned)}
+              className="p-1 rounded-md text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors cursor-pointer"
+              title={isPinned ? "Unpin sidebar" : "Pin sidebar expanded"}
             >
-              {isExpanded ? <PanelLeftClose className="h-4 w-4" /> : <PanelLeftOpen className="h-4 w-4" />}
+              {isPinned ? <ChevronLeft className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
             </button>
           )}
         </div>
 
-        {/* Quick Search Button */}
-        <div className="px-3 py-3">
-          <button
-            onClick={() => setSearchModalOpen(true)}
-            className={`w-full flex items-center gap-3 px-2.5 py-2 rounded-xl bg-slate-900/90 border border-slate-800 hover:border-slate-700 text-slate-400 hover:text-slate-200 text-xs transition-all group ${
-              !openState ? "justify-center px-0" : ""
-            }`}
-          >
-            <Search className="h-4 w-4 shrink-0 text-slate-400 group-hover:text-indigo-400" />
-            {openState && (
-              <div className="flex items-center justify-between w-full">
-                <span className="truncate">{isOwnerMode ? "Search My Land..." : "Quick Search..."}</span>
-                <kbd className="px-1.5 py-0.5 bg-slate-800 border border-slate-700 rounded text-[9px] text-slate-400">⌘K</kbd>
-              </div>
-            )}
-          </button>
+        {/* Quick CTA Button */}
+        <div className="px-3 mb-4">
+          <Link href="/upload">
+            <button
+              className={`w-full bg-primary text-on-primary rounded-xl font-bold text-xs hover:bg-primary/90 transition-all shadow-sm flex items-center justify-center cursor-pointer ${
+                showExpanded ? "py-2.5 px-3 gap-2" : "py-2.5 px-0"
+              }`}
+              title="Verify Record"
+            >
+              <FileCheck2 className="h-4 w-4 shrink-0" />
+              {showExpanded && <span className="truncate">Verify Record</span>}
+            </button>
+          </Link>
         </div>
 
-        {/* Primary Navigation */}
-        <nav className="flex-1 px-3 space-y-1.5 overflow-y-auto">
-          {currentNavItems.map((item) => {
+        {/* Navigation Items */}
+        <nav className="flex-1 px-2 space-y-1 overflow-y-auto custom-scrollbar">
+          {navItems.map((item) => {
             const Icon = item.icon;
-            const isActive = pathname === item.href;
+            const active = isActive(item.href);
 
             return (
               <Link
-                key={item.href}
+                key={item.name}
                 href={item.href}
-                className={`flex items-center gap-3.5 px-3 py-2.5 rounded-xl text-xs font-medium transition-all group relative ${
-                  isActive
-                    ? isOwnerMode
-                      ? "bg-emerald-600/20 text-emerald-300 border border-emerald-500/30 shadow-sm"
-                      : "bg-indigo-600/20 text-indigo-300 border border-indigo-500/30 shadow-sm"
-                    : "text-slate-400 hover:text-slate-100 hover:bg-slate-900/60 border border-transparent"
-                } ${!openState ? "justify-center px-0" : ""}`}
+                className={`flex items-center justify-between rounded-xl text-xs font-semibold transition-all relative group cursor-pointer ${
+                  showExpanded ? "px-3 py-2.5" : "px-0 py-2.5 justify-center"
+                } ${
+                  active
+                    ? "bg-primary text-on-primary shadow-sm font-bold"
+                    : "text-on-surface-variant hover:text-primary hover:bg-surface-container-high"
+                }`}
+                title={!showExpanded ? item.name : undefined}
               >
-                <Icon className={`h-4 w-4 shrink-0 ${
-                  isActive
-                    ? isOwnerMode ? "text-emerald-400" : "text-indigo-400"
-                    : "text-slate-400 group-hover:text-slate-200"
-                }`} />
+                <div className={`flex items-center gap-3 ${!showExpanded ? "justify-center" : ""}`}>
+                  <Icon className={`h-4 w-4 shrink-0 ${active ? "text-on-primary" : "text-on-surface-variant group-hover:text-primary"}`} />
+                  {showExpanded && <span className="truncate">{item.name}</span>}
+                </div>
 
-                {openState && (
-                  <div className="flex items-center justify-between w-full min-w-0">
-                    <div className="flex items-center gap-1.5 truncate">
-                      <span className="truncate">{item.name}</span>
-                      <span className="text-[10px] text-slate-500 font-normal">({item.labelIndic})</span>
-                    </div>
-
-                    {item.badge && (
-                      <span className={`px-1.5 py-0.2 rounded text-[9px] font-bold ${
-                        item.badge === "AI"
-                          ? "bg-purple-500/20 text-purple-300 border border-purple-500/40"
-                          : "bg-indigo-500/20 text-indigo-300 border border-indigo-500/40"
-                      }`}>
-                        {item.badge}
-                      </span>
-                    )}
-                  </div>
+                {showExpanded && item.badge && (
+                  <span
+                    className={`px-1.5 py-0.2 rounded text-[9px] font-bold shrink-0 ${
+                      active
+                        ? "bg-white/20 text-white"
+                        : item.badge === "AI"
+                        ? "bg-[#E0E7FF] text-[#4338CA] border border-[#A5B4FC]"
+                        : "bg-[#FFEDD5] text-[#C2410C] border border-[#FDBA74]"
+                    }`}
+                  >
+                    {item.badge}
+                  </span>
                 )}
               </Link>
             );
           })}
         </nav>
 
-        {/* Portal Switcher & User Profile */}
-        <div className="p-3 border-t border-slate-800/80 space-y-2">
-          
-          {/* Switch Portal Quick Link */}
-          {openState && (
-            <div className="px-2 py-1">
-              <Link
-                href={isOwnerMode ? "/dashboard" : "/owner"}
-                className="flex items-center justify-between text-[11px] text-slate-400 hover:text-white p-2 rounded-lg bg-slate-900/60 border border-slate-800/60 transition-colors"
-              >
-                <span>{isOwnerMode ? "🏛️ Switch to Govt Command" : "👤 Switch to Owner Vault"}</span>
-                <ChevronRight className="h-3 w-3 text-slate-500" />
-              </Link>
-            </div>
+        {/* Bottom Actions & User Profile */}
+        <div className="px-2 mt-auto pt-3 border-t border-outline-variant space-y-2">
+          {/* Quick Portal Switcher */}
+          {showExpanded ? (
+            <Link
+              href={isOwnerMode ? "/dashboard" : "/owner"}
+              className="flex items-center justify-between text-[11px] font-semibold text-on-surface-variant hover:text-primary p-2 rounded-lg bg-surface-container-low hover:bg-surface-container transition-colors border border-outline-variant/60"
+            >
+              <span>{isOwnerMode ? "🏛️ Govt Command" : "👤 Owner Vault"}</span>
+              <ChevronRight className="h-3 w-3" />
+            </Link>
+          ) : (
+            <Link
+              href={isOwnerMode ? "/dashboard" : "/owner"}
+              className="flex items-center justify-center p-2 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface-variant hover:text-primary transition-colors border border-outline-variant/60"
+              title={isOwnerMode ? "Switch to Govt Command" : "Switch to Owner Vault"}
+            >
+              <span className="text-xs">{isOwnerMode ? "🏛️" : "👤"}</span>
+            </Link>
           )}
 
+          {/* Supporting Links */}
+          <div className="space-y-0.5">
+            <Link
+              href="/intelligence"
+              className={`flex items-center gap-3 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container-high text-xs transition-colors ${
+                showExpanded ? "px-3 py-1.5" : "py-2 justify-center"
+              }`}
+              title="Lineage Intelligence"
+            >
+              <GitFork className="h-3.5 w-3.5 shrink-0" />
+              {showExpanded && <span className="truncate">Lineage Intelligence</span>}
+            </Link>
+            <Link
+              href="/audit"
+              className={`flex items-center gap-3 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container-high text-xs transition-colors ${
+                showExpanded ? "px-3 py-1.5" : "py-2 justify-center"
+              }`}
+              title="Audit & Compliance"
+            >
+              <Settings className="h-3.5 w-3.5 shrink-0" />
+              {showExpanded && <span className="truncate">Audit & Compliance</span>}
+            </Link>
+          </div>
+
           {/* User Profile Pill */}
-          <div className={`flex items-center gap-2.5 p-2 rounded-xl bg-slate-900 border border-slate-800/80 ${
-            !openState ? "justify-center p-2" : ""
-          }`}>
-            <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-slate-800 to-slate-700 border border-slate-600/50 flex items-center justify-center text-white shrink-0">
-              <User className="h-4 w-4" />
-            </div>
-
-            {openState && (
-              <div className="flex-1 min-w-0">
-                <div className="text-xs font-semibold text-white truncate">
-                  {user?.full_name || "Nishu Kumar"}
-                </div>
-                <div className="text-[10px] text-slate-400 truncate flex items-center gap-1">
-                  {isOwnerMode ? (
-                    <span className="text-emerald-400 font-medium">Land Owner</span>
-                  ) : (
-                    <span className="text-indigo-400 font-medium">Revenue Officer</span>
-                  )}
-                </div>
+          <div
+            className={`rounded-xl bg-surface-container-low border border-outline-variant flex items-center transition-all ${
+              showExpanded ? "p-2 justify-between" : "p-1.5 justify-center"
+            }`}
+          >
+            <div className="flex items-center gap-2 min-w-0">
+              <div className="w-7 h-7 rounded-full bg-primary text-on-primary font-bold text-xs flex items-center justify-center shrink-0">
+                {user?.full_name ? user.full_name.charAt(0) : "N"}
               </div>
-            )}
-
-            {openState && (
+              {showExpanded && (
+                <div className="min-w-0">
+                  <div className="text-xs font-bold text-on-surface truncate">
+                    {user?.full_name || "Nishu Kumar"}
+                  </div>
+                  <div className="text-[10px] text-on-surface-variant truncate">
+                    {isOwnerMode ? "Land Owner" : "Revenue Officer"}
+                  </div>
+                </div>
+              )}
+            </div>
+            {showExpanded && (
               <button
                 onClick={logout}
                 title="Sign Out"
-                className="p-1.5 text-slate-400 hover:text-rose-400 hover:bg-slate-800 rounded-lg transition-colors"
+                className="p-1 text-on-surface-variant hover:text-error hover:bg-surface-container rounded transition-colors cursor-pointer"
               >
                 <LogOut className="h-3.5 w-3.5" />
               </button>
@@ -360,6 +245,75 @@ export function Sidebar() {
           </div>
         </div>
       </aside>
+
+      {/* Mobile Drawer */}
+      {mobileDrawerOpen && (
+        <div
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] md:hidden"
+          onClick={() => setMobileDrawerOpen(false)}
+        >
+          <div
+            className="w-[270px] bg-surface h-full p-4 flex flex-col justify-between shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div>
+              <div className="flex items-center justify-between pb-4 border-b border-outline-variant mb-4">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-xl bg-primary-container flex items-center justify-center text-white font-bold">
+                    L
+                  </div>
+                  <div>
+                    <span className="font-bold text-sm text-primary">LAND AI</span>
+                    <span className="text-[10px] text-on-surface-variant block font-semibold">इंडी-भूमि</span>
+                  </div>
+                </div>
+                <button onClick={() => setMobileDrawerOpen(false)} className="p-1 text-on-surface-variant">
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+
+              <nav className="space-y-1">
+                {navItems.map((item) => {
+                  const Icon = item.icon;
+                  const active = isActive(item.href);
+                  return (
+                    <Link
+                      key={item.name}
+                      href={item.href}
+                      onClick={() => setMobileDrawerOpen(false)}
+                      className={`flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold ${
+                        active
+                          ? "bg-primary text-on-primary font-bold"
+                          : "text-on-surface-variant hover:bg-surface-container"
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <Icon className="h-4 w-4" />
+                        <span>{item.name}</span>
+                      </div>
+                      {item.badge && (
+                        <span className="px-1.5 py-0.2 rounded text-[9px] bg-surface-container-high border border-outline-variant font-bold">
+                          {item.badge}
+                        </span>
+                      )}
+                    </Link>
+                  );
+                })}
+              </nav>
+            </div>
+
+            <div className="pt-4 border-t border-outline-variant">
+              <button
+                onClick={logout}
+                className="w-full flex items-center justify-center gap-2 py-2 text-xs font-bold text-error hover:bg-error-container/20 rounded-lg transition-colors"
+              >
+                <LogOut className="h-4 w-4" />
+                <span>Sign Out</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

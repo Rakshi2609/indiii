@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>LAND AI - Command Center</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "surface-variant": "#e1e3dd",
+                      "on-tertiary-fixed": "#3c0613",
+                      "secondary-fixed-dim": "#c5c7c3",
+                      "surface-dim": "#d8dbd5",
+                      "secondary-container": "#dee0dc",
+                      "on-secondary-fixed": "#191c1a",
+                      "on-primary-fixed-variant": "#12512c",
+                      "on-primary-container": "#87c695",
+                      "on-error-container": "#93000a",
+                      "outline": "#717970",
+                      "on-secondary-fixed-variant": "#444845",
+                      "on-secondary-container": "#606360",
+                      "surface-bright": "#f8faf4",
+                      "inverse-on-surface": "#eff2eb",
+                      "secondary": "#5c5f5c",
+                      "on-background": "#191c19",
+                      "tertiary-fixed": "#ffd9dc",
+                      "surface-container-lowest": "#ffffff",
+                      "on-tertiary-container": "#f79eaa",
+                      "surface": "#f8faf4",
+                      "on-tertiary-fixed-variant": "#73323d",
+                      "on-surface-variant": "#404941",
+                      "error-container": "#ffdad6",
+                      "background": "#f8faf4",
+                      "inverse-surface": "#2e312d",
+                      "outline-variant": "#c0c9be",
+                      "surface-container": "#ecefe9",
+                      "on-error": "#ffffff",
+                      "primary-fixed-dim": "#96d5a3",
+                      "on-tertiary": "#ffffff",
+                      "inverse-primary": "#96d5a3",
+                      "on-surface": "#191c19",
+                      "tertiary": "#591d28",
+                      "surface-container-low": "#f2f4ee",
+                      "tertiary-fixed-dim": "#ffb2bb",
+                      "primary-container": "#14532d",
+                      "secondary-fixed": "#e1e3df",
+                      "primary": "#003b1b",
+                      "on-secondary": "#ffffff",
+                      "primary-fixed": "#b1f2be",
+                      "tertiary-container": "#75333e",
+                      "surface-container-high": "#e7e9e3",
+                      "surface-tint": "#2e6a41",
+                      "error": "#ba1a1a",
+                      "surface-container-highest": "#e1e3dd",
+                      "on-primary-fixed": "#00210d",
+                      "on-primary": "#ffffff"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.125rem",
+                      "lg": "0.25rem",
+                      "xl": "0.5rem",
+                      "full": "0.75rem"
+              },
+              "spacing": {
+                      "unit-md": "16px",
+                      "sidebar-width": "250px",
+                      "container-margin": "24px",
+                      "unit-lg": "24px",
+                      "gutter": "16px",
+                      "topbar-height": "64px",
+                      "unit-xs": "4px",
+                      "unit-xl": "32px",
+                      "unit-sm": "8px"
+              },
+              "fontFamily": {
+                      "label-md": [
+                              "Manrope"
+                      ],
+                      "display-lg": [
+                              "Manrope"
+                      ],
+                      "headline-lg": [
+                              "Manrope"
+                      ],
+                      "body-md": [
+                              "Manrope"
+                      ],
+                      "headline-lg-mobile": [
+                              "Manrope"
+                      ],
+                      "headline-sm": [
+                              "Manrope"
+                      ],
+                      "headline-md": [
+                              "Manrope"
+                      ],
+                      "body-lg": [
+                              "Manrope"
+                      ],
+                      "title-lg": [
+                              "Manrope"
+                      ],
+                      "label-sm": [
+                              "Manrope"
+                      ]
+              },
+              "fontSize": {
+                      "label-md": [
+                              "12px",
+                              {
+                                      "lineHeight": "16px",
+                                      "letterSpacing": "0.02em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "display-lg": [
+                              "48px",
+                              {
+                                      "lineHeight": "56px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "headline-lg": [
+                              "32px",
+                              {
+                                      "lineHeight": "40px",
+                                      "letterSpacing": "-0.01em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "body-md": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "headline-lg-mobile": [
+                              "28px",
+                              {
+                                      "lineHeight": "36px",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "headline-sm": [
+                              "20px",
+                              {
+                                      "lineHeight": "28px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "headline-md": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "body-lg": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "title-lg": [
+                              "18px",
+                              {
+                                      "lineHeight": "26px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "label-sm": [
+                              "10px",
+                              {
+                                      "lineHeight": "14px",
+                                      "letterSpacing": "0.05em",
+                                      "fontWeight": "700"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+    </script>
+</head>
+<body class="bg-background text-on-background font-body-md min-h-screen flex antialiased">
+<!-- SideNavBar -->
+<nav class="bg-surface dark:bg-inverse-surface w-[250px] h-full fixed left-0 top-0 border-r border-outline-variant dark:border-outline shadow-sm flex flex-col h-screen py-unit-lg z-50">
+<div class="px-unit-md mb-8 flex items-center gap-3">
+<img alt="LAND AI Logo" class="w-10 h-10 object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAJC_iuQSS2N5cVKCazp-4-98YFt-eSA3LTVJjhdqc9zA-f3ttgk_hPMrP0im6wpfGRZh60GcXjJRRqLG8kbJOn8-CAN9T-lsU3IWM_lTUsaTKsJjzYIyNBRYzPuzak0mBpTrLoA-g14dOgGVpL784HD38N13QYn4_7OFeAjS-73ztizQ-vkLJZvpiLN2OgWLzI7ABnYoQ0idURHyyl6Dj1e3fyto3ZkopHtN71tlGbbYlhClrPoO3LeQ"/>
+<div>
+<h1 class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed">LAND AI</h1>
+<p class="font-label-md text-label-md text-on-surface-variant">इंडी-भूमि</p>
+</div>
+</div>
+<div class="flex-1 px-unit-sm space-y-1">
+<a class="flex items-center gap-3 px-3 py-2 rounded-DEFAULT text-primary dark:text-primary-fixed-dim font-bold border-l-4 border-primary dark:border-primary-fixed-dim bg-primary-container/10" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">dashboard</span>
+<span class="font-label-md text-label-md">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-DEFAULT text-on-surface-variant dark:text-surface-variant hover:text-primary hover:bg-surface-container-high dark:hover:bg-surface-container-highest transition-colors" href="#">
+<span class="material-symbols-outlined">description</span>
+<span class="font-label-md text-label-md">Land Records</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-DEFAULT text-on-surface-variant dark:text-surface-variant hover:text-primary hover:bg-surface-container-high dark:hover:bg-surface-container-highest transition-colors" href="#">
+<span class="material-symbols-outlined">map</span>
+<span class="font-label-md text-label-md">GIS Mapping</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-DEFAULT text-on-surface-variant dark:text-surface-variant hover:text-primary hover:bg-surface-container-high dark:hover:bg-surface-container-highest transition-colors" href="#">
+<span class="material-symbols-outlined">fact_check</span>
+<span class="font-label-md text-label-md">Verifications</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-DEFAULT text-on-surface-variant dark:text-surface-variant hover:text-primary hover:bg-surface-container-high dark:hover:bg-surface-container-highest transition-colors" href="#">
+<span class="material-symbols-outlined">history_edu</span>
+<span class="font-label-md text-label-md">Audit Ledger</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-DEFAULT text-on-surface-variant dark:text-surface-variant hover:text-primary hover:bg-surface-container-high dark:hover:bg-surface-container-highest transition-colors" href="#">
+<span class="material-symbols-outlined">smart_toy</span>
+<span class="font-label-md text-label-md">AI Copilot</span>
+</a>
+</div>
+<div class="px-unit-md mt-auto space-y-4">
+<button class="w-full bg-primary text-on-primary py-2 rounded-DEFAULT font-label-md text-label-md font-semibold hover:bg-surface-tint transition-colors">Verify Record</button>
+<div class="space-y-1">
+<a class="flex items-center gap-3 px-3 py-2 rounded-DEFAULT text-on-surface-variant dark:text-surface-variant hover:text-primary hover:bg-surface-container-high dark:hover:bg-surface-container-highest transition-colors" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-label-md text-label-md">Settings</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-DEFAULT text-on-surface-variant dark:text-surface-variant hover:text-primary hover:bg-surface-container-high dark:hover:bg-surface-container-highest transition-colors" href="#">
+<span class="material-symbols-outlined">help</span>
+<span class="font-label-md text-label-md">Support</span>
+</a>
+</div>
+</div>
+</nav>
+<!-- TopNavBar -->
+<header class="bg-surface/95 dark:bg-inverse-surface/95 h-[64px] fixed top-0 right-0 left-[250px] z-40 border-b border-outline-variant dark:border-outline backdrop-blur-md shadow-sm flex items-center justify-between px-unit-lg w-[calc(100%-250px)]">
+<div class="flex items-center gap-8 h-full">
+<nav class="hidden md:flex items-center gap-6 h-full">
+<a class="h-full flex items-center text-primary dark:text-primary-fixed border-b-2 border-primary font-semibold font-label-md text-label-md transition-all" href="#">Explorer</a>
+<a class="h-full flex items-center text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-primary-fixed-dim font-label-md text-label-md transition-all" href="#">District View</a>
+<a class="h-full flex items-center text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-primary-fixed-dim font-label-md text-label-md transition-all" href="#">State Stats</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<button class="bg-primary-container text-on-primary-container px-4 py-1.5 rounded-full font-label-md text-label-md hover:bg-surface-tint hover:text-on-primary transition-colors">Officer Portal</button>
+<div class="flex items-center gap-2 text-on-surface-variant">
+<button class="p-1 hover:text-primary transition-colors"><span class="material-symbols-outlined">notifications</span></button>
+<button class="p-1 hover:text-primary transition-colors"><span class="material-symbols-outlined">find_replace</span></button>
+</div>
+<div class="w-8 h-8 rounded-full bg-surface-container-highest border border-outline-variant overflow-hidden">
+<img alt="User profile" class="w-full h-full object-cover" data-alt="A small, professional avatar portrait of a government official, neutral lighting, corporate aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAtIk6v6yLomPrxnvFTXeo5WKo7zIW9kqyRT3Q4UwHYGW1l2QG2JW5OM2bZazxgIIPgh_X_1ws3BSkK3rcjqv_hNMARV8PF9tHifJKIM1oefvNj4R1zuz6NWUbXKByvu4p-E0MeY3wOD3uZbayD6KYLeoUH3dTM9rWvV1vrf0orREqY-ZSQVfCFc8HKYOdy6CEQuGy8sKGWKhGyPsgienuKMM_17ZNljhdDdUgSMNaqt8XMfgmsAMWRNQ"/>
+</div>
+</div>
+</header>
+<!-- Main Canvas -->
+<main class="ml-[250px] mt-[64px] p-container-margin w-full bg-surface-container-lowest min-h-[calc(100vh-64px)] overflow-y-auto">
+<!-- Header -->
+<div class="mb-unit-xl">
+<div class="flex items-center gap-2 text-label-md font-label-md text-on-surface-variant mb-2">
+<span>Command Center</span>
+<span class="material-symbols-outlined text-[16px]">chevron_right</span>
+<span class="text-primary font-semibold">Overview</span>
+</div>
+<h2 class="font-headline-lg text-headline-lg text-on-surface font-bold">Land Intelligence Command Center</h2>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1">National / State / District land-record verification overview.</p>
+</div>
+<!-- Metrics Row -->
+<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-unit-md mb-unit-xl">
+<!-- Metric 1 -->
+<div class="bg-surface p-unit-md rounded-lg border border-outline-variant shadow-sm hover:shadow-md transition-shadow">
+<div class="flex items-center justify-between mb-2">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Documents Processed</span>
+<span class="material-symbols-outlined text-outline text-[20px]">description</span>
+</div>
+<div class="font-headline-md text-headline-md text-on-surface font-bold">1.2M</div>
+<div class="mt-2 text-primary font-label-sm text-label-sm flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">trending_up</span> +12% this week
+                </div>
+</div>
+<!-- Metric 2 -->
+<div class="bg-surface p-unit-md rounded-lg border border-outline-variant shadow-sm hover:shadow-md transition-shadow">
+<div class="flex items-center justify-between mb-2">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Pending Verification</span>
+<span class="material-symbols-outlined text-outline text-[20px]">pending_actions</span>
+</div>
+<div class="font-headline-md text-headline-md text-on-surface font-bold">45,230</div>
+<div class="mt-2 text-on-surface-variant font-label-sm text-label-sm">Requires Officer Review</div>
+</div>
+<!-- Metric 3 -->
+<div class="bg-surface p-unit-md rounded-lg border border-outline-variant shadow-sm hover:shadow-md transition-shadow relative overflow-hidden">
+<div class="absolute top-0 right-0 w-16 h-16 bg-error/10 rounded-bl-full -z-10"></div>
+<div class="flex items-center justify-between mb-2">
+<span class="font-label-sm text-label-sm text-error uppercase tracking-wider font-bold">Spatial Conflicts</span>
+<span class="material-symbols-outlined text-error text-[20px]">map</span>
+</div>
+<div class="font-headline-md text-headline-md text-on-surface font-bold">8,401</div>
+<div class="mt-2 text-error font-label-sm text-label-sm flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">warning</span> Critical Action Req.
+                </div>
+</div>
+<!-- Metric 4 -->
+<div class="bg-surface p-unit-md rounded-lg border border-outline-variant shadow-sm hover:shadow-md transition-shadow relative overflow-hidden">
+<div class="absolute top-0 right-0 w-16 h-16 bg-error/10 rounded-bl-full -z-10"></div>
+<div class="flex items-center justify-between mb-2">
+<span class="font-label-sm text-label-sm text-error uppercase tracking-wider font-bold">Title Conflicts</span>
+<span class="material-symbols-outlined text-error text-[20px]">gavel</span>
+</div>
+<div class="font-headline-md text-headline-md text-on-surface font-bold">2,150</div>
+<div class="mt-2 text-error font-label-sm text-label-sm flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">warning</span> Legal Review Req.
+                </div>
+</div>
+<!-- Metric 5 -->
+<div class="bg-surface p-unit-md rounded-lg border border-outline-variant shadow-sm hover:shadow-md transition-shadow relative overflow-hidden">
+<div class="absolute top-0 right-0 w-16 h-16 bg-[#F59E0B]/10 rounded-bl-full -z-10"></div>
+<div class="flex items-center justify-between mb-2">
+<span class="font-label-sm text-label-sm text-[#F59E0B] uppercase tracking-wider font-bold">AI Low Confidence</span>
+<span class="material-symbols-outlined text-[#F59E0B] text-[20px]">smart_toy</span>
+</div>
+<div class="font-headline-md text-headline-md text-on-surface font-bold">12,890</div>
+<div class="mt-2 text-[#F59E0B] font-label-sm text-label-sm flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">info</span> Manual Audit Needed
+                </div>
+</div>
+<!-- Metric 6 -->
+<div class="bg-surface p-unit-md rounded-lg border border-outline-variant shadow-sm hover:shadow-md transition-shadow">
+<div class="flex items-center justify-between mb-2">
+<span class="font-label-sm text-label-sm text-primary uppercase tracking-wider font-bold">Verified Records</span>
+<span class="material-symbols-outlined text-primary text-[20px]">verified</span>
+</div>
+<div class="font-headline-md text-headline-md text-on-surface font-bold">894K</div>
+<div class="mt-2 text-primary font-label-sm text-label-sm flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">check_circle</span> Fully Validated
+                </div>
+</div>
+</div>
+<!-- Main Bento Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-unit-md">
+<!-- Left Column: Critical Queue & Processing Activity -->
+<div class="lg:col-span-1 space-y-unit-md flex flex-col">
+<!-- Critical Verification Queue -->
+<div class="bg-surface rounded-xl border border-outline-variant shadow-sm flex-1 flex flex-col overflow-hidden">
+<div class="p-unit-md border-b border-outline-variant flex justify-between items-center bg-surface-container-low">
+<h3 class="font-headline-sm text-headline-sm text-on-surface font-semibold flex items-center gap-2">
+<span class="material-symbols-outlined text-error">priority_high</span> Critical Queue
+                        </h3>
+<button class="text-primary font-label-md text-label-md hover:underline">View All</button>
+</div>
+<div class="p-unit-sm flex-1 overflow-y-auto max-h-[300px]">
+<!-- Queue Item 1 -->
+<div class="p-unit-sm hover:bg-surface-container-low rounded-lg cursor-pointer transition-colors border-b border-outline-variant last:border-0">
+<div class="flex justify-between items-start mb-1">
+<span class="font-label-md text-label-md font-bold text-on-surface">Survey #402/A</span>
+<span class="bg-error/10 text-error px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border border-error/20">Title Conflict</span>
+</div>
+<div class="text-body-md font-body-md text-on-surface-variant text-sm truncate">Owner mismatch detected in legacy record.</div>
+<div class="text-label-sm font-label-sm text-outline mt-2 flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px]">schedule</span> 2 hrs ago • District 12
+                            </div>
+</div>
+<!-- Queue Item 2 -->
+<div class="p-unit-sm hover:bg-surface-container-low rounded-lg cursor-pointer transition-colors border-b border-outline-variant last:border-0">
+<div class="flex justify-between items-start mb-1">
+<span class="font-label-md text-label-md font-bold text-on-surface">Survey #118/B</span>
+<span class="bg-error/10 text-error px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border border-error/20">Spatial Conflict</span>
+</div>
+<div class="text-body-md font-body-md text-on-surface-variant text-sm truncate">Boundary overlap with adjacent parcel.</div>
+<div class="text-label-sm font-label-sm text-outline mt-2 flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px]">schedule</span> 4 hrs ago • District 08
+                            </div>
+</div>
+<!-- Queue Item 3 -->
+<div class="p-unit-sm hover:bg-surface-container-low rounded-lg cursor-pointer transition-colors border-b border-outline-variant last:border-0">
+<div class="flex justify-between items-start mb-1">
+<span class="font-label-md text-label-md font-bold text-on-surface">Survey #992/C</span>
+<span class="bg-[#F59E0B]/10 text-[#F59E0B] px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border border-[#F59E0B]/20">Low Confidence</span>
+</div>
+<div class="text-body-md font-body-md text-on-surface-variant text-sm truncate">Illegible handwriting in source document.</div>
+<div class="text-label-sm font-label-sm text-outline mt-2 flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px]">schedule</span> 5 hrs ago • District 15
+                            </div>
+</div>
+</div>
+</div>
+<!-- Processing Activity -->
+<div class="bg-surface rounded-xl border border-outline-variant shadow-sm h-64 flex flex-col overflow-hidden">
+<div class="p-unit-md border-b border-outline-variant bg-surface-container-low flex justify-between items-center">
+<h3 class="font-headline-sm text-headline-sm text-on-surface font-semibold flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">data_usage</span> Live Processing
+                        </h3>
+<span class="flex h-2 w-2 relative">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+</span>
+</div>
+<div class="p-unit-md flex-1 overflow-y-auto space-y-3 relative">
+<!-- Timeline Line -->
+<div class="absolute left-[27px] top-6 bottom-4 w-px bg-outline-variant"></div>
+<!-- Activity 1 -->
+<div class="flex gap-3 relative z-10">
+<div class="w-8 h-8 rounded-full bg-[#4F46E5]/10 border border-[#4F46E5]/30 flex items-center justify-center flex-shrink-0 mt-1">
+<span class="material-symbols-outlined text-[#4F46E5] text-[16px]">smart_toy</span>
+</div>
+<div>
+<div class="text-label-md font-label-md text-on-surface">AI Extraction Complete</div>
+<div class="text-label-sm font-label-sm text-outline">Batch #8892 - 450 docs processed</div>
+</div>
+</div>
+<!-- Activity 2 -->
+<div class="flex gap-3 relative z-10">
+<div class="w-8 h-8 rounded-full bg-surface-container-high border border-outline-variant flex items-center justify-center flex-shrink-0 mt-1">
+<span class="material-symbols-outlined text-on-surface-variant text-[16px]">upload_file</span>
+</div>
+<div>
+<div class="text-label-md font-label-md text-on-surface">New Ingestion</div>
+<div class="text-label-sm font-label-sm text-outline">District 04 uploaded 1,200 scans</div>
+</div>
+</div>
+<!-- Activity 3 -->
+<div class="flex gap-3 relative z-10">
+<div class="w-8 h-8 rounded-full bg-primary/10 border border-primary/30 flex items-center justify-center flex-shrink-0 mt-1">
+<span class="material-symbols-outlined text-primary text-[16px]">verified</span>
+</div>
+<div>
+<div class="text-label-md font-label-md text-on-surface">Officer Approval</div>
+<div class="text-label-sm font-label-sm text-outline">Officer ID-902 approved 54 records</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Column: Map & District Progress -->
+<div class="lg:col-span-2 space-y-unit-md flex flex-col">
+<!-- GIS Conflict Map -->
+<div class="bg-surface rounded-xl border border-outline-variant shadow-sm flex-1 flex flex-col overflow-hidden h-[400px]">
+<div class="p-unit-md border-b border-outline-variant flex justify-between items-center bg-surface-container-low z-10">
+<h3 class="font-headline-sm text-headline-sm text-on-surface font-semibold flex items-center gap-2">
+<span class="material-symbols-outlined text-on-surface-variant">map</span> GIS Conflict Clusters
+                        </h3>
+<div class="flex gap-2">
+<button class="bg-surface-container-high px-3 py-1 rounded text-label-md font-label-md border border-outline-variant hover:bg-surface-container-highest">Filter Regions</button>
+<button class="bg-surface-container-high p-1 rounded border border-outline-variant hover:bg-surface-container-highest"><span class="material-symbols-outlined text-[20px]">fullscreen</span></button>
+</div>
+</div>
+<div class="flex-1 relative bg-[#E5E7EB] overflow-hidden" data-location="India" style="">
+<div class="w-full h-full bg-cover bg-center absolute inset-0 opacity-80" data-alt="A highly detailed, professional GIS map interface showing cadastral land boundaries. Clean, technical style suitable for a government command center. Dark muted tones with bright semantic highlights (red for conflicts, green for verified areas). Topographical lines faint in the background." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBSji0CE9rhL-jIly9dg0VAV0iqm_kTe3XzHDHA4r1FhGWDbYzQyUFr0ylLfScW1d0QO1vJMCgGuAT1fsNM4LKtXQ3MOnYBcHG-dSFyvgTbz_bcl7h2c7Nqm6vHmjd3Cu-wCVbaUtiUaT90U9L76NUkDn57Gnh95GkneDIzEeNDDnITHt8wIE1IDpRto9LsvQ-bj-EuKKTRx0r_FyXCE1JV1wu6BIIf9NfVjx9txGvS00VxtwPYIxBdLg')"></div>
+<!-- Simulated Map Overlay UI -->
+<div class="absolute inset-0 pointer-events-none p-4 flex flex-col justify-between">
+<div class="flex justify-end">
+<div class="bg-surface/90 backdrop-blur border border-outline-variant p-2 rounded shadow-sm flex flex-col gap-1 pointer-events-auto">
+<div class="flex items-center gap-2 text-label-sm font-label-sm">
+<div class="w-3 h-3 rounded-full bg-error"></div> High Conflict Density
+                                    </div>
+<div class="flex items-center gap-2 text-label-sm font-label-sm">
+<div class="w-3 h-3 rounded-full bg-[#F59E0B]"></div> Moderate Density
+                                    </div>
+</div>
+</div>
+<!-- Fake Hotspots -->
+<div class="absolute top-[40%] left-[30%] w-12 h-12 bg-error/30 rounded-full animate-pulse border border-error"></div>
+<div class="absolute top-[42%] left-[32%] w-4 h-4 bg-error rounded-full shadow-[0_0_10px_rgba(186,26,26,0.8)]"></div>
+<div class="absolute top-[60%] left-[60%] w-16 h-16 bg-[#F59E0B]/30 rounded-full animate-pulse border border-[#F59E0B]"></div>
+<div class="absolute top-[63%] left-[63%] w-4 h-4 bg-[#F59E0B] rounded-full shadow-[0_0_10px_rgba(245,158,11,0.8)]"></div>
+</div>
+</div>
+</div>
+<!-- District Progress -->
+<div class="bg-surface rounded-xl border border-outline-variant shadow-sm p-unit-md">
+<h3 class="font-headline-sm text-headline-sm text-on-surface font-semibold mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-on-surface-variant">bar_chart</span> District Digitization Status
+                    </h3>
+<div class="space-y-4">
+<!-- District 1 -->
+<div>
+<div class="flex justify-between items-end mb-1">
+<span class="font-label-md text-label-md font-bold text-on-surface">Pune District</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">85% Complete</span>
+</div>
+<div class="w-full bg-surface-container-high rounded-full h-2.5 overflow-hidden border border-outline-variant">
+<div class="bg-primary h-2.5 rounded-full" style="width: 85%"></div>
+</div>
+</div>
+<!-- District 2 -->
+<div>
+<div class="flex justify-between items-end mb-1">
+<span class="font-label-md text-label-md font-bold text-on-surface">Nashik District</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">62% Complete</span>
+</div>
+<div class="w-full bg-surface-container-high rounded-full h-2.5 overflow-hidden border border-outline-variant flex">
+<div class="bg-primary h-2.5" style="width: 62%"></div>
+<div class="bg-[#F59E0B] h-2.5" style="width: 15%" title="Pending Review"></div>
+<div class="bg-error h-2.5" style="width: 5%" title="Conflicts"></div>
+</div>
+</div>
+<!-- District 3 -->
+<div>
+<div class="flex justify-between items-end mb-1">
+<span class="font-label-md text-label-md font-bold text-on-surface">Nagpur District</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">40% Complete</span>
+</div>
+<div class="w-full bg-surface-container-high rounded-full h-2.5 overflow-hidden border border-outline-variant flex">
+<div class="bg-primary h-2.5" style="width: 40%"></div>
+<div class="bg-[#F59E0B] h-2.5" style="width: 30%" title="Pending Review"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</body></html>
