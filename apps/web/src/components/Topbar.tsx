@@ -84,36 +84,93 @@ export function Topbar({ onMenuClick }: { onMenuClick?: () => void }) {
           </button>
 
           <nav className="hidden md:flex items-center gap-6 text-xs font-semibold">
-            <Link
-              href={isOwnerMode ? "/owner" : "/dashboard"}
-              className={`py-2 transition-colors border-b-2 ${
-                pathname === "/dashboard" || pathname === "/owner"
-                  ? "text-primary border-primary font-bold"
-                  : "text-on-surface-variant hover:text-primary border-transparent"
-              }`}
-            >
-              Explorer
-            </Link>
-            <Link
-              href="/gis"
-              className={`py-2 transition-colors border-b-2 ${
-                pathname === "/gis" || pathname === "/owner/gis"
-                  ? "text-primary border-primary font-bold"
-                  : "text-on-surface-variant hover:text-primary border-transparent"
-              }`}
-            >
-              District View
-            </Link>
-            <Link
-              href="/intelligence"
-              className={`py-2 transition-colors border-b-2 ${
-                pathname === "/intelligence"
-                  ? "text-primary border-primary font-bold"
-                  : "text-on-surface-variant hover:text-primary border-transparent"
-              }`}
-            >
-              State Stats
-            </Link>
+            {isOwnerMode ? (
+              <>
+                <Link
+                  href="/owner"
+                  className={`py-2 transition-colors border-b-2 ${
+                    pathname === "/owner"
+                      ? "text-primary border-primary font-bold"
+                      : "text-on-surface-variant hover:text-primary border-transparent"
+                  }`}
+                >
+                  Overview
+                </Link>
+                <Link
+                  href="/owner/properties"
+                  className={`py-2 transition-colors border-b-2 ${
+                    pathname.startsWith("/owner/properties")
+                      ? "text-primary border-primary font-bold"
+                      : "text-on-surface-variant hover:text-primary border-transparent"
+                  }`}
+                >
+                  My Land
+                </Link>
+                <Link
+                  href="/owner/gis"
+                  className={`py-2 transition-colors border-b-2 ${
+                    pathname === "/owner/gis"
+                      ? "text-primary border-primary font-bold"
+                      : "text-on-surface-variant hover:text-primary border-transparent"
+                  }`}
+                >
+                  Cadastral GIS
+                </Link>
+                <Link
+                  href="/owner/history"
+                  className={`py-2 transition-colors border-b-2 ${
+                    pathname === "/owner/history"
+                      ? "text-primary border-primary font-bold"
+                      : "text-on-surface-variant hover:text-primary border-transparent"
+                  }`}
+                >
+                  History Timeline
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link
+                  href="/dashboard"
+                  className={`py-2 transition-colors border-b-2 ${
+                    pathname === "/dashboard"
+                      ? "text-primary border-primary font-bold"
+                      : "text-on-surface-variant hover:text-primary border-transparent"
+                  }`}
+                >
+                  Command Center
+                </Link>
+                <Link
+                  href="/verification"
+                  className={`py-2 transition-colors border-b-2 ${
+                    pathname.startsWith("/verification")
+                      ? "text-primary border-primary font-bold"
+                      : "text-on-surface-variant hover:text-primary border-transparent"
+                  }`}
+                >
+                  Verification Queue
+                </Link>
+                <Link
+                  href="/gis"
+                  className={`py-2 transition-colors border-b-2 ${
+                    pathname === "/gis"
+                      ? "text-primary border-primary font-bold"
+                      : "text-on-surface-variant hover:text-primary border-transparent"
+                  }`}
+                >
+                  Cadastral GIS
+                </Link>
+                <Link
+                  href="/intelligence"
+                  className={`py-2 transition-colors border-b-2 ${
+                    pathname === "/intelligence"
+                      ? "text-primary border-primary font-bold"
+                      : "text-on-surface-variant hover:text-primary border-transparent"
+                  }`}
+                >
+                  Lineage Graph
+                </Link>
+              </>
+            )}
           </nav>
         </div>
 
@@ -151,28 +208,26 @@ export function Topbar({ onMenuClick }: { onMenuClick?: () => void }) {
           </Link>
 
           <Link
-            href="/audit"
+            href={isOwnerMode ? "/owner/history" : "/audit"}
             className="p-2 text-on-surface-variant hover:text-primary rounded-full hover:bg-surface-container-high transition-colors relative"
-            title="Notifications & Audit Events"
+            title={isOwnerMode ? "Ownership History" : "Notifications & Audit Events"}
           >
             <Bell className="h-4 w-4" />
             <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-error rounded-full" />
           </Link>
 
-          <div className="h-6 w-[1px] bg-outline-variant hidden sm:block" />
-
-          {/* Switch Portal Badge Button */}
-          <Link
-            href={isOwnerMode ? "/dashboard" : "/owner"}
-            className={`hidden sm:flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold transition-colors shadow-sm ${
-              isOwnerMode
-                ? "bg-[#14532d] text-[#87c695] hover:bg-[#003b1b] hover:text-white"
-                : "bg-primary text-on-primary hover:bg-primary/90"
-            }`}
-          >
-            <Shield className="h-3 w-3" />
-            <span>{isOwnerMode ? "Switch to Officer Portal" : "Citizen Vault"}</span>
-          </Link>
+          {!isOwnerMode && (
+            <>
+              <div className="h-6 w-[1px] bg-outline-variant hidden sm:block" />
+              <Link
+                href="/owner"
+                className="hidden sm:flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold transition-colors shadow-sm bg-primary text-on-primary hover:bg-primary/90"
+              >
+                <Shield className="h-3 w-3" />
+                <span>View Citizen Vault</span>
+              </Link>
+            </>
+          )}
 
           {/* User Avatar */}
           <Link

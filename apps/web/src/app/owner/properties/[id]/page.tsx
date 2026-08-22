@@ -111,7 +111,10 @@ export default function PropertyDetailPage() {
     try {
       setLoading(true);
       setError(null);
-      const res = await fetch(`http://localhost:8000/api/owner/properties/${propertyId}`);
+      const token = localStorage.getItem("land_ai_token");
+      const headers: HeadersInit = {};
+      if (token) headers["Authorization"] = `Bearer ${token}`;
+      const res = await fetch(`http://localhost:8000/api/owner/properties/${propertyId}`, { headers });
       if (!res.ok) {
         if (res.status === 403) throw new Error("Access Denied: You do not own this land record.");
         if (res.status === 404) throw new Error("Land Record not found.");
@@ -161,17 +164,17 @@ export default function PropertyDetailPage() {
       {/* Top Breadcrumb & Actions Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-outline-variant pb-4">
         <div className="flex items-center gap-2 text-xs text-on-surface-variant">
-          <Link href="/owner" className="hover:text-primary">Overview</Link>
+          <Link href="/owner" className="hover:text-primary font-medium">Overview</Link>
           <span>/</span>
-          <Link href="/owner/properties" className="hover:text-primary">My Land</Link>
+          <Link href="/owner/properties" className="hover:text-primary font-medium">My Land</Link>
           <span>/</span>
           <span className="text-primary font-bold">Survey {property.survey_number}</span>
         </div>
 
         <div className="flex items-center gap-2.5">
           <Link
-            href={`/copilot`}
-            className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 px-3.5 py-2 text-xs font-semibold text-white shadow-md hover:from-indigo-500 hover:to-purple-500 transition-all"
+            href="/copilot"
+            className="inline-flex items-center gap-1.5 rounded-xl bg-primary text-on-primary px-3.5 py-2 text-xs font-bold shadow-sm hover:bg-primary/90 transition-all"
           >
             <Sparkles className="h-3.5 w-3.5" />
             <span>Ask Copilot About This Land</span>
@@ -179,96 +182,90 @@ export default function PropertyDetailPage() {
 
           <Link
             href={`/owner/gis?survey=${property.survey_number}`}
-            className="inline-flex items-center gap-1.5 rounded-xl bg-slate-900 border border-slate-800 hover:bg-slate-800 px-3.5 py-2 text-xs font-semibold text-slate-300 transition-colors"
+            className="inline-flex items-center gap-1.5 rounded-xl bg-surface-container border border-outline-variant hover:bg-surface-container-high px-3.5 py-2 text-xs font-bold text-on-surface transition-colors"
           >
-            <Compass className="h-3.5 w-3.5 text-emerald-400" />
+            <Compass className="h-3.5 w-3.5 text-primary" />
             <span>Cadastral GIS Map</span>
           </Link>
         </div>
       </div>
 
       {/* Hero Property Overview Header */}
-      <div className="rounded-2xl border border-slate-800 bg-gradient-to-br from-slate-900/90 via-slate-900/60 to-slate-950 p-6 md:p-8 shadow-xl space-y-6">
+      <div className="rounded-2xl border border-outline-variant bg-surface p-6 md:p-8 shadow-sm space-y-6">
         <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
           <div>
             <div className="flex items-center gap-2 mb-1.5">
-              <Badge variant="outline" className="border-emerald-500/40 bg-emerald-500/10 text-emerald-300 text-xs px-2.5 py-0.5">
+              <Badge variant="outline" className="border-primary/30 bg-primary/10 text-primary text-xs px-2.5 py-0.5 font-bold">
                 {property.state} Land Revenue Register
               </Badge>
               {property.has_discrepancy ? (
-                <Badge className="bg-amber-500/20 text-amber-400 border-amber-500/40 text-xs">
+                <Badge className="bg-amber-500/15 text-amber-700 border-amber-500/30 text-xs font-bold">
                   ⚠ Area Discrepancy Flagged
                 </Badge>
               ) : (
-                <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/40 text-xs">
+                <Badge className="bg-emerald-500/15 text-emerald-700 border-emerald-500/30 text-xs font-bold">
                   ✓ Statutorily Verified
                 </Badge>
               )}
             </div>
-            <h1 className="text-2xl md:text-3xl font-bold text-white tracking-tight">
+            <h1 className="text-2xl md:text-3xl font-extrabold text-on-surface tracking-tight">
               Survey No. {property.survey_number}
-              {property.hissa_number && <span className="text-slate-400 text-xl ml-2">/ Hissa {property.hissa_number}</span>}
-              {property.gat_number && <span className="text-slate-400 text-xl ml-2">(Gat {property.gat_number})</span>}
+              {property.hissa_number && <span className="text-on-surface-variant font-medium text-xl ml-2">/ Hissa {property.hissa_number}</span>}
+              {property.gat_number && <span className="text-on-surface-variant font-medium text-xl ml-2">(Gat {property.gat_number})</span>}
             </h1>
-            <p className="text-sm text-slate-400 mt-1 flex items-center gap-1.5">
-              <MapPin className="h-4 w-4 text-slate-500 shrink-0" />
+            <p className="text-sm text-on-surface-variant mt-1 flex items-center gap-1.5">
+              <MapPin className="h-4 w-4 text-primary shrink-0" />
               <span>Village {property.village}, Taluk {property.taluk || "Headquarters"}, District {property.district}, {property.state}</span>
             </p>
           </div>
 
           {/* Large Area Display */}
-          <div className="rounded-xl bg-slate-950/80 border border-slate-800 p-4 text-right shrink-0">
-            <span className="text-xs text-slate-400 block font-medium">Authoritative Land Extent</span>
-            <div className="text-2xl md:text-3xl font-bold text-emerald-400 mt-0.5">
+          <div className="rounded-xl bg-surface-container-low border border-outline-variant p-4 text-right shrink-0">
+            <span className="text-xs text-on-surface-variant block font-medium">Authoritative Land Extent</span>
+            <div className="text-2xl md:text-3xl font-extrabold text-primary mt-0.5 font-mono">
               {property.area_acres} Acres
             </div>
-            <span className="text-xs text-slate-500 block">({property.total_area} {property.area_unit})</span>
+            <span className="text-xs text-on-surface-variant/80 block">({property.total_area} {property.area_unit})</span>
           </div>
         </div>
 
         {/* Primary Attribute Metrics Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4 border-t border-slate-800/80">
-          <div className="rounded-lg bg-slate-950/50 p-3 border border-slate-800/60">
-            <span className="text-[11px] text-slate-400 block">Cultivable Extent</span>
-            <strong className="text-sm text-white font-semibold">{property.cultivable_area || property.total_area} {property.area_unit}</strong>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4 border-t border-outline-variant/60">
+          <div className="rounded-xl bg-surface-container-low p-3.5 border border-outline-variant/60">
+            <span className="text-[11px] text-on-surface-variant block font-semibold">Cultivable Extent</span>
+            <strong className="text-sm text-on-surface font-bold">{property.cultivable_area || property.total_area} {property.area_unit}</strong>
           </div>
-          <div className="rounded-lg bg-slate-950/50 p-3 border border-slate-800/60">
-            <span className="text-[11px] text-slate-400 block">Uncultivable (Pot-Kharaba)</span>
-            <strong className="text-sm text-white font-semibold">{property.uncultivable_area || 0.0} {property.area_unit}</strong>
+          <div className="rounded-xl bg-surface-container-low p-3.5 border border-outline-variant/60">
+            <span className="text-[11px] text-on-surface-variant block font-semibold">Uncultivable (Pot-Kharaba)</span>
+            <strong className="text-sm text-on-surface font-bold">{property.uncultivable_area || 0.0} {property.area_unit}</strong>
           </div>
-          <div className="rounded-lg bg-slate-950/50 p-3 border border-slate-800/60">
-            <span className="text-[11px] text-slate-400 block">Land Tenure Class</span>
-            <strong className="text-sm text-white font-semibold line-clamp-1">{property.land_tenure || "Occupant Class 1"}</strong>
+          <div className="rounded-xl bg-surface-container-low p-3.5 border border-outline-variant/60">
+            <span className="text-[11px] text-on-surface-variant block font-semibold">Land Tenure Class</span>
+            <strong className="text-sm text-on-surface font-bold line-clamp-1">{property.land_tenure || "Occupant Class 1"}</strong>
           </div>
-          <div className="rounded-lg bg-slate-950/50 p-3 border border-slate-800/60">
-            <span className="text-[11px] text-slate-400 block">AI Verification Score</span>
-            <strong className="text-sm text-emerald-400 font-semibold">{Math.round(property.overall_confidence_score * 100)}% Confidence</strong>
+          <div className="rounded-xl bg-surface-container-low p-3.5 border border-outline-variant/60">
+            <span className="text-[11px] text-on-surface-variant block font-semibold">AI Verification Score</span>
+            <strong className="text-sm text-primary font-bold">{Math.round(property.overall_confidence_score * 100)}% Confidence</strong>
           </div>
         </div>
       </div>
 
       {/* Discrepancy Warning Alert Box */}
       {property.has_discrepancy && (
-        <div className="rounded-2xl border border-amber-500/50 bg-amber-950/20 p-5 space-y-2">
-          <div className="flex items-center gap-2 text-sm font-bold text-amber-400">
+        <div className="rounded-2xl border border-amber-500/40 bg-amber-500/10 p-5 space-y-2">
+          <div className="flex items-center gap-2 text-sm font-bold text-amber-800">
             <AlertTriangle className="h-5 w-5" />
             <span>Cadastral Boundary &amp; Ground Area Discrepancy Detected</span>
           </div>
-          <p className="text-xs text-amber-200/90 leading-relaxed">
+          <p className="text-xs text-amber-900/90 leading-relaxed">
             {property.discrepancy_details || "The physical surveyed cadastral satellite polygon boundary deviates from the registered document deed."}
           </p>
           <div className="flex items-center gap-4 text-xs pt-2">
             <Link
               href={`/owner/gis?survey=${property.survey_number}`}
-              className="font-semibold text-amber-300 hover:text-white underline"
+              className="font-bold text-primary hover:underline"
             >
               Inspect Polygon in GIS Explorer →
-            </Link>
-            <Link
-              href={`/verification/${property.id}`}
-              className="font-semibold text-indigo-300 hover:text-white underline"
-            >
-              View Officer Verification Details →
             </Link>
           </div>
         </div>
@@ -278,40 +275,40 @@ export default function PropertyDetailPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         
         {/* GIS Cadastral Comparison Card */}
-        <div className="rounded-2xl border border-slate-800 bg-slate-900/80 p-6 space-y-4">
+        <div className="rounded-2xl border border-outline-variant bg-surface p-6 space-y-4 shadow-sm">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 text-sm font-bold text-white">
-              <Compass className="h-4 w-4 text-emerald-400" />
+            <div className="flex items-center gap-2 text-sm font-bold text-on-surface">
+              <Compass className="h-4 w-4 text-primary" />
               <span>Cadastral GIS Verification</span>
             </div>
-            <Badge variant="outline" className="border-slate-700 bg-slate-950 text-slate-300 text-xs">
+            <Badge variant="outline" className="border-outline-variant bg-surface-container text-on-surface-variant text-xs">
               PostGIS WGS-84
             </Badge>
           </div>
 
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-on-surface-variant">
             Comparison between legal revenue deed text and physical satellite surveyed polygon extent:
           </p>
 
           <div className="grid grid-cols-2 gap-3">
-            <div className="rounded-xl bg-slate-950 border border-slate-800 p-3.5 text-center">
-              <span className="text-[11px] text-slate-400 block">Deed Document Area</span>
-              <strong className="text-base text-white font-bold block mt-1">
+            <div className="rounded-xl bg-surface-container-low border border-outline-variant p-3.5 text-center">
+              <span className="text-[11px] text-on-surface-variant block font-semibold">Deed Document Area</span>
+              <strong className="text-base text-on-surface font-bold block mt-1 font-mono">
                 {property.total_area} Ha
               </strong>
-              <span className="text-[10px] text-slate-500">({property.area_acres} Acres)</span>
+              <span className="text-[10px] text-on-surface-variant">({property.area_acres} Acres)</span>
             </div>
 
             <div className={`rounded-xl border p-3.5 text-center ${
-              property.has_discrepancy ? "bg-amber-950/20 border-amber-500/40" : "bg-slate-950 border-slate-800"
+              property.has_discrepancy ? "bg-amber-500/10 border-amber-500/30" : "bg-surface-container-low border-outline-variant"
             }`}>
-              <span className="text-[11px] text-slate-400 block">Cadastral GIS Area</span>
-              <strong className={`text-base font-bold block mt-1 ${
-                property.has_discrepancy ? "text-amber-400" : "text-emerald-400"
+              <span className="text-[11px] text-on-surface-variant block font-semibold">Cadastral GIS Area</span>
+              <strong className={`text-base font-bold block mt-1 font-mono ${
+                property.has_discrepancy ? "text-amber-700" : "text-primary"
               }`}>
                 {property.gis_parcel?.area_ha || property.total_area} Ha
               </strong>
-              <span className="text-[10px] text-slate-500">
+              <span className="text-[10px] text-on-surface-variant">
                 ({property.gis_parcel?.area_acres || property.area_acres} Acres)
               </span>
             </div>
@@ -320,88 +317,81 @@ export default function PropertyDetailPage() {
           <div className="pt-2">
             <Link
               href={`/owner/gis?survey=${property.survey_number}`}
-              className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-white py-2.5 transition-colors"
+              className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-primary text-on-primary hover:bg-primary/90 text-xs font-bold py-2.5 transition-colors shadow-sm"
             >
-              <Compass className="h-4 w-4 text-emerald-400" />
+              <Compass className="h-4 w-4" />
               <span>Open Cadastral Map View</span>
             </Link>
           </div>
         </div>
 
         {/* Document Evidence Card */}
-        <div className="rounded-2xl border border-slate-800 bg-slate-900/80 p-6 space-y-4">
+        <div className="rounded-2xl border border-outline-variant bg-surface p-6 space-y-4 shadow-sm">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 text-sm font-bold text-white">
-              <FileText className="h-4 w-4 text-indigo-400" />
+            <div className="flex items-center gap-2 text-sm font-bold text-on-surface">
+              <FileText className="h-4 w-4 text-primary" />
               <span>Document Evidence</span>
             </div>
-            <Badge variant="outline" className="border-indigo-500/30 bg-indigo-500/10 text-indigo-300 text-xs">
+            <Badge variant="outline" className="border-primary/20 bg-primary/10 text-primary text-xs font-bold">
               Original Deed
             </Badge>
           </div>
 
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-on-surface-variant">
             Source deed extract processed by Sarvam Vision &amp; Mistral OCR:
           </p>
 
           {property.document ? (
-            <div className="rounded-xl bg-slate-950 border border-slate-800 p-4 space-y-3">
+            <div className="rounded-xl bg-surface-container-low border border-outline-variant p-4 space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-white line-clamp-1">
+                <span className="text-xs font-bold text-on-surface line-clamp-1">
                   {property.document.original_name}
                 </span>
-                <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/40 text-[10px]">
+                <Badge className="bg-emerald-500/15 text-emerald-700 border-emerald-500/30 text-[10px] font-bold">
                   {property.document.status}
                 </Badge>
               </div>
 
               {/* Real Deed Image Preview */}
-              <div className="relative rounded-lg overflow-hidden border border-slate-800 bg-slate-900 aspect-[4/3] group">
+              <div className="relative rounded-lg overflow-hidden border border-outline-variant bg-surface aspect-[4/3] group shadow-inner">
                 <img
-                  src={`/sample/deeds/${property.document.filename}`}
+                  src={`http://localhost:8000/api/documents/${property.document?.id || property.document_id || property.id}/file`}
                   alt={property.document.original_name}
                   className="w-full h-full object-cover object-top transition-transform duration-300 group-hover:scale-105"
                   onError={(e) => {
-                    // Fallback to API direct serving or placeholder
-                    (e.target as HTMLImageElement).src = `http://localhost:8000/api/documents/${property.document?.id}/file`;
+                    // Fallback to sample or placeholder
+                    (e.target as HTMLImageElement).src = `/sample/deeds/${property.document?.filename || "images.jpeg"}`;
                   }}
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent flex items-end p-2.5 opacity-90 group-hover:opacity-100 transition-opacity">
-                  <span className="text-[10px] font-semibold text-white bg-slate-900/90 px-2 py-0.5 rounded border border-slate-700">
-                    Official Revenue Extract • Nishu Kumar
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex items-end p-2.5 opacity-90 group-hover:opacity-100 transition-opacity">
+                  <span className="text-[10px] font-bold text-white bg-black/70 px-2 py-0.5 rounded border border-white/20">
+                    Official Revenue Extract • {property.document.original_name}
                   </span>
                 </div>
               </div>
 
-              <div className="text-[11px] text-slate-400 flex items-center justify-between">
+              <div className="text-[11px] text-on-surface-variant flex items-center justify-between">
                 <span>File Size: {Math.round(property.document.file_size / 1024)} KB</span>
                 <span>Type: {property.document.mime_type}</span>
               </div>
             </div>
           ) : (
-            <div className="rounded-xl bg-slate-950 border border-slate-800 p-4 text-xs text-slate-500 text-center">
+            <div className="rounded-xl bg-surface-container-low border border-outline-variant p-4 text-xs text-on-surface-variant text-center">
               Historical digitized deed record
             </div>
           )}
 
           <div className="pt-2 flex items-center gap-2">
-            <Link
-              href={`/verification/${property.id}`}
-              className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600/20 border border-indigo-500/30 hover:bg-indigo-600/30 text-xs font-semibold text-indigo-300 py-2.5 transition-colors"
-            >
-              <FileCheck2 className="h-4 w-4" />
-              <span>Open Verification Record</span>
-            </Link>
             {property.document && (
               <a
-                href={`/sample/deeds/${property.document.filename}`}
+                href={`http://localhost:8000/api/documents/${property.document?.id || property.document_id || property.id}/file`}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 px-3 py-2.5 text-xs font-semibold text-slate-300 transition-colors"
+                className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-primary text-on-primary hover:bg-primary/90 px-3 py-2.5 text-xs font-bold transition-colors shadow-sm"
                 title="Open full resolution deed image in new tab"
               >
                 <ExternalLink className="h-3.5 w-3.5" />
-                <span>Full View</span>
+                <span>View Full Resolution Scan</span>
               </a>
             )}
           </div>
@@ -410,58 +400,58 @@ export default function PropertyDetailPage() {
       </div>
 
       {/* Ownership History Chronological Timeline */}
-      <div className="rounded-2xl border border-slate-800 bg-slate-900/80 p-6 md:p-8 space-y-6">
+      <div className="rounded-2xl border border-outline-variant bg-surface p-6 md:p-8 space-y-6 shadow-sm">
         <div className="flex items-center justify-between">
           <div>
-            <div className="flex items-center gap-2 text-sm font-bold text-white">
-              <History className="h-4 w-4 text-purple-400" />
+            <div className="flex items-center gap-2 text-sm font-bold text-on-surface">
+              <History className="h-4 w-4 text-primary" />
               <span>Chronological Ownership History</span>
             </div>
-            <p className="text-xs text-slate-400 mt-0.5">
+            <p className="text-xs text-on-surface-variant mt-0.5">
               Verified mutation entries, title transfers, and succession records from official land registers.
             </p>
           </div>
-          <Badge variant="outline" className="border-slate-700 bg-slate-950 text-slate-400 text-xs">
+          <Badge variant="outline" className="border-outline-variant bg-surface-container text-on-surface-variant text-xs">
             Zero Hallucination
           </Badge>
         </div>
 
         {property.ownership_history && property.ownership_history.length > 0 ? (
-          <div className="space-y-6 pl-4 relative before:absolute before:left-6 before:top-3 before:bottom-3 before:w-0.5 before:bg-slate-800">
+          <div className="space-y-6 pl-4 relative before:absolute before:left-6 before:top-3 before:bottom-3 before:w-0.5 before:bg-outline-variant">
             {property.ownership_history.map((event, idx) => (
               <div key={event.id || idx} className="flex items-start gap-4 relative">
-                <div className={`h-5 w-5 rounded-full flex items-center justify-center ring-4 ring-slate-950 shrink-0 mt-0.5 ${
+                <div className={`h-5 w-5 rounded-full flex items-center justify-center ring-4 ring-surface shrink-0 mt-0.5 ${
                   event.event_type === "VERIFIED_RECORD"
-                    ? "bg-emerald-500 text-white"
+                    ? "bg-primary text-on-primary"
                     : event.event_type === "MORTGAGE_LIEN"
-                    ? "bg-purple-500 text-white"
-                    : "bg-indigo-500 text-white"
+                    ? "bg-purple-600 text-white"
+                    : "bg-primary text-on-primary"
                 }`}>
                   <div className="h-2 w-2 rounded-full bg-white" />
                 </div>
 
-                <div className="flex-1 rounded-xl bg-slate-950 border border-slate-800/80 p-4 space-y-1.5">
+                <div className="flex-1 rounded-xl bg-surface-container-low border border-outline-variant p-4 space-y-2 shadow-xs">
                   <div className="flex flex-wrap items-center justify-between gap-2">
-                    <h4 className="text-xs font-bold text-white">
+                    <h4 className="text-xs font-bold text-on-surface">
                       {event.title}
                     </h4>
-                    <span className="text-[11px] text-emerald-400 font-semibold">
+                    <span className="text-[11px] text-primary font-bold font-mono">
                       {event.event_date || (event.event_year ? `Year ${event.event_year}` : "Recorded")}
                     </span>
                   </div>
 
-                  <p className="text-xs text-slate-300 leading-relaxed">
+                  <p className="text-xs text-on-surface leading-relaxed">
                     {event.description}
                   </p>
 
                   {event.parties_involved && (
-                    <div className="text-[11px] text-slate-400 pt-1 border-t border-slate-800/60">
-                      <span className="text-slate-500">Parties Involved:</span> {event.parties_involved}
+                    <div className="text-[11px] text-on-surface-variant pt-2 border-t border-outline-variant/60">
+                      <span className="font-semibold text-on-surface">Parties Involved:</span> {event.parties_involved}
                     </div>
                   )}
 
                   {event.mutation_number && (
-                    <Badge variant="outline" className="text-[10px] border-slate-700 bg-slate-900 text-slate-300">
+                    <Badge variant="outline" className="text-[10px] border-primary/20 bg-primary/10 text-primary font-semibold">
                       Mutation Order #{event.mutation_number}
                     </Badge>
                   )}
@@ -470,7 +460,7 @@ export default function PropertyDetailPage() {
             ))}
           </div>
         ) : (
-          <div className="rounded-xl bg-slate-950 border border-slate-800 p-6 text-center text-xs text-slate-500">
+          <div className="rounded-xl bg-surface-container-low border border-outline-variant p-6 text-center text-xs text-on-surface-variant">
             Historical record prior to current registration is unavailable in the database.
           </div>
         )}

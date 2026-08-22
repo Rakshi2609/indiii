@@ -40,16 +40,16 @@ export function Sidebar() {
     ? [
         { name: "Dashboard", href: "/owner", icon: Layers, badge: null },
         { name: "Land Records", href: "/owner/properties", icon: FileText, badge: null },
-        { name: "GIS Mapping", href: "/owner/gis", icon: Compass, badge: null },
-        { name: "Verifications", href: "/verification", icon: FileCheck2, badge: "2" },
-        { name: "Audit Ledger", href: "/owner/history", icon: History, badge: null },
+        { name: "Cadastral GIS", href: "/owner/gis", icon: Compass, badge: null },
+        { name: "Deed Documents", href: "/owner/documents", icon: FileCheck2, badge: null },
+        { name: "Ownership History", href: "/owner/history", icon: History, badge: null },
         { name: "AI Copilot", href: "/copilot", icon: Sparkles, badge: "AI" },
       ]
     : [
         { name: "Dashboard", href: "/dashboard", icon: Layers, badge: null },
-        { name: "Land Records", href: "/upload", icon: FileText, badge: null },
-        { name: "GIS Mapping", href: "/gis", icon: Compass, badge: null },
-        { name: "Verifications", href: "/verification", icon: FileCheck2, badge: "3" },
+        { name: "Ingest Deed", href: "/upload", icon: FileText, badge: null },
+        { name: "Cadastral GIS", href: "/gis", icon: Compass, badge: null },
+        { name: "Verifications", href: "/verification", icon: FileCheck2, badge: "Review" },
         { name: "Audit Ledger", href: "/audit", icon: History, badge: null },
         { name: "AI Copilot", href: "/copilot", icon: Sparkles, badge: "AI" },
       ];
@@ -110,20 +110,22 @@ export function Sidebar() {
           )}
         </div>
 
-        {/* Quick CTA Button */}
-        <div className="px-3 mb-4">
-          <Link href="/upload">
-            <button
-              className={`w-full bg-primary text-on-primary rounded-xl font-bold text-xs hover:bg-primary/90 transition-all shadow-sm flex items-center justify-center cursor-pointer ${
-                showExpanded ? "py-2.5 px-3 gap-2" : "py-2.5 px-0"
-              }`}
-              title="Verify Record"
-            >
-              <FileCheck2 className="h-4 w-4 shrink-0" />
-              {showExpanded && <span className="truncate">Verify Record</span>}
-            </button>
-          </Link>
-        </div>
+        {/* Quick CTA Button - Only for Government Revenue Officers / Admins */}
+        {!isOwnerMode && (
+          <div className="px-3 mb-4">
+            <Link href="/upload">
+              <button
+                className={`w-full bg-primary text-on-primary rounded-xl font-bold text-xs hover:bg-primary/90 transition-all shadow-sm flex items-center justify-center cursor-pointer ${
+                  showExpanded ? "py-2.5 px-3 gap-2" : "py-2.5 px-0"
+                }`}
+                title="Verify / Ingest Record"
+              >
+                <FileCheck2 className="h-4 w-4 shrink-0" />
+                {showExpanded && <span className="truncate">Verify / Ingest Deed</span>}
+              </button>
+            </Link>
+          </div>
+        )}
 
         {/* Navigation Items */}
         <nav className="flex-1 px-2 space-y-1 overflow-y-auto custom-scrollbar">
@@ -169,48 +171,52 @@ export function Sidebar() {
 
         {/* Bottom Actions & User Profile */}
         <div className="px-2 mt-auto pt-3 border-t border-outline-variant space-y-2">
-          {/* Quick Portal Switcher */}
-          {showExpanded ? (
-            <Link
-              href={isOwnerMode ? "/dashboard" : "/owner"}
-              className="flex items-center justify-between text-[11px] font-semibold text-on-surface-variant hover:text-primary p-2 rounded-lg bg-surface-container-low hover:bg-surface-container transition-colors border border-outline-variant/60"
-            >
-              <span>{isOwnerMode ? "🏛️ Govt Command" : "👤 Owner Vault"}</span>
-              <ChevronRight className="h-3 w-3" />
-            </Link>
-          ) : (
-            <Link
-              href={isOwnerMode ? "/dashboard" : "/owner"}
-              className="flex items-center justify-center p-2 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface-variant hover:text-primary transition-colors border border-outline-variant/60"
-              title={isOwnerMode ? "Switch to Govt Command" : "Switch to Owner Vault"}
-            >
-              <span className="text-xs">{isOwnerMode ? "🏛️" : "👤"}</span>
-            </Link>
-          )}
+          {/* Quick Portal Switcher - Only for Government Admins/Officers */}
+          {!isOwnerMode && (
+            <>
+              {showExpanded ? (
+                <Link
+                  href="/owner"
+                  className="flex items-center justify-between text-[11px] font-semibold text-on-surface-variant hover:text-primary p-2 rounded-lg bg-surface-container-low hover:bg-surface-container transition-colors border border-outline-variant/60"
+                >
+                  <span>👤 View Owner Vault</span>
+                  <ChevronRight className="h-3 w-3" />
+                </Link>
+              ) : (
+                <Link
+                  href="/owner"
+                  className="flex items-center justify-center p-2 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface-variant hover:text-primary transition-colors border border-outline-variant/60"
+                  title="View Owner Vault"
+                >
+                  <span className="text-xs">👤</span>
+                </Link>
+              )}
 
-          {/* Supporting Links */}
-          <div className="space-y-0.5">
-            <Link
-              href="/intelligence"
-              className={`flex items-center gap-3 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container-high text-xs transition-colors ${
-                showExpanded ? "px-3 py-1.5" : "py-2 justify-center"
-              }`}
-              title="Lineage Intelligence"
-            >
-              <GitFork className="h-3.5 w-3.5 shrink-0" />
-              {showExpanded && <span className="truncate">Lineage Intelligence</span>}
-            </Link>
-            <Link
-              href="/audit"
-              className={`flex items-center gap-3 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container-high text-xs transition-colors ${
-                showExpanded ? "px-3 py-1.5" : "py-2 justify-center"
-              }`}
-              title="Audit & Compliance"
-            >
-              <Settings className="h-3.5 w-3.5 shrink-0" />
-              {showExpanded && <span className="truncate">Audit & Compliance</span>}
-            </Link>
-          </div>
+              {/* Supporting Government Links */}
+              <div className="space-y-0.5">
+                <Link
+                  href="/intelligence"
+                  className={`flex items-center gap-3 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container-high text-xs transition-colors ${
+                    showExpanded ? "px-3 py-1.5" : "py-2 justify-center"
+                  }`}
+                  title="Lineage Intelligence"
+                >
+                  <GitFork className="h-3.5 w-3.5 shrink-0" />
+                  {showExpanded && <span className="truncate">Lineage Intelligence</span>}
+                </Link>
+                <Link
+                  href="/audit"
+                  className={`flex items-center gap-3 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container-high text-xs transition-colors ${
+                    showExpanded ? "px-3 py-1.5" : "py-2 justify-center"
+                  }`}
+                  title="Audit & Compliance"
+                >
+                  <Settings className="h-3.5 w-3.5 shrink-0" />
+                  {showExpanded && <span className="truncate">Audit & Compliance</span>}
+                </Link>
+              </div>
+            </>
+          )}
 
           {/* User Profile Pill */}
           <div

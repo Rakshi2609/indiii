@@ -42,10 +42,10 @@ class VerificationService:
             query = query.filter(LandRecord.validation_status == status_filter)
 
         total = query.count()
-        # Order items needing attention first (flagged or lower confidence)
+        # Order latest uploaded records first
         items = query.order_by(
-            LandRecord.overall_confidence_score.asc(),
-            LandRecord.created_at.desc()
+            LandRecord.created_at.desc(),
+            LandRecord.id.desc()
         ).offset(skip).limit(limit).all()
 
         queue_items: List[VerificationQueueItem] = []
@@ -59,21 +59,39 @@ class VerificationService:
             if r.validation_status not in ["VERIFIED_MANUAL", "VERIFIED_CORRECTED"]:
                 pending_count += 1
 
+            missing: List[str] = []
+            if not r.owners_data or len(r.owners_data) == 0:
+                missing.append("Khatadars / Co-Sharers")
+            if not r.survey_number or r.survey_number in ["UNKNOWN", ""]:
+                missing.append("Survey Number")
+            if not r.total_area or r.total_area <= 0:
+                missing.append("Total Extent Area")
+            if not r.sub_registrar_office:
+                missing.append("Sub-Registrar Office")
+            if not r.khata_number:
+                missing.append("Khata Number")
+
+            has_missing = len(missing) > 0
+            has_conflicts = len(v_results) > 0 or crit_count > 0 or r.validation_status in ["FLAGGED_FOR_REVIEW", "REJECTED_CRITICAL"]
+
             queue_items.append(
                 VerificationQueueItem(
                     record_id=r.id,
                     document_id=r.document_id,
                     filename=doc.filename if doc else "unknown",
                     original_name=doc.original_name if doc else "Unknown Deed",
-                    state=r.state,
-                    district=r.district,
-                    village=r.village,
-                    survey_number=r.survey_number,
-                    overall_confidence_score=r.overall_confidence_score,
-                    validation_status=r.validation_status,
+                    state=r.state or "Unknown",
+                    district=r.district or "Unknown",
+                    village=r.village or "Unknown",
+                    survey_number=r.survey_number or "—",
+                    overall_confidence_score=r.overall_confidence_score or 0.0,
+                    validation_status=r.validation_status or "PENDING",
                     total_issues=len(v_results),
                     critical_issues=crit_count,
-                    created_at=r.created_at
+                    has_conflicts=has_conflicts,
+                    has_missing_details=has_missing,
+                    missing_fields=missing,
+                    created_at=r.created_at or datetime.now(timezone.utc)
                 )
             )
 

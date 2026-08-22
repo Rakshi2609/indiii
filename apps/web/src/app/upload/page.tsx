@@ -90,7 +90,7 @@ export default function DocumentUploadPage() {
       const res = await fetch("http://localhost:8000/api/documents");
       if (res.ok) {
         const data = await res.json();
-        setUploadedDocs(data.documents || []);
+        setUploadedDocs(data.items || data.documents || []);
       }
     } catch {
       // Fallback
@@ -146,44 +146,53 @@ export default function DocumentUploadPage() {
       formData.append("files", file);
       formData.append("processing_mode", processingMode);
 
+      const token = localStorage.getItem("land_ai_token");
+      const headers: HeadersInit = {};
+      if (token) headers["Authorization"] = `Bearer ${token}`;
+
       const uploadRes = await fetch("http://localhost:8000/api/documents/upload", {
         method: "POST",
+        headers,
         body: formData,
       });
 
-      let docId = 1;
-      if (uploadRes.ok) {
-        const uploadData = await uploadRes.json();
-        docId = uploadData.document_ids?.[0] || 1;
+      if (!uploadRes.ok) {
+        const errData = await uploadRes.json().catch(() => ({}));
+        throw new Error(errData.detail || "Document upload failed.");
       }
+
+      const uploadData = await uploadRes.json();
+      const docId = uploadData.documents?.[0]?.id || uploadData.document_ids?.[0] || 1;
 
       setProcessingStep("2/4: Multilingual OCR (Indic Vision Pipeline)...");
       await new Promise((r) => setTimeout(r, 600));
 
       setProcessingStep("3/4: Extracting Survey, Khasra, and Khatadar Entities...");
-      const procRes = await fetch(`http://localhost:8000/api/documents/${docId}/process`, {
+      const procRes = await fetch(`http://localhost:8000/api/documents/${docId}/process?sync=true`, {
         method: "POST",
+        headers,
       });
 
-      let recordId = 1;
+      let recordId = docId;
       if (procRes.ok) {
         const procData = await procRes.json();
-        recordId = procData.record_id || 1;
-        setExtractedMetadata({
-          detectedLanguage: procData.detected_language || "Marathi / English",
-          detectedType: procData.document_type || "Village Form VII-XII (7/12 Satbara)",
-          detectedState: procData.state || "Maharashtra",
-          detectedDistrict: procData.district || "Pune",
-          confidence: procData.overall_confidence || 0.96,
-        });
-      } else {
-        setExtractedMetadata({
-          detectedLanguage: "Telugu / Indic Script",
-          detectedType: "Registered Sale Deed (విక్రయ దస్తావేజు)",
-          detectedState: "Andhra Pradesh",
-          detectedDistrict: "Guntur",
-          confidence: 0.94,
-        });
+        // Check for created land record
+        try {
+          const recRes = await fetch(`http://localhost:8000/api/records/by-document/${docId}`);
+          if (recRes.ok) {
+            const recData = await recRes.json();
+            recordId = recData.id;
+            setExtractedMetadata({
+              detectedLanguage: procData.extracted_data?.language || "Marathi / English (Indic Script)",
+              detectedType: procData.extracted_data?.document_type || "Village Form VII-XII (7/12 Satbara)",
+              detectedState: recData.administrative?.state || "Maharashtra",
+              detectedDistrict: recData.administrative?.district || "Pune",
+              confidence: recData.overall_confidence_score || 0.96,
+            });
+          }
+        } catch {
+          // fallback
+        }
       }
 
       setProcessingStep("4/4: Cadastral GIS Spatial Alignment & Audit Hash...");
@@ -191,20 +200,47 @@ export default function DocumentUploadPage() {
 
       setResultRecordId(recordId);
       fetchUploadedDocs();
-    } catch {
-      setResultRecordId(1);
-      setExtractedMetadata({
-        detectedLanguage: "Marathi / Devanagari",
-        detectedType: "Village Form VII-XII (7/12 Satbara)",
-        detectedState: "Maharashtra",
-        detectedDistrict: "Pune",
-        confidence: 0.96,
-      });
+    } catch (err: any) {
+      setError(err.message || "Failed to process document. Please ensure backend is running.");
     } finally {
       setUploading(false);
       setProcessingStep("");
     }
   };
+
+  // If user is a Land Owner/Citizen, restrict upload access
+  if (user?.role === "OWNER") {
+    return (
+      <div className="min-h-screen bg-surface-container-lowest text-on-surface flex flex-col md:pl-[72px]">
+        <Topbar />
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 flex items-center justify-center">
+          <div className="max-w-md w-full bg-surface p-6 sm:p-8 rounded-2xl border border-outline-variant shadow-lg text-center space-y-4">
+            <div className="w-12 h-12 rounded-full bg-error-container text-on-error-container flex items-center justify-center mx-auto">
+              <Lock className="w-6 h-6" />
+            </div>
+            <h2 className="text-lg font-bold text-on-surface">Access Restricted to Revenue Officers</h2>
+            <p className="text-xs text-on-surface-variant leading-relaxed">
+              Document upload and Indic Vision OCR ingestion is an official function reserved for authorized Revenue Officers and Cadastral Survey Administrators.
+            </p>
+            <div className="pt-2 flex flex-col gap-2">
+              <Link href="/owner">
+                <Button className="w-full bg-primary text-on-primary text-xs font-semibold">
+                  Return to Citizen Land Vault
+                </Button>
+              </Link>
+              <Button
+                variant="outline"
+                onClick={() => window.location.href = "/dashboard"}
+                className="w-full text-xs font-semibold text-on-surface-variant"
+              >
+                Switch to Revenue Officer Portal
+              </Button>
+            </div>
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-surface-container-lowest text-on-surface flex flex-col md:pl-[72px]">

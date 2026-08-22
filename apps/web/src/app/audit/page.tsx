@@ -24,6 +24,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Topbar } from "@/components/Topbar";
+import { useAuth } from "@/context/AuthContext";
 
 interface AuditEvent {
   id: number;
@@ -39,6 +40,7 @@ interface AuditEvent {
 }
 
 export default function AuditTrailLedgerPage() {
+  const { user } = useAuth();
   const [events, setEvents] = useState<AuditEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -124,9 +126,35 @@ export default function AuditTrailLedgerPage() {
       ev.action_type.toLowerCase().includes(search.toLowerCase()) ||
       ev.details.toLowerCase().includes(search.toLowerCase());
 
-    if (roleFilter === "ALL") return matchesSearch;
-    return matchesSearch && ev.actor_role === roleFilter;
+    const matchesRole = roleFilter === "ALL" || ev.actor_role === roleFilter;
+    return matchesSearch && matchesRole;
   });
+
+  if (user?.role === "OWNER") {
+    return (
+      <div className="min-h-screen bg-surface-container-lowest text-on-surface flex flex-col md:pl-[72px]">
+        <Topbar />
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 flex items-center justify-center">
+          <div className="max-w-md w-full bg-surface p-6 sm:p-8 rounded-2xl border border-outline-variant shadow-lg text-center space-y-4">
+            <div className="w-12 h-12 rounded-full bg-error-container text-on-error-container flex items-center justify-center mx-auto">
+              <Lock className="w-6 h-6" />
+            </div>
+            <h2 className="text-lg font-bold text-on-surface">Audit Ledger Restricted</h2>
+            <p className="text-xs text-on-surface-variant leading-relaxed">
+              System governance audit logs and cryptographic ledgers are restricted to official oversight bodies and administrators.
+            </p>
+            <div className="pt-2">
+              <Link href="/owner">
+                <Button className="w-full bg-primary text-on-primary font-bold text-xs">
+                  Go to Citizen Land Vault
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-surface-container-lowest text-on-surface flex flex-col md:pl-[72px]">

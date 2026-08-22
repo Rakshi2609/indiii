@@ -48,6 +48,13 @@ async def upload_documents(
             detail="No files provided for upload."
         )
 
+    # Restrict upload privilege from citizens/owners
+    if current_user and current_user.role in [UserRole.OWNER, UserRole.VIEWER]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Access Denied: Citizens and Land Owners are not authorized to upload or ingest revenue records. Ingestion is reserved for authorized Revenue Officers and System Administrators."
+        )
+
     saved_documents: List[DocumentResponse] = []
     uploader_id = current_user.id if current_user else None
     client_ip = request.client.host if request.client else None

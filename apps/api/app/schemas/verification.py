@@ -20,6 +20,9 @@ class VerificationQueueItem(BaseModel):
     validation_status: str
     total_issues: int
     critical_issues: int
+    has_conflicts: bool = False
+    has_missing_details: bool = False
+    missing_fields: List[str] = Field(default_factory=list)
     created_at: datetime
 
 
