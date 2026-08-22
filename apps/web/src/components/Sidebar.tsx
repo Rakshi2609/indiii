@@ -44,8 +44,23 @@ export function Sidebar() {
   const [searchQuery, setSearchQuery] = useState("");
   const sidebarRef = useRef<HTMLDivElement>(null);
 
-  // If on login page, hide sidebar completely
-  if (pathname === "/login") {
+  // Hotkey listener for Cmd+K / Ctrl+K - must run unconditionally before any early returns
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+        e.preventDefault();
+        setSearchModalOpen((prev) => !prev);
+      }
+      if (e.key === "Escape") {
+        setSearchModalOpen(false);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
+  // If on login or signup page, hide sidebar completely
+  if (pathname === "/login" || pathname === "/signup") {
     return null;
   }
 
@@ -116,21 +131,6 @@ export function Sidebar() {
     { title: "System Audit Logs & Security Events", href: "/audit", type: "Audit Log" },
     { title: "FastAPI Interactive Swagger Specs", href: "http://localhost:8000/docs", isExternal: true, type: "API Docs" },
   ];
-
-  // Hotkey listener for Cmd+K / Ctrl+K
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
-        e.preventDefault();
-        setSearchModalOpen((prev) => !prev);
-      }
-      if (e.key === "Escape") {
-        setSearchModalOpen(false);
-      }
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, []);
 
   const openState = isExpanded || isHovered;
 
