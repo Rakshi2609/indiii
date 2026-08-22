@@ -17,12 +17,14 @@ import {
   FileUp,
   GitFork,
   Layers,
+  Bot,
   MapPin,
   Menu,
   PanelLeftClose,
   PanelLeftOpen,
   Search,
   ShieldCheck,
+  Sparkles,
   User,
   X,
   Zap
@@ -41,6 +43,13 @@ export function Sidebar() {
 
   const navItems = [
     { name: "Overview", href: "/", icon: Layers, labelIndic: "अवलोकन" },
+    { 
+      name: "Land Copilot", 
+      href: "/copilot", 
+      icon: Sparkles, 
+      labelIndic: "सहायक",
+      badge: "AI" 
+    },
     { name: "Upload & Extract", href: "/upload", icon: FileUp, labelIndic: "दस्तावेज़" },
     { name: "Dashboard", href: "/dashboard", icon: BarChart3, labelIndic: "डैशबोर्ड" },
     { name: "Cadastral GIS", href: "/gis", icon: Compass, labelIndic: "मानचित्र" },
@@ -62,6 +71,7 @@ export function Sidebar() {
   ];
 
   const quickSearchRecords = [
+    { title: "Land AI Copilot (Mistral DB Grounded Chat)", href: "/copilot", type: "AI Chatbot" },
     { title: "Survey No. 142/2A • Wagholi, Pune (Maharashtra)", href: "/verification/1", type: "Cadastral Record" },
     { title: "Land Ownership Lineage Graph & Timeline (10 Acres Split)", href: "/intelligence", type: "Lineage Graph" },
     { title: "Sale Deed • Guntur City, Andhra Pradesh (Telugu)", href: "/verification/4", type: "Deed Extract" },

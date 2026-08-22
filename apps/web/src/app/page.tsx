@@ -48,11 +48,18 @@ export default function Home() {
 
   const modules = [
     {
+      title: "Land AI Copilot (Intelligence Chatbot)",
+      description: "Database-grounded conversational intelligence with deterministic aggregations and Mistral reasoning.",
+      tag: "Mistral Reasoning & DB Grounding",
+      href: "/copilot",
+      icon: Sparkles
+    },
+    {
       title: "Document Upload & Processing",
       description: "Upload Satbara 7/12, RTC, or Jamabandi deeds with Sarvam & Mistral multi-model OCR.",
       tag: "AI Pipeline",
       href: "/upload",
-      icon: Sparkles
+      icon: FileText
     },
     {
       title: "Executive Analytics Dashboard",

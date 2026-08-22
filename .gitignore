@@ -46,6 +46,10 @@ Thumbs.db
 # Uploads & Temp Data
 apps/api/data/
 data/uploads/
+data/*.db
+*.db
+*.sqlite
+*.sqlite3
 *.pdf
 *.jpg
 *.jpeg

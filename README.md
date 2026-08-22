@@ -11,11 +11,11 @@
 [![Mistral OCR](https://img.shields.io/badge/Mistral_OCR-Latest-F43F5E?style=for-the-badge)](https://mistral.ai)
 [![Gemini](https://img.shields.io/badge/Google_Gemini-2.0_Flash-4285F4?style=for-the-badge&logo=google&logoColor=white)](https://ai.google.dev)
 [![Leaflet GIS](https://img.shields.io/badge/Leaflet-Satellite_GIS-199900?style=for-the-badge&logo=leaflet&logoColor=white)](https://leafletjs.com)
-[![Tests](https://img.shields.io/badge/Pytest-50%20Passed-emerald?style=for-the-badge)](#-automated-testing-suite)
+[![Tests](https://img.shields.io/badge/Pytest-56%20Passed-emerald?style=for-the-badge)](#-automated-testing-suite)
 
 *Transforming complex, unstructured historical Indian land revenue records into tamper-evident, spatially verified digital cadastral intelligence.*
 
-[🎯 3-Minute Hackathon Pitch](docs/PITCH.md) • [📊 Executive Dashboard](http://localhost:3000/dashboard) • [🗺️ Cadastral Satellite GIS](http://localhost:3000/gis) • [✍️ Verification Workbench](http://localhost:3000/verification) • [📑 Swagger API Docs](http://localhost:8000/docs)
+[🎯 3-Minute Hackathon Pitch](docs/PITCH.md) • [🤖 Land AI Copilot](http://localhost:3000/copilot) • [📊 Executive Dashboard](http://localhost:3000/dashboard) • [🗺️ Cadastral Satellite GIS](http://localhost:3000/gis) • [✍️ Verification Workbench](http://localhost:3000/verification) • [📑 Swagger API Docs](http://localhost:8000/docs)
 
 </div>
 
@@ -28,6 +28,7 @@
 - [Sample Land Revenue Documents Repository](#-sample-land-revenue-documents-repository)
 - [System Architecture](#-system-architecture)
 - [Multi-Model AI Extraction Pipeline](#-multi-model-ai-extraction-pipeline)
+- [Land AI Copilot (इंडी-भूमि सहायक)](#-land-ai-copilot-इंडी-भूमि-सहायक)
 - [Live Satellite Cadastral GIS Explorer](#-live-satellite-cadastral-gis-explorer)
 - [Human-in-the-Loop Active Learning Workbench](#-human-in-the-loop-active-learning-workbench)
 - [Demo Manager & Document Deletion](#-demo-manager--document-deletion)
@@ -142,6 +143,47 @@ Land AI features an **AIRouter** designed for mission-critical uptime during hig
 
 ---
 
+## 🤖 Land AI Copilot (इंडी-भूमि सहायक)
+
+The **Land AI Copilot** ([`/copilot`](http://localhost:3000/copilot)) is an authoritative conversational intelligence partner designed with a strict zero-hallucination architectural rule:
+
+> **CRITICAL ARCHITECTURAL GUARANTEE:**
+> **Mistral NEVER answers land-record questions from its general or pretrained knowledge.**
+> Mistral operates purely as the natural-language reasoning and summarization engine over structured evidence retrieved from the **PostgreSQL/PostGIS Database**.
+
+```
+========================================================================================
+                          LAND AI COPILOT PIPELINE
+========================================================================================
+ User Query: "How much land does Nishu own?"
+     ↓
+ 1. Multi-Entity Intent Extraction (RapidFuzz entity match, owner names, survey nos, states)
+     ↓
+ 2. Authoritative Database Search (Query LandRecords, Parcels, Validations, Documents)
+     ↓
+ 3. Deterministic Python Aggregation (Totals, state-wise breakdowns, acreage calculation)
+     ↓
+ 4. Strict Grounding Guard (If 0 records match → immediate honest fallback, 0 LLM calls)
+     ↓
+ 5. Structured Evidence Context Assembly (Pass ONLY verified facts to Mistral)
+     ↓
+ 6. Mistral Grounded Reasoning (Zero pretrained hallucination, structured markdown response)
+     ↓
+ 7. UI Rendering (Markdown answer + Summary Stat Chips + Clickable Record & GIS links)
+========================================================================================
+```
+
+### Supported Query Scenarios & Demonstrations:
+1. **Multi-State Ownership Totals**: *"How much land does Nishu own?"* $\rightarrow$ Calculates authoritative aggregate acres across Karnataka, Telangana, Andhra Pradesh, Tamil Nadu, and Maharashtra.
+2. **Discrepancy & Attention Detection**: *"Which of my properties need attention?"* $\rightarrow$ Inspects deeds where Document Extent vs Cadastral GIS Polygon area mismatch exceeds $5\%$.
+3. **Regional Holdings**: *"Show my land in Karnataka"* $\rightarrow$ Filters parcels situated in Karnataka with survey numbers, taluks, and khatedar details.
+4. **Largest Area Parcel**: *"Which property has the largest area?"* $\rightarrow$ Authoritatively ranks properties by acreage with exact location and tenure class.
+5. **Mutation & Succession Lineage**: *"Give me the ownership history of Survey 142/2B"* $\rightarrow$ Summarizes mutation entries and historical title transfers.
+6. **Encumbrance & Mortgage Checks**: *"Are there any mortgage encumbrances on my land?"* $\rightarrow$ Audits active bank charges and loan liens.
+7. **No-Hallucination Safe Fallback**: *"Show land owned by Tony Stark in Avengers Tower"* $\rightarrow$ Responsibly answers *"I couldn't find enough verified information in the Land AI records to answer that."* without guessing.
+
+---
+
 ## 🗺️ Live Satellite Cadastral GIS Explorer
 
 Land AI connects extracted legal deed text with real-world spatial geometries on an interactive vector map ([`/gis`](http://localhost:3000/gis)):
@@ -193,6 +235,9 @@ To ensure smooth, repeatable hackathon demonstrations:
 | **GIS** | `GET` | `/api/gis/parcels` | Fetch cadastral vector polygons as GeoJSON |
 | **Analytics** | `GET` | `/api/analytics/overview` | Executive KPI counts and accuracy rates |
 | **Analytics** | `GET` | `/api/analytics/districts` | Geographic digitization progress breakdown |
+| **Copilot** | `POST` | `/api/copilot/query` | Database-grounded query with Mistral reasoning |
+| **Copilot** | `GET` | `/api/copilot/suggestions` | Fetch curated query suggestions & categories |
+| **Copilot** | `POST` | `/api/copilot/seed-demo` | Pre-seed multi-state demo land records & parcels |
 | **Audit** | `GET` | `/api/audit/` | Tamper-evident mutation logs & RBAC events |
 | **Auth** | `POST` | `/api/auth/login` | JWT OAuth2 authentication |
 
