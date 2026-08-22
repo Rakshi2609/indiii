@@ -34,6 +34,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { MarkdownRenderer } from "@/components/MarkdownRenderer";
+import { useAuth } from "@/context/AuthContext";
 
 interface SourceRef {
   record_id?: number;
@@ -85,6 +86,7 @@ interface Message {
 }
 
 export default function LandAICopilotPage() {
+  const { user } = useAuth();
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -155,10 +157,19 @@ export default function LandAICopilotPage() {
     setLoading(true);
 
     try {
+      const headers: Record<string, string> = { "Content-Type": "application/json" };
+      if (typeof window !== "undefined") {
+        const token = localStorage.getItem("land_ai_auth_token");
+        if (token) headers["Authorization"] = `Bearer ${token}`;
+      }
+
       const res = await fetch("http://localhost:8000/api/copilot/query", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ query: textToSend }),
+        headers,
+        body: JSON.stringify({
+          query: textToSend,
+          user_role: user?.role || "OWNER"
+        }),
       });
 
       if (!res.ok) {
