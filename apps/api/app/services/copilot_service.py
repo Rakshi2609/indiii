@@ -745,7 +745,7 @@ class LandAICopilotService:
         if the database is clean, enabling comprehensive testing of all user query variations.
         """
         existing = db.query(LandRecord).count()
-        if existing >= 5:
+        if existing >= 12:
             return
 
         logger.info("Seeding authoritative demo Land Records across states for Land AI Copilot...")

@@ -39,10 +39,11 @@ def build_engine():
         except Exception as e:
             logger.warning(f"PostgreSQL connection unavailable ({e}). Falling back to embedded SQLite database.")
 
-    # Resilient SQLite database
-    data_dir = Path("./data")
+    # Resilient SQLite database with unified absolute path
+    data_dir = Path(__file__).resolve().parent.parent.parent / "data"
     data_dir.mkdir(parents=True, exist_ok=True)
-    sqlite_url = "sqlite:///./data/land_ai.db"
+    db_path = data_dir / "land_ai.db"
+    sqlite_url = f"sqlite:///{db_path.as_posix()}"
     return create_engine(
         sqlite_url,
         connect_args={"check_same_thread": False},
