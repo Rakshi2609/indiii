@@ -57,8 +57,11 @@ In India today, **over 66% of all civil litigation** is tied to land and propert
 
 | Feature | Description |
 | :--- | :--- |
+| **Owner Land Vault** | Citizen portal answering *"What land do I own?"* with deterministic DB metrics, deed evidence, cadastral GIS comparison, and zero-hallucination chronological title lineage (`/owner`). |
+| **Role-Based Auth (RBAC)** | Unified institutional login (`/login`) with 1-click Demo logins for **Land Owner** (`nishu@demo.landai`) and **Revenue Officer** (`officer@demo.landai`). |
 | **Indic Document AI** | Autonomous multi-lingual vision OCR tuned for Indian revenue records powered by **Google Gemini 2.0 / 1.5 Flash Vision**, **Sarvam Vision**, and **Mistral OCR**. |
 | **Resilient AI Router** | Automated failover chain (**Gemini $\rightarrow$ Sarvam $\rightarrow$ Mistral**) with High-Accuracy ensemble cross-validation and zero manual language selection required. |
+| **Land AI Copilot** | Conversational chat interface grounded strictly in PostGIS & LandRecord database evidence with Mistral reasoning, query expansion, and source citations (`/copilot`). |
 | **Live Satellite GIS Engine** | Interactive high-resolution satellite imagery (Esri World Imagery / CartoDB Dark) overlaid with PostGIS WGS-84 cadastral polygon boundaries and $5\%$ discrepancy flags. |
 | **Fuzzy Title Chain Matcher** | Levenshtein-based entity normalization using RapidFuzz to resolve transliterated owner names across decades of mutation ledgers. |
 | **Active Learning Workbench** | Side-by-side deed viewer with real uploaded image rendering, bounding box citations, active learning field corrections, and statutory approval workflows. |

@@ -19,6 +19,12 @@ class LandRecord(Base):
         unique=True,
         index=True
     )
+    owner_user_id: Mapped[Optional[int]] = mapped_column(
+        Integer,
+        ForeignKey("users.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True
+    )
 
     # Administrative Grouping
     state: Mapped[str] = mapped_column(String(100), nullable=False, index=True)

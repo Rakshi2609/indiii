@@ -8,11 +8,6 @@ from app.schemas.copilot import CopilotQueryRequest
 from app.services.copilot_service import copilot_service
 
 
-@pytest.fixture
-def client():
-    return TestClient(app)
-
-
 def test_copilot_intent_parsing():
     """Test natural language intent and entity extraction."""
     intent1 = copilot_service.parse_query_intent("How much land does Nishu own?")

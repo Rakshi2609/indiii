@@ -15,6 +15,7 @@ from app.api.analytics import router as analytics_router
 from app.api.audit import router as audit_router
 from app.api.intelligence import router as intelligence_router
 from app.api.copilot import router as copilot_router
+from app.api.owner import router as owner_router
 from app.api.v1.api import api_router
 from app.schemas.health import HealthResponse
 
@@ -90,6 +91,9 @@ def create_application() -> FastAPI:
 
     # Land AI Copilot & Grounded Reasoning Chatbot router
     app.include_router(copilot_router, prefix="/api/copilot")
+
+    # Owner Land Vault & Personal Intelligence Portal router
+    app.include_router(owner_router, prefix="/api/owner")
 
     # API v1 routes
     app.include_router(api_router, prefix=settings.API_V1_STR)

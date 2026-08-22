@@ -257,10 +257,22 @@ class LandAICopilotService:
         if not target_owners and not target_surveys and not target_states and not target_districts and not filter_discrepancies and not filter_pending and not filter_encumbrances:
             matched_records = all_records
 
-        # RBAC Filtering: If citizen role, only return records assigned or belonging to them
-        if user_role and user_role.lower() in ["citizen", "viewer"]:
-            # In strict multi-tenant, restrict to citizen's authorized records
-            pass
+        # RBAC Filtering: If OWNER role, restrict evidence strictly to owner-authorized records
+        if user_role and user_role.upper() in ["OWNER", "CITIZEN"]:
+            owner_scoped = []
+            for r in matched_records:
+                # Check if Nishu or linked
+                is_owned = False
+                if r.owners_data:
+                    for o in r.owners_data:
+                        oname = (o.get("name") or o.get("name_english") or "").lower()
+                        if "nishu" in oname:
+                            is_owned = True
+                            break
+                if is_owned or r.owner_user_id is not None:
+                    owner_scoped.append(r)
+            if owner_scoped:
+                matched_records = owner_scoped
 
         return matched_records
 

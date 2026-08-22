@@ -70,6 +70,15 @@ def init_db(target_engine=None) -> None:
     try:
         logger.info("Initializing database tables...")
         Base.metadata.create_all(bind=target)
+
+        # Automatic lightweight schema migration for existing SQLite databases
+        with target.connect() as conn:
+            try:
+                conn.execute(text("ALTER TABLE land_records ADD COLUMN owner_user_id INTEGER"))
+                conn.commit()
+            except Exception:
+                pass
+
         logger.info("Database tables initialized successfully.")
     except Exception as e:
         logger.warning(f"Database table initialization warning: {e}")
