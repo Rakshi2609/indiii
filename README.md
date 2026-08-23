@@ -344,6 +344,9 @@ To guarantee absolute trust, transparency, and safety for real-world government 
 
 ### 🚫 Real Document Processing (Zero Mock Tolerance)
 * When documents are processed in production, the AI pipeline executes **actual API calls** to Mistral OCR, Sarvam Document AI, and Google Gemini Vision.
+* **Sarvam Asynchronous Job Extract**: Production uses `/doc-ai/v1/job/extract` with custom JSON schemas. The pipeline polls job status until terminal state (`completed`, `partially_completed`) and retrieves values.
+* **Mistral Dynamic Field Parsing**: OCR content is parsed via regex patterns dynamically resolving land fields (Survey Numbers, Area sizes) directly from raw text evidence.
+* **Stateless and Location Integrity**: Maharashtra/Marathi assumptions are removed from model parsing. State and language attributes default strictly to `None` / `unknown` unless explicitly found in document text.
 * If credentials are unconfigured or upstream endpoints fail/are rate-limited, the system **honestly raises processing errors** (e.g. `RuntimeError`) and halts. It **never fabricates placeholder extractions or fake AI analysis** in the production path.
 * Confidence scores are never hardcoded. They are derived exclusively from actual provider confidence values or OCR consensus metrics. If unavailable, they are outputted as `None` (represented in the UI as `UNKNOWN`).
 
