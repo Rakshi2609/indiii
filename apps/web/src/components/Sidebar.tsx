@@ -52,6 +52,7 @@ export function Sidebar() {
         { name: "Verifications", href: "/verification", icon: FileCheck2, badge: "Review" },
         { name: "Audit Ledger", href: "/audit", icon: History, badge: null },
         { name: "AI Copilot", href: "/copilot", icon: Sparkles, badge: "AI" },
+        { name: "API Settings", href: "/settings", icon: Settings, badge: null },
       ];
 
   const isActive = (path: string) => {

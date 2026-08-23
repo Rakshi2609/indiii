@@ -1,8 +1,28 @@
 import logging
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.responses import Response
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.middleware.base import BaseHTTPMiddleware
+
+class GovtCORSMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        # Handle preflight OPTIONS requests directly for govt endpoints
+        if request.method == "OPTIONS" and request.url.path.startswith("/api/govt/"):
+            response = Response()
+            response.headers["Access-Control-Allow-Origin"] = "*"
+            response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS, PATCH, PUT, DELETE"
+            response.headers["Access-Control-Allow-Headers"] = "X-API-Key, Authorization, Content-Type, api_key"
+            response.headers["Access-Control-Max-Age"] = "86400"
+            return response
+            
+        response = await call_next(request)
+        if request.url.path.startswith("/api/govt/"):
+            response.headers["Access-Control-Allow-Origin"] = "*"
+            response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS, PATCH, PUT, DELETE"
+            response.headers["Access-Control-Allow-Headers"] = "X-API-Key, Authorization, Content-Type, api_key"
+        return response
 
 from app.core.config import settings
 from app.db.database import init_db
@@ -16,6 +36,7 @@ from app.api.audit import router as audit_router
 from app.api.intelligence import router as intelligence_router
 from app.api.copilot import router as copilot_router
 from app.api.owner import router as owner_router
+from app.api.govt import router as govt_router
 from app.api.v1.api import api_router
 from app.schemas.health import HealthResponse
 
@@ -52,6 +73,8 @@ def create_application() -> FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
+    
+    app.add_middleware(GovtCORSMiddleware)
 
     # Root health endpoint
     @app.get("/health", response_model=HealthResponse, tags=["Health"])
@@ -94,6 +117,9 @@ def create_application() -> FastAPI:
 
     # Owner Land Vault & Personal Intelligence Portal router
     app.include_router(owner_router, prefix="/api/owner")
+
+    # Government Open API Integration
+    app.include_router(govt_router, prefix="/api/govt")
 
     # API v1 routes
     app.include_router(api_router, prefix=settings.API_V1_STR)

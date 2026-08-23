@@ -295,6 +295,9 @@ graph TB
 - `POST /api/verification/{id}/approve` — Officer verification approval & active learning correction
 - `GET /api/gis/parcels` — Cadastral GIS parcels with conflict flags
 - `GET /api/audit/logs` — Immutable JSON-diffed audit trail
+- `POST /api/govt/keys/generate` — Dynamically generate secure government open API keys (persisted in JSON)
+- `GET /api/govt/keys` — Retrieve active integration API keys
+- `GET /api/govt/verify` — Verify and retrieve database values for land record(s) using a valid API key (returns all records if code parameter is omitted)
 
 ---
 
@@ -357,6 +360,7 @@ pytest -v
 | `/gis` | **Cadastral GIS Explorer** | Revenue Officer | Interactive satellite map with boundary conflict detection |
 | `/intelligence` | **Lineage Intelligence** | Revenue Officer | Ownership lineage graph and family tree split history |
 | `/audit` | **Statutory Audit Trail** | Officer / Auditor | Immutable SHA-256 verified action history |
+| `/settings` | **API Integration Settings** | Revenue Officer / Admin | Dynamically generate and manage government open API keys |
 
 ---
 
