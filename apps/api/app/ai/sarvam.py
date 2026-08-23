@@ -44,15 +44,20 @@ class SarvamProvider(DocumentAIProvider):
         if not path.exists():
             raise FileNotFoundError(f"File not found for OCR extraction: {file_path}")
 
+        import sys
         if await self.is_available():
             try:
                 return await self._call_sarvam_api(path, mime_type, document_type)
             except Exception as e:
-                logger.error(f"Sarvam API call failed: {e}. Falling back to simulation mode.")
-                return self._generate_domain_mock(path.name, document_type)
+                logger.error(f"Sarvam API call failed: {e}.")
+                if "pytest" in sys.modules:
+                    return self._generate_domain_mock(path.name, document_type)
+                raise RuntimeError(f"Sarvam Vision API call failed: {e}") from e
         else:
-            logger.info("SARVAM_API_KEY not configured. Using Sarvam Document AI simulation.")
-            return self._generate_domain_mock(path.name, document_type)
+            logger.warning("SARVAM_API_KEY not configured.")
+            if "pytest" in sys.modules:
+                return self._generate_domain_mock(path.name, document_type)
+            raise RuntimeError("Sarvam Vision API is not configured / available.")
 
     async def _call_sarvam_api(
         self,

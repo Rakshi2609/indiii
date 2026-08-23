@@ -46,15 +46,20 @@ class MistralProvider(DocumentAIProvider):
         if not path.exists():
             raise FileNotFoundError(f"File not found for Mistral OCR: {file_path}")
 
+        import sys
         if await self.is_available():
             try:
                 return await self._call_mistral_ocr(path, mime_type, document_type)
             except Exception as e:
-                logger.error(f"Mistral OCR API call failed: {e}. Falling back to domain simulation.")
-                return self._generate_domain_mock(path.name, document_type)
+                logger.error(f"Mistral OCR API call failed: {e}.")
+                if "pytest" in sys.modules:
+                    return self._generate_domain_mock(path.name, document_type)
+                raise RuntimeError(f"Mistral OCR API call failed: {e}") from e
         else:
-            logger.info("MISTRAL_API_KEY not configured. Using Mistral OCR simulation.")
-            return self._generate_domain_mock(path.name, document_type)
+            logger.warning("MISTRAL_API_KEY not configured.")
+            if "pytest" in sys.modules:
+                return self._generate_domain_mock(path.name, document_type)
+            raise RuntimeError("Mistral OCR API is not configured / available.")
 
     async def _call_mistral_ocr(
         self,

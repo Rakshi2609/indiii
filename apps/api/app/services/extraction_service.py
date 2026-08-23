@@ -95,7 +95,16 @@ class ExtractionService:
             )
 
         # 6. Generate Explainability Evidence items
-        confidence = float(raw_data.get("extraction_confidence") or 0.95)
+        prov_conf = raw_data.get("extraction_confidence")
+        consensus_score = raw_data.get("_consensus", {}).get("overall_agreement_score")
+        
+        if prov_conf is not None:
+            confidence = float(prov_conf)
+        elif consensus_score is not None:
+            confidence = float(consensus_score)
+        else:
+            confidence = 1.0  # Treat as full match if no contradictions exist
+
         transcript = raw_data.get("ocr_transcript_sample", "")
         evidence_list: List[EvidenceSchema] = [
             EvidenceSchema(
