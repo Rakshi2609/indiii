@@ -109,6 +109,51 @@ class MistralProvider(DocumentAIProvider):
             mock_fallback["raw_mistral_pages_count"] = len(pages)
             return mock_fallback
 
+        # Simple extraction from markdown text
+        survey_number = None
+        village = None
+        district = None
+        taluk = None
+        total_area = None
+        
+        import re
+        
+        survey_match = re.search(r"(?:survey|gat|khasra)\s*(?:no|num|number)?\s*[:\-\s\.]*\s*([A-Za-z0-9\-\/]+)", markdown_text, re.IGNORECASE)
+        if not survey_match:
+            survey_match = re.search(r"(?:भूमापन|गट)\s*(?:क्रमांक)?\s*[:\-\s\.]*\s*([०-९0-9\-\/]+)", markdown_text)
+        if survey_match:
+            survey_number = survey_match.group(1)
+
+        village_match = re.search(r"village\s*[:\-\s\.]*\s*([A-Za-z]+)", markdown_text, re.IGNORECASE)
+        if not village_match:
+            village_match = re.search(r"गाव\s*[:\-\s\.]*\s*([^\s\n\r]+)", markdown_text)
+        if village_match:
+            village = village_match.group(1)
+
+        district_match = re.search(r"district\s*[:\-\s\.]*\s*([A-Za-z]+)", markdown_text, re.IGNORECASE)
+        if not district_match:
+            district_match = re.search(r"जिल्हा\s*[:\-\s\.]*\s*([^\s\n\r]+)", markdown_text)
+        if district_match:
+            district = district_match.group(1)
+
+        taluk_match = re.search(r"(?:taluk|taluka|mandal|tehsil)\s*[:\-\s\.]*\s*([A-Za-z]+)", markdown_text, re.IGNORECASE)
+        if not taluk_match:
+            taluk_match = re.search(r"(?:तालुका|तहसील)\s*[:\-\s\.]*\s*([^\s\n\r]+)", markdown_text)
+        if taluk_match:
+            taluk = taluk_match.group(1)
+
+        area_match = re.search(r"(?:total\s*)?area\s*[:\-\s\.]*\s*([0-9\.]+)", markdown_text, re.IGNORECASE)
+        if not area_match:
+            area_match = re.search(r"एकूण क्षेत्र\s*[:\-\s\.]*\s*([०-९0-9\.]+)", markdown_text)
+        if area_match:
+            try:
+                val = area_match.group(1)
+                trans_map = str.maketrans('०१२३४५६७८९', '0123456789')
+                val = val.translate(trans_map)
+                total_area = float(val)
+            except ValueError:
+                pass
+
         return {
             "provider": "Mistral OCR (mistral-ocr-latest)",
             "ocr_engine_version": "mistral-ocr-latest",
@@ -118,25 +163,25 @@ class MistralProvider(DocumentAIProvider):
                 "sections": []
             },
             "detected_language": {
-                "primary": "mr",
-                "name": "Marathi",
+                "primary": "unknown",
+                "name": "Unknown",
                 "confidence": None
             },
             "revenue_identifiers": {
-                "survey_number": None,
+                "survey_number": survey_number,
                 "hissa_number": None,
                 "gat_number": None,
                 "khata_number": None
             },
             "location": {
-                "state": "Maharashtra",
-                "district": None,
-                "taluk": None,
-                "village": None,
+                "state": None,
+                "district": district,
+                "taluk": taluk,
+                "village": village,
                 "sub_registrar_office": None
             },
             "area_and_tenure": {
-                "total_area_hectares": None,
+                "total_area_hectares": total_area,
                 "cultivable_area_hectares": None,
                 "pot_kharaba_uncultivable_hectares": None,
                 "equivalent_acres": None,

@@ -65,22 +65,147 @@ class SarvamProvider(DocumentAIProvider):
         mime_type: str,
         document_type: Optional[str]
     ) -> Dict[str, Any]:
-        """Perform real HTTP call to Sarvam Document AI service."""
-        url = f"{self.BASE_URL}/document-ai/extract"
+        """Perform real HTTP call to Sarvam Document AI service using job extraction flow."""
+        import json
+        import asyncio
+        
+        # 1. Initiate job
+        url = f"{self.BASE_URL}/doc-ai/v1/job/extract"
         headers = {
             "api-subscription-key": self.api_key,
         }
-
+        
+        schema = {
+            "type": "object",
+            "properties": {
+                "document_type": {"type": "string", "description": "The type of document, e.g. 7/12 extract, Pahani, sale deed"},
+                "survey_number": {"type": "string", "description": "The survey number or khasra number"},
+                "village": {"type": "string", "description": "The village name"},
+                "district": {"type": "string", "description": "The district name"},
+                "taluk": {"type": "string", "description": "The taluk or mandal or block name"},
+                "total_area": {"type": "number", "description": "The total area of the land"},
+                "area_unit": {"type": "string", "description": "The unit of area, e.g. Hectare, Acre, Guntha"},
+                "owners": {"type": "string", "description": "Comma-separated list of land owners"}
+            }
+        }
+        
         async with httpx.AsyncClient(timeout=60.0) as client:
             with open(path, "rb") as f:
                 files = {"file": (path.name, f, mime_type)}
                 data = {
-                    "document_type": document_type or "land_record",
-                    "language_code": "auto"
+                    "schema": json.dumps(schema)
                 }
+                
+                logger.info(f"Creating Sarvam Extract job for file {path.name}...")
                 response = await client.post(url, headers=headers, files=files, data=data)
+                if response.status_code != 200:
+                    logger.error(f"Sarvam job creation failed: status={response.status_code}, response={response.text}")
                 response.raise_for_status()
-                return response.json()
+                job_data = response.json()
+                job_id = job_data.get("job_id")
+                if not job_id:
+                    raise RuntimeError("No job_id returned by Sarvam Extract API")
+                
+                logger.info(f"Sarvam job created successfully. Job ID: {job_id}")
+                
+                # 2. Poll Status
+                status_url = f"{self.BASE_URL}/doc-ai/v1/job/{job_id}/status"
+                max_polls = 30
+                poll_interval = 2.0
+                job_status = "pending"
+                
+                for attempt in range(max_polls):
+                    await asyncio.sleep(poll_interval)
+                    status_res = await client.get(status_url, headers=headers)
+                    status_res.raise_for_status()
+                    status_data = status_res.json()
+                    job_status = status_data.get("status")
+                    
+                    logger.info(f"Sarvam Job {job_id} Status: {job_status} (Attempt {attempt+1}/{max_polls})")
+                    
+                    if job_status in ["completed", "partially_completed", "failed", "rejected"]:
+                        break
+                        
+                if job_status not in ["completed", "partially_completed"]:
+                    raise RuntimeError(f"Sarvam job {job_id} finished with terminal state: {job_status}")
+                    
+                # 3. Retrieve Results
+                results_url = f"{self.BASE_URL}/doc-ai/v1/job/{job_id}/results"
+                results_res = await client.get(results_url, headers=headers)
+                results_res.raise_for_status()
+                results_data = results_res.json()
+                
+                return self._parse_sarvam_extract_output(results_data, path.name, document_type)
+
+    def _parse_sarvam_extract_output(self, results_data: Dict[str, Any], filename: str, document_type: Optional[str]) -> Dict[str, Any]:
+        """Map Sarvam's schema-based extraction results to the canonical Indi-Bhoomi schema."""
+        extraction = {}
+        res_list = results_data.get("results", [])
+        if isinstance(res_list, list) and len(res_list) > 0:
+            extraction = res_list[0].get("extraction", {})
+        elif isinstance(res_list, dict):
+            extraction = res_list.get("extraction", {})
+        else:
+            extraction = results_data.get("extraction", {})
+
+        state = extraction.get("state")
+        
+        location = {
+            "state": state,
+            "district": extraction.get("district"),
+            "taluk": extraction.get("taluk"),
+            "village": extraction.get("village"),
+            "sub_registrar_office": None
+        }
+
+        revenue_identifiers = {
+            "survey_number": extraction.get("survey_number"),
+            "hissa_number": extraction.get("hissa_number"),
+            "gat_number": extraction.get("gat_number"),
+            "khata_number": extraction.get("khata_number")
+        }
+
+        total_area = extraction.get("total_area")
+        area_and_tenure = {
+            "total_area_hectares": float(total_area) if total_area is not None else None,
+            "cultivable_area_hectares": None,
+            "pot_kharaba_uncultivable_hectares": None,
+            "equivalent_acres": None,
+            "land_tenure": None,
+            "assessment_tax_inr": None,
+            "irrigation_type": None
+        }
+
+        owners_list = []
+        for o in extraction.get("owners", []):
+            owners_list.append({
+                "name_english": o.get("name_english"),
+                "name_indic": o.get("name_indic"),
+                "gender": None,
+                "share_fraction": o.get("share_fraction"),
+                "share_percentage": float(o.get("share_percentage")) if o.get("share_percentage") is not None else None,
+                "mutation_entry_number": None,
+                "aadhaar_hash_matched": None
+            })
+
+        return {
+            "provider": "Sarvam Vision AI (doc-ai/v1/job/extract)",
+            "ocr_engine_version": "sarvam-doc-v2.1-job",
+            "document_type": document_type or extraction.get("document_type") or "7/12_extract_satbara",
+            "detected_language": {
+                "primary": "mr" if state == "Maharashtra" else "unknown",
+                "name": "Marathi" if state == "Maharashtra" else "Unknown",
+                "confidence": None
+            },
+            "revenue_identifiers": revenue_identifiers,
+            "location": location,
+            "area_and_tenure": area_and_tenure,
+            "owners": owners_list,
+            "encumbrances_and_charges": [],
+            "mutation_history": [],
+            "ocr_transcript_sample": "",
+            "extraction_confidence": None
+        }
 
     def _generate_domain_mock(self, filename: str, document_type: Optional[str] = None) -> Dict[str, Any]:
         """

@@ -28,7 +28,7 @@ class ExtractionService:
         # 1. Administrative
         loc = raw_data.get("location", {})
         admin_info = AdministrativeInfo(
-            state=loc.get("state") or "Maharashtra",
+            state=loc.get("state") or "Unknown State",
             district=loc.get("district") or "Unknown District",
             taluk=loc.get("taluk"),
             village=loc.get("village") or "Unknown Village",
@@ -206,6 +206,7 @@ class ExtractionService:
         record.mutations_data = [m.model_dump() for m in structured.mutations]
         record.encumbrances_data = [e.model_dump() for e in structured.encumbrances]
         record.raw_extracted_payload = raw_data
+        record.overall_confidence_score = raw_data.get("extraction_confidence") or raw_data.get("_consensus", {}).get("overall_agreement_score") or 1.0
 
         db.flush()
 
@@ -217,7 +218,7 @@ class ExtractionService:
                     record_id=record.id,
                     field_name=ev.field_name,
                     extracted_value=ev.extracted_value,
-                    confidence_score=ev.confidence_score,
+                    confidence_score=ev.confidence_score if ev.confidence_score is not None else 1.0,
                     source_text=ev.source_text,
                     bounding_box=ev.bounding_box
                 )
