@@ -28,7 +28,7 @@ class ExtractionService:
         # 1. Administrative
         loc = raw_data.get("location", {})
         admin_info = AdministrativeInfo(
-            state=loc.get("state") or "Maharashtra",
+            state=loc.get("state") or "Unknown State",
             district=loc.get("district") or "Unknown District",
             taluk=loc.get("taluk"),
             village=loc.get("village") or "Unknown Village",
@@ -46,7 +46,7 @@ class ExtractionService:
             total_area=area_tenure.get("total_area_hectares") or area_tenure.get("total_area"),
             cultivable_area=area_tenure.get("cultivable_area_hectares") or area_tenure.get("cultivable_area"),
             uncultivable_area=area_tenure.get("pot_kharaba_uncultivable_hectares") or area_tenure.get("uncultivable_area"),
-            area_unit=area_tenure.get("area_unit") or "hectares",
+            area_unit=area_tenure.get("area_unit") or "unknown",
             land_tenure=area_tenure.get("land_tenure"),
             assessment_tax=area_tenure.get("assessment_tax_inr") or area_tenure.get("assessment_tax"),
             irrigation_type=area_tenure.get("irrigation_type")
@@ -206,6 +206,7 @@ class ExtractionService:
         record.mutations_data = [m.model_dump() for m in structured.mutations]
         record.encumbrances_data = [e.model_dump() for e in structured.encumbrances]
         record.raw_extracted_payload = raw_data
+        record.overall_confidence_score = raw_data.get("extraction_confidence") or raw_data.get("_consensus", {}).get("overall_agreement_score")
 
         db.flush()
 
