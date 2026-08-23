@@ -8,6 +8,9 @@ from app.db.database import SessionLocal
 from app.models.document import Document, DocumentStatus
 from app.services.extraction_service import extraction_service
 from app.services.validation_service import validation_service
+from app.services.document_image_pipeline import document_image_pipeline
+from app.services.consensus_engine import consensus_engine
+from app.services.reasoning_engine import reasoning_engine
 
 logger = logging.getLogger(__name__)
 
@@ -29,10 +32,12 @@ class DocumentProcessingService:
         """
         Process a document through the complete Land AI pipeline:
         1. Status -> PROCESSING
-        2. AI Extraction with Fallback / High-Accuracy Multi-Model Ensemble
-        3. Schema mapping and evidence generation (ExtractionService)
-        4. Rule-based consistency and confidence scoring (ValidationService)
-        5. Status -> COMPLETED
+        2. Image Quality Assessment & Adaptive Preprocessing
+        3. AI Extraction with Fallback / High-Accuracy Multi-Model Ensemble
+        4. Schema mapping and evidence generation (ExtractionService)
+        5. Rule-based consistency and confidence scoring (ValidationService)
+        6. Explainable Reasoning Layer (ReasoningEngine)
+        7. Status -> COMPLETED
         """
         doc = db.query(Document).filter(Document.id == document_id).first()
         if not doc:
@@ -46,15 +51,57 @@ class DocumentProcessingService:
         logger.info(f"Document {document_id} transitioned to PROCESSING status (Mode: {mode}).")
 
         try:
-            # Step 2: Multi-Model Routing & Extraction
+            # Step 2: Quality Assessment & Adaptive Image Preprocessing
+            quality_metrics = {}
+            applied_filters = []
+            try:
+                logger.info(f"Running Image Quality Assessment and Adaptive Preprocessing for Document {document_id}...")
+                quality_metrics, processed_path, applied_filters = document_image_pipeline.process_file(doc.file_path)
+                # Reassign file path so downstream extraction consumes enhanced version
+                doc.file_path = processed_path
+                logger.info(f"Document {document_id} preprocessed successfully. Applied filters: {applied_filters}")
+            except Exception as img_err:
+                logger.error(f"Image pipeline failed for Document {document_id}: {img_err}", exc_info=True)
+                quality_metrics = {
+                    "quality": "UNKNOWN",
+                    "error": str(img_err)
+                }
+
+            # Step 3: Multi-Model Routing & Extraction
             if mode == "high_accuracy":
-                logger.info(f"High-Accuracy Mode triggered for Document {document_id}. Executing Sarvam + Mistral ensemble...")
-                extracted_data = await AIRouter.extract_with_ensemble(
+                logger.info(f"High-Accuracy Mode triggered for Document {document_id}. Executing Sarvam + Mistral independently...")
+                
+                sarvam_provider = get_document_ai_provider("sarvam")
+                mistral_provider = get_document_ai_provider("mistral")
+                
+                sarvam_res = await sarvam_provider.extract_information(
                     file_path=doc.file_path,
                     mime_type=doc.mime_type,
-                    document_type=document_type,
-                    providers=["sarvam", "mistral"]
+                    document_type=document_type
                 )
+                mistral_res = await mistral_provider.extract_information(
+                    file_path=doc.file_path,
+                    mime_type=doc.mime_type,
+                    document_type=document_type
+                )
+                
+                # Perform OCR Consensus comparison
+                logger.info(f"Running OCR Consensus Engine for Document {document_id}...")
+                consensus_res = consensus_engine.run_consensus(sarvam_res, mistral_res)
+                
+                # Merge into final output
+                extracted_data = dict(sarvam_res)
+                extracted_data["_consensus"] = consensus_res
+                extracted_data["_model_comparison"] = {
+                    "overall_agreement_score": consensus_res["overall_agreement_score"],
+                    "compared_models": ["sarvam", "mistral"],
+                    "discrepancies": [v for v in consensus_res["conflicts"].values()]
+                }
+                extracted_data["_routing_metadata"] = {
+                    "mode": "high_accuracy_ensemble",
+                    "participating_providers": ["sarvam", "mistral"],
+                    "agreement_score": consensus_res["overall_agreement_score"]
+                }
             elif mode == "single":
                 provider = get_document_ai_provider(provider_name)
                 logger.info(f"Single Provider Mode ({provider.provider_name}) for Document {document_id}...")
@@ -74,24 +121,35 @@ class DocumentProcessingService:
                 )
                 logger.info(f"Extraction fulfilled by '{winning_provider}' after attempts: {attempts}")
 
-            # Step 3: Persist structured LandRecord and Evidence layer
+            # Embed image quality and filters telemetry
+            extracted_data["quality_assessment"] = quality_metrics
+            extracted_data["applied_filters"] = applied_filters
+
+            # Step 4: Persist structured LandRecord and Evidence layer
             record = extraction_service.extract_and_persist_record(
                 doc=doc,
                 raw_data=extracted_data,
                 db=db
             )
 
-            # Step 4: Automatically run validation engine & confidence scoring
+            # Step 5: Automatically run validation engine & confidence scoring
             validation_service.validate_and_persist_record(
                 record=record,
                 db=db
             )
 
-            # Step 5: Update document status to COMPLETED and persist results
+            # Step 6: Generate Explainable Reasoning Layer
+            logger.info(f"Generating grounded reasoning report for Record {record.id}...")
+            reasoning_res = await reasoning_engine.generate_reasoning(record, db)
+            extracted_data["reasoning_report"] = reasoning_res
+
+            # Step 7: Update document status to COMPLETED and persist results
             doc.status = DocumentStatus.COMPLETED
             doc.extracted_data = extracted_data
             doc.processed_at = datetime.now(timezone.utc)
             doc.error_message = None
+            
+            # Save final changes
             db.commit()
             db.refresh(doc)
             logger.info(f"Document {document_id} and Record {record.id} successfully COMPLETED & VALIDATED.")

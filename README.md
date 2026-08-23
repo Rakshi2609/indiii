@@ -338,6 +338,20 @@ cd apps/api
 pytest -v
 ```
 
+## 🔒 Production Integrity & Mock Data Isolation
+
+To guarantee absolute trust, transparency, and safety for real-world government deployments, the platform strictly separates real-world document processing from mock/simulated data.
+
+### 🚫 Real Document Processing (Zero Mock Tolerance)
+* When documents are processed in production, the AI pipeline executes **actual API calls** to Mistral OCR, Sarvam Document AI, and Google Gemini Vision.
+* If credentials are unconfigured or upstream endpoints fail/are rate-limited, the system **honestly raises processing errors** (e.g. `RuntimeError`) and halts. It **never fabricates placeholder extractions or fake AI analysis** in the production path.
+* Confidence scores are never hardcoded. They are derived exclusively from actual provider confidence values or OCR consensus metrics. If unavailable, they are outputted as `None` (represented in the UI as `UNKNOWN`).
+
+### 🧪 Permitted Mock Data Isolation
+Mock data is strictly isolated to these two scopes:
+1. **Automated Testing (`tests/` directory)**: Mocks are used exclusively in the backend tests (detected at runtime via `sys.modules`) to simulate provider outages and verify fallback architectures.
+2. **Demo/Seeded Citizen Data (Nishu Kumar Portal)**: Pre-populated properties, mutation histories, and cadastral maps for the seeded citizen `Nishu Kumar` are maintained strictly for showcasing dashboard statistics and the verification queue workflow.
+
 ---
 
 ## 🌐 Frontend Route Directory

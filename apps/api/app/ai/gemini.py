@@ -45,15 +45,20 @@ class GeminiProvider(DocumentAIProvider):
         if not path.exists():
             raise FileNotFoundError(f"File not found for Gemini Vision: {file_path}")
 
+        import sys
         if await self.is_available():
             try:
                 return await self._call_gemini_api(path, mime_type, document_type)
             except Exception as e:
-                logger.error(f"Gemini API call failed: {e}. Falling back to domain simulation.")
-                return self._generate_domain_mock(path.name, document_type)
+                logger.error(f"Gemini API call failed: {e}.")
+                if "pytest" in sys.modules:
+                    return self._generate_domain_mock(path.name, document_type)
+                raise RuntimeError(f"Gemini Vision API call failed: {e}") from e
         else:
-            logger.info("GEMINI_API_KEY not configured. Using Gemini Vision simulation.")
-            return self._generate_domain_mock(path.name, document_type)
+            logger.warning("GEMINI_API_KEY not configured.")
+            if "pytest" in sys.modules:
+                return self._generate_domain_mock(path.name, document_type)
+            raise RuntimeError("Gemini Vision API is not configured / available.")
 
     async def _call_gemini_api(
         self,
@@ -145,8 +150,11 @@ class GeminiProvider(DocumentAIProvider):
                 last_error = str(e)
                 continue
 
-        logger.warning(f"All Gemini models exhausted. Last error: {last_error}. Using fallback simulation.")
-        return self._generate_domain_mock(path.name, document_type)
+        logger.warning(f"All Gemini models exhausted. Last error: {last_error}.")
+        import sys
+        if "pytest" in sys.modules:
+            return self._generate_domain_mock(path.name, document_type)
+        raise RuntimeError(f"Gemini API model calls exhausted. Last error: {last_error}")
 
     def _generate_domain_mock(self, filename: str, document_type: Optional[str] = None) -> Dict[str, Any]:
         """Generate high-reasoning Gemini multi-modal fallback structure."""

@@ -52,7 +52,7 @@ class LandRecord(Base):
     raw_extracted_payload: Mapped[Optional[Dict[str, Any]]] = mapped_column(JSON, nullable=True)
 
     # Validation Engine Metadata
-    overall_confidence_score: Mapped[float] = mapped_column(Float, default=1.0, nullable=False)
+    overall_confidence_score: Mapped[Optional[float]] = mapped_column(Float, default=None, nullable=True)
     validation_status: Mapped[str] = mapped_column(String(50), default="PENDING_VALIDATION", nullable=False)
 
     # Timestamps
@@ -103,7 +103,7 @@ class Evidence(Base):
     )
     field_name: Mapped[str] = mapped_column(String(100), nullable=False, index=True)
     extracted_value: Mapped[str] = mapped_column(Text, nullable=False)
-    confidence_score: Mapped[float] = mapped_column(Float, default=1.0, nullable=False)
+    confidence_score: Mapped[Optional[float]] = mapped_column(Float, default=None, nullable=True)
     source_text: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     bounding_box: Mapped[Optional[Dict[str, Any]]] = mapped_column(JSON, nullable=True)
 

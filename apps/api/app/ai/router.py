@@ -216,67 +216,21 @@ class AIRouter:
         p1, p2 = provider_names[0], provider_names[1]
         r1, r2 = results_map[p1], results_map[p2]
 
+        from app.services.consensus_engine import consensus_engine
+        consensus_res = consensus_engine.run_consensus(r1, r2)
+
         discrepancies = []
-        agreed_points = 0
-        total_points = 4
-
-        # 1. Survey Number Check
-        s1 = r1.get("revenue_identifiers", {}).get("survey_number", "").strip().lower()
-        s2 = r2.get("revenue_identifiers", {}).get("survey_number", "").strip().lower()
-        if s1 and s2 and s1 == s2:
-            agreed_points += 1
-        elif s1 or s2:
+        for field, conf in consensus_res.get("conflicts", {}).items():
             discrepancies.append({
-                "field": "survey_number",
-                f"{p1}_value": s1,
-                f"{p2}_value": s2,
-                "note": "Survey number mismatch between models"
+                "field": field,
+                f"{p1}_value": conf["values"].get("sarvam"),
+                f"{p2}_value": conf["values"].get("mistral"),
+                "note": conf["reason"]
             })
-
-        # 2. Area Check
-        a1 = float(r1.get("area_and_tenure", {}).get("total_area_hectares", 0.0) or 0.0)
-        a2 = float(r2.get("area_and_tenure", {}).get("total_area_hectares", 0.0) or 0.0)
-        if abs(a1 - a2) < 0.01:
-            agreed_points += 1
-        else:
-            discrepancies.append({
-                "field": "total_area_hectares",
-                f"{p1}_value": a1,
-                f"{p2}_value": a2,
-                "note": f"Area difference: {abs(a1 - a2):.3f} Ha"
-            })
-
-        # 3. Village Check
-        v1 = r1.get("location", {}).get("village", "").strip().lower()
-        v2 = r2.get("location", {}).get("village", "").strip().lower()
-        if v1 and v2 and v1 == v2:
-            agreed_points += 1
-        elif v1 or v2:
-            discrepancies.append({
-                "field": "village",
-                f"{p1}_value": v1,
-                f"{p2}_value": v2,
-                "note": "Village name mismatch between models"
-            })
-
-        # 4. Owners Count Check
-        o1 = len(r1.get("owners", []))
-        o2 = len(r2.get("owners", []))
-        if o1 == o2:
-            agreed_points += 1
-        else:
-            discrepancies.append({
-                "field": "owners_count",
-                f"{p1}_value": o1,
-                f"{p2}_value": o2,
-                "note": f"Owner entity count difference ({o1} vs {o2})"
-            })
-
-        score = round(agreed_points / total_points, 3)
 
         return {
-            "overall_agreement_score": score,
-            "agreed_checks": f"{agreed_points}/{total_points}",
+            "overall_agreement_score": consensus_res["overall_agreement_score"],
+            "agreed_checks": f"{consensus_res['agreed_count']}/{consensus_res['agreed_count'] + consensus_res['disagreed_count']}",
             "discrepancies": discrepancies,
             "compared_models": provider_names
         }

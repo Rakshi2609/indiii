@@ -80,6 +80,7 @@ def format_record_response(record: LandRecord) -> LandRecordResponse:
         validation_results=validation_results,
         overall_confidence_score=record.overall_confidence_score,
         validation_status=record.validation_status,
+        raw_extracted_payload=record.raw_extracted_payload,
         created_at=record.created_at,
         updated_at=record.updated_at
     )

@@ -64,7 +64,7 @@ class EvidenceSchema(BaseModel):
     id: Optional[int] = None
     field_name: str
     extracted_value: str
-    confidence_score: float = Field(default=1.0, ge=0.0, le=1.0)
+    confidence_score: Optional[float] = Field(default=None, ge=0.0, le=1.0)
     source_text: Optional[str] = None
     bounding_box: Optional[Dict[str, Any]] = None
 
@@ -96,6 +96,7 @@ class LandRecordResponse(BaseModel):
     validation_results: List[ValidationResultResponse] = Field(default_factory=list)
     overall_confidence_score: float = 1.0
     validation_status: str = "VALIDATED"
+    raw_extracted_payload: Optional[Dict[str, Any]] = None
     created_at: datetime
     updated_at: datetime
 
