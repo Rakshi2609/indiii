@@ -103,14 +103,14 @@ class ExtractionService:
         elif consensus_score is not None:
             confidence = float(consensus_score)
         else:
-            confidence = 1.0  # Treat as full match if no contradictions exist
+            confidence = None  # UNKNOWN
 
         transcript = raw_data.get("ocr_transcript_sample", "")
         evidence_list: List[EvidenceSchema] = [
             EvidenceSchema(
                 field_name="survey_number",
                 extracted_value=str(land_info.survey_number),
-                confidence_score=min(confidence + 0.02, 1.0),
+                confidence_score=confidence,
                 source_text=f"भूमापन क्रमांक / Survey No: {land_info.survey_number}",
                 bounding_box={"page": 1, "region": "header_identifiers"}
             ),
@@ -131,7 +131,7 @@ class ExtractionService:
             EvidenceSchema(
                 field_name="total_area",
                 extracted_value=f"{land_info.total_area} {land_info.area_unit}",
-                confidence_score=confidence - 0.01,
+                confidence_score=confidence,
                 source_text=f"एकूण क्षेत्र: {land_info.total_area} {land_info.area_unit}",
                 bounding_box={"page": 1, "region": "area_table"}
             ),

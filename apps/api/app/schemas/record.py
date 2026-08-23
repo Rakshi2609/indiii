@@ -64,7 +64,7 @@ class EvidenceSchema(BaseModel):
     id: Optional[int] = None
     field_name: str
     extracted_value: str
-    confidence_score: float = Field(default=1.0, ge=0.0, le=1.0)
+    confidence_score: Optional[float] = Field(default=None, ge=0.0, le=1.0)
     source_text: Optional[str] = None
     bounding_box: Optional[Dict[str, Any]] = None
 
