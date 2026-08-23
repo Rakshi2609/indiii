@@ -154,6 +154,15 @@ class MistralProvider(DocumentAIProvider):
             except ValueError:
                 pass
 
+        area_unit = None
+        unit_match = re.search(r"(?:total\s*)?area\s*[:\-\s\.]*\s*[0-9\.]+\s*(hectares|hectare|ha|acres|acre|guntha|heck|hec|R)", markdown_text, re.IGNORECASE)
+        if not unit_match:
+            unit_match = re.search(r"एकूण क्षेत्र\s*[:\-\s\.]*\s*[०-९0-9\.]+\s*(हेक्टर|आर|एकर)", markdown_text)
+        if unit_match:
+            area_unit = unit_match.group(1).strip()
+        else:
+            area_unit = "unknown"
+
         return {
             "provider": "Mistral OCR (mistral-ocr-latest)",
             "ocr_engine_version": "mistral-ocr-latest",
@@ -182,6 +191,7 @@ class MistralProvider(DocumentAIProvider):
             },
             "area_and_tenure": {
                 "total_area_hectares": total_area,
+                "area_unit": area_unit,
                 "cultivable_area_hectares": None,
                 "pot_kharaba_uncultivable_hectares": None,
                 "equivalent_acres": None,
