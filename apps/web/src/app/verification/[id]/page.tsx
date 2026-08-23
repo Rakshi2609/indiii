@@ -918,6 +918,123 @@ export default function VerificationWorkspacePage({ params }: VerificationPagePr
               </div>
             )}
 
+            {/* IMAGE QUALITY ASSESSMENT & PREPROCESSING */}
+            {rec?.raw_extracted_payload?.quality_assessment && (
+              <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-3 shadow-sm">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-slate-700 font-bold text-xs">
+                    <ImageIcon className="w-4 h-4 text-slate-500" />
+                    <span>Image Quality &amp; CV Preprocessing</span>
+                  </div>
+                  <Badge className={`${
+                    rec.raw_extracted_payload.quality_assessment.quality === "GOOD" ? "bg-emerald-100 text-emerald-800" :
+                    rec.raw_extracted_payload.quality_assessment.quality === "FAIR" ? "bg-blue-100 text-blue-800" :
+                    rec.raw_extracted_payload.quality_assessment.quality === "POOR" ? "bg-amber-100 text-amber-800" :
+                    "bg-rose-100 text-rose-800"
+                  }`}>
+                    {rec.raw_extracted_payload.quality_assessment.quality}
+                  </Badge>
+                </div>
+                <div className="grid grid-cols-2 gap-2 text-[11px] text-slate-600">
+                  <div>Blur Score: <span className="font-semibold text-slate-800">{rec.raw_extracted_payload.quality_assessment.blur_score}</span></div>
+                  <div>Contrast Score: <span className="font-semibold text-slate-800">{rec.raw_extracted_payload.quality_assessment.contrast_score}</span></div>
+                  <div>Brightness: <span className="font-semibold text-slate-800">{rec.raw_extracted_payload.quality_assessment.brightness_score}</span></div>
+                  <div>Noise Level: <span className="font-semibold text-slate-800">{rec.raw_extracted_payload.quality_assessment.noise_level}</span></div>
+                  <div>Skew Angle: <span className="font-semibold text-slate-800">{rec.raw_extracted_payload.quality_assessment.skew_angle}°</span></div>
+                  <div>Resolution: <span className="font-semibold text-slate-800">{rec.raw_extracted_payload.quality_assessment.width}x{rec.raw_extracted_payload.quality_assessment.height}</span></div>
+                </div>
+                {rec.raw_extracted_payload.applied_filters?.length > 0 && (
+                  <div className="pt-2 border-t border-slate-100">
+                    <div className="text-[10px] text-slate-500 font-semibold mb-1">Applied Enhancement Filters:</div>
+                    <div className="flex flex-wrap gap-1">
+                      {rec.raw_extracted_payload.applied_filters.map((f: string, idx: number) => (
+                        <span key={idx} className="bg-slate-100 text-slate-600 px-2 py-0.5 rounded text-[10px] font-mono">
+                          {f}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* OCR CONSENSUS SUMMARY */}
+            {rec?.raw_extracted_payload?._consensus && (
+              <div className="bg-sky-50/50 border border-sky-200 rounded-xl p-4 space-y-3 shadow-sm">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-sky-800 font-bold text-xs">
+                    <Layers className="w-4 h-4 text-sky-600" />
+                    <span>OCR Consensus (Sarvam + Mistral)</span>
+                  </div>
+                  <div className="text-[11px] font-bold text-sky-900 bg-sky-100 px-2 py-0.5 rounded">
+                    Agreement: {Math.round(rec.raw_extracted_payload._consensus.overall_agreement_score * 100)}%
+                  </div>
+                </div>
+                <div className="text-[11px] text-slate-600">
+                  {rec.raw_extracted_payload._consensus.disagreed_count > 0 ? (
+                    <div className="space-y-1.5">
+                      <div className="text-amber-800 font-semibold">Detected Model Disagreements ({rec.raw_extracted_payload._consensus.disagreed_count}):</div>
+                      <div className="space-y-1">
+                        {Object.values(rec.raw_extracted_payload._consensus.conflicts).map((conf: any, idx: number) => (
+                          <div key={idx} className="bg-white/80 p-2 border border-amber-200 rounded text-[10px]">
+                            <div className="font-bold text-amber-900 capitalize">{conf.reason.split("'")[1]}</div>
+                            <div className="grid grid-cols-2 gap-1 text-slate-500 mt-1">
+                              <div>Sarvam: <span className="font-semibold text-slate-800">{String(conf.values.sarvam || "—")}</span></div>
+                              <div>Mistral: <span className="font-semibold text-slate-800">{String(conf.values.mistral || "—")}</span></div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-emerald-800 font-semibold flex items-center gap-1">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                      <span>All models are in perfect OCR agreement.</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* AI GROUNDED REASONING REPORT */}
+            {rec?.raw_extracted_payload?.reasoning_report && (
+              <div className="bg-indigo-50/50 border border-indigo-200 rounded-xl p-4 space-y-3 shadow-sm">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-indigo-900 font-bold text-xs">
+                    <Bot className="w-4 h-4 text-indigo-600" />
+                    <span>Explainable Reasoning Report</span>
+                  </div>
+                  <Badge className={`${
+                    rec.raw_extracted_payload.reasoning_report.severity === "CRITICAL" ? "bg-red-100 text-red-800" :
+                    rec.raw_extracted_payload.reasoning_report.severity === "HIGH" ? "bg-amber-100 text-amber-800" :
+                    rec.raw_extracted_payload.reasoning_report.severity === "MEDIUM" ? "bg-yellow-100 text-yellow-800" :
+                    "bg-slate-100 text-slate-800"
+                  }`}>
+                    {rec.raw_extracted_payload.reasoning_report.severity} RISK
+                  </Badge>
+                </div>
+                <div className="text-xs space-y-2 text-slate-700">
+                  <div className="font-bold text-indigo-950 text-[12px]">{rec.raw_extracted_payload.reasoning_report.finding}</div>
+                  <div>
+                    <span className="font-semibold text-indigo-950 block text-[10px] uppercase tracking-wider text-slate-500">Grounded Evidence:</span>
+                    <ul className="list-disc pl-4 space-y-0.5 mt-0.5 text-[11px]">
+                      {rec.raw_extracted_payload.reasoning_report.evidence?.map((ev: string, idx: number) => (
+                        <li key={idx}>{ev}</li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div className="bg-white/80 p-2.5 border border-indigo-100 rounded-lg">
+                    <span className="font-bold text-indigo-950 text-[10px] block uppercase tracking-wider text-slate-500">Detailed Rationale:</span>
+                    <p className="text-[11px] mt-0.5 text-slate-600 leading-relaxed">{rec.raw_extracted_payload.reasoning_report.reason}</p>
+                  </div>
+                  <div className="bg-amber-50/50 p-2.5 border border-amber-200 rounded-lg">
+                    <span className="font-bold text-amber-800 text-[10px] block uppercase tracking-wider text-slate-600">Officer Verification Guidance:</span>
+                    <p className="text-[11px] mt-0.5 text-amber-900 font-semibold">{rec.raw_extracted_payload.reasoning_report.action}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Editing Active Notice Banner */}
             {isEditing && (
               <div className="bg-[#FFF7ED] border border-[#FDBA74] rounded-xl p-4 text-xs space-y-1 shadow-sm">

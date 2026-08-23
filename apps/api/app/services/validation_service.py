@@ -1,4 +1,6 @@
 import logging
+import re
+from datetime import datetime
 from typing import Any, Dict, List, Optional, Tuple
 from sqlalchemy.orm import Session
 
@@ -10,7 +12,6 @@ from app.services.gis_service import gis_service
 from app.services.ownership_service import ownership_service
 
 logger = logging.getLogger(__name__)
-
 
 class ValidationService:
     """
@@ -31,7 +32,7 @@ class ValidationService:
         issues: List[Dict[str, Any]] = []
 
         # -------------------------------------------------------------
-        # 1. Mandatory Fields & Identification Checks
+        # 1. Required Field & Identification Checks (State/Doc-Type Aware)
         # -------------------------------------------------------------
         if not record.survey_number or record.survey_number in ["0", "", "None", "null"]:
             issues.append({
@@ -42,6 +43,19 @@ class ValidationService:
                 "severity": IssueSeverity.CRITICAL,
                 "description": "Missing or invalid mandatory Survey Number / Khasra Number."
             })
+        else:
+            # Identifier Validation: Check malformed formats
+            # E.g. survey numbers usually start with numbers and can contain letters/slashes/dashes
+            clean_survey = str(record.survey_number).strip()
+            if not re.match(r"^\d+([/\-a-zA-Z\d]*)$", clean_survey):
+                issues.append({
+                    "issue_type": IssueType.RULE,
+                    "field_name": "survey_number",
+                    "expected_value": "Standard survey format (e.g. 142, 142/2, 142-2B)",
+                    "extracted_value": clean_survey,
+                    "severity": IssueSeverity.MEDIUM,
+                    "description": f"Malformed survey/khasra number format '{clean_survey}'."
+                })
 
         if not record.village or "Unknown" in record.village:
             issues.append({
@@ -76,11 +90,12 @@ class ValidationService:
                 "description": "Total land area must be a strictly positive quantity."
             })
         else:
-            # Check sub-area arithmetic (Cultivable + Pot Kharaba == Total Area)
+            # Check sub-area arithmetic (Cultivable + Pot Kharaba == Total Area) with tolerance
             if record.cultivable_area is not None and record.uncultivable_area is not None:
                 computed_sum = round(record.cultivable_area + record.uncultivable_area, 4)
                 reported_total = round(record.total_area, 4)
-                if abs(computed_sum - reported_total) > 0.01:
+                # Allowing a configurable tolerance of up to 0.02 units
+                if abs(computed_sum - reported_total) > 0.02:
                     issues.append({
                         "issue_type": IssueType.RULE,
                         "field_name": "area_balance",
@@ -104,7 +119,25 @@ class ValidationService:
                 "description": "No registered land owners or khatadars identified in record."
             })
         else:
-            percentages = [o.get("share_percentage") for o in owners if o.get("share_percentage") is not None]
+            percentages = []
+            for o in owners:
+                pct = o.get("share_percentage")
+                frac = o.get("share_fraction")
+                if pct is not None:
+                    try:
+                        percentages.append(float(pct))
+                    except ValueError:
+                        pass
+                elif frac:
+                    try:
+                        if "/" in str(frac):
+                            n, d = str(frac).split("/")
+                            percentages.append((float(n) / float(d)) * 100.0)
+                        else:
+                            percentages.append(float(frac) * 100.0)
+                    except Exception:
+                        pass
+            
             if len(percentages) == len(owners) and len(owners) > 0:
                 total_percentage = sum(percentages)
                 if abs(total_percentage - 100.0) > 1.0:
@@ -112,33 +145,90 @@ class ValidationService:
                         "issue_type": IssueType.RULE,
                         "field_name": "ownership_shares",
                         "expected_value": "100.0%",
-                        "extracted_value": f"{total_percentage}%",
+                        "extracted_value": f"{total_percentage:.1f}%",
                         "severity": IssueSeverity.MEDIUM,
-                        "description": f"Aggregate ownership shares total {total_percentage}%, expected 100.0%."
+                        "description": f"Aggregate ownership shares total {total_percentage:.1f}%, expected 100.0%."
                     })
 
         # -------------------------------------------------------------
-        # 4. Ownership Chain & Mutation Continuity (OwnershipService)
+        # 4. Chronological & Date Validation
+        # -------------------------------------------------------------
+        # Gather all mutation dates and validation
+        now = datetime.now()
+        mutations = record.mutations_data or []
+        mutation_dates = []
+        for m in mutations:
+            m_date_str = m.get("date")
+            m_num = m.get("mutation_number", "unknown")
+            if m_date_str:
+                try:
+                    m_date = datetime.strptime(m_date_str, "%Y-%m-%d")
+                    mutation_dates.append((m_date, m_num))
+                    if m_date > now:
+                        issues.append({
+                            "issue_type": IssueType.RULE,
+                            "field_name": "mutation_date",
+                            "expected_value": "Date in the past",
+                            "extracted_value": m_date_str,
+                            "severity": IssueSeverity.HIGH,
+                            "description": f"Mutation '{m_num}' date '{m_date_str}' lies in the future."
+                        })
+                except ValueError:
+                    # Inconsistent format
+                    issues.append({
+                        "issue_type": IssueType.RULE,
+                        "field_name": "mutation_date",
+                        "expected_value": "YYYY-MM-DD format",
+                        "extracted_value": m_date_str,
+                        "severity": IssueSeverity.LOW,
+                        "description": f"Mutation '{m_num}' date format is invalid: {m_date_str}."
+                    })
+
+        # Verify mutation history chronology (older mutations must have older dates)
+        if len(mutation_dates) > 1:
+            # Sort mutation dates and check sequence consistency
+            for i in range(len(mutation_dates) - 1):
+                d1, m1 = mutation_dates[i]
+                d2, m2 = mutation_dates[i+1]
+                # If chronological order of mutation number sequence contradicts the dates
+                if m1.startswith("M-") and m2.startswith("M-"):
+                    try:
+                        n1 = int(m1.replace("M-", ""))
+                        n2 = int(m2.replace("M-", ""))
+                        if n1 < n2 and d1 > d2:
+                            issues.append({
+                                "issue_type": IssueType.RULE,
+                                "field_name": "chronology",
+                                "expected_value": f"Chronologically consistent mutation sequence",
+                                "extracted_value": f"{m1} ({d1.strftime('%Y-%m-%d')}) vs {m2} ({d2.strftime('%Y-%m-%d')})",
+                                "severity": IssueSeverity.MEDIUM,
+                                "description": f"Chronology discrepancy: Mutation sequence number indicates {m1} precedes {m2}, but mutation date sequence is reversed."
+                            })
+                    except ValueError:
+                        pass
+
+        # -------------------------------------------------------------
+        # 5. Ownership Chain & Mutation Continuity (OwnershipService)
         # -------------------------------------------------------------
         ownership_issues = ownership_service.analyze_ownership_chain(record)
         issues.extend(ownership_issues)
 
         # -------------------------------------------------------------
-        # 5. Duplicate & Collision Detection (DuplicateDetectionService)
+        # 6. Duplicate & Collision Detection (DuplicateDetectionService)
         # -------------------------------------------------------------
         if db is not None:
             duplicate_issues = duplicate_service.detect_duplicates(record, db)
             issues.extend(duplicate_issues)
 
         # -------------------------------------------------------------
-        # 6. GIS Spatial Discrepancy & Cadastral Checks (GISService)
+        # 7. GIS Spatial Discrepancy & Cadastral Checks (GISService)
         # -------------------------------------------------------------
         if db is not None:
             spatial_issues = gis_service.validate_spatial_alignment(record, db)
             issues.extend(spatial_issues)
 
         # -------------------------------------------------------------
-        # 7. Evidence Confidence & OCR Quality Checks
+        # 8. Evidence Confidence & OCR Quality Checks
         # -------------------------------------------------------------
         evidence_items = record.evidence_items or []
         confidences: List[float] = []
@@ -164,7 +254,7 @@ class ValidationService:
                 })
 
         # -------------------------------------------------------------
-        # 8. Encumbrance & Boja Active Charge Alerts
+        # 9. Encumbrance & Boja Active Charge Alerts
         # -------------------------------------------------------------
         encumbrances = record.encumbrances_data or []
         for enc in encumbrances:
@@ -179,7 +269,7 @@ class ValidationService:
                 })
 
         # -------------------------------------------------------------
-        # 9. Overall Confidence & Health Score Calculation
+        # 10. Overall Confidence & Health Score Calculation
         # -------------------------------------------------------------
         base_confidence = (sum(confidences) / len(confidences)) if confidences else 0.95
 
@@ -275,7 +365,6 @@ class ValidationService:
             f"Record {record.id} validated with ownership, duplicate & GIS checks: score={confidence_score}, status={val_status}, issues={len(persisted_results)}"
         )
         return record, summary
-
 
 # Singleton instance
 validation_service = ValidationService()

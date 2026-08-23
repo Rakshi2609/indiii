@@ -96,6 +96,7 @@ class LandRecordResponse(BaseModel):
     validation_results: List[ValidationResultResponse] = Field(default_factory=list)
     overall_confidence_score: float = 1.0
     validation_status: str = "VALIDATED"
+    raw_extracted_payload: Optional[Dict[str, Any]] = None
     created_at: datetime
     updated_at: datetime
 
