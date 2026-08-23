@@ -201,7 +201,9 @@ async def process_document_endpoint(
         )
 
     provider_name = request.provider if request and request.provider else "sarvam"
-    doc_type = request.document_type if request and request.document_type else "7/12_extract"
+    # A missing hint must remain missing.  Treating every upload as a 7/12 record
+    # turns a caller default into an unsupported classification.
+    doc_type = request.document_type if request else None
     mode = request.mode if request and request.mode else "standard"
 
     if sync:

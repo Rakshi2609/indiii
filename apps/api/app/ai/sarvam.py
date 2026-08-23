@@ -79,6 +79,9 @@ class SarvamProvider(DocumentAIProvider):
             "type": "object",
             "properties": {
                 "document_type": {"type": "string", "description": "The type of document, e.g. 7/12 extract, Pahani, sale deed"},
+                "document_type_confidence": {"type": "number", "description": "Confidence in document_type only; omit when uncertain"},
+                "state": {"type": "string", "description": "State printed in the document, if present"},
+                "detected_language": {"type": "string", "description": "Language of the document, if evidenced by OCR; omit when uncertain"},
                 "survey_number": {"type": "string", "description": "The survey number or khasra number"},
                 "village": {"type": "string", "description": "The village name"},
                 "district": {"type": "string", "description": "The district name"},
@@ -150,11 +153,14 @@ class SarvamProvider(DocumentAIProvider):
     def _parse_sarvam_extract_output(self, results_data: Dict[str, Any], filename: str, document_type: Optional[str]) -> Dict[str, Any]:
         """Map Sarvam's schema-based extraction results to the canonical Indi-Bhoomi schema."""
         extraction = {}
-        res_list = results_data.get("results", [])
+        # The job API returns `result` while older integrations returned
+        # `results`; accept both response envelopes before interpreting fields.
+        res_list = results_data.get("results", results_data.get("result", []))
         if isinstance(res_list, list) and len(res_list) > 0:
-            extraction = res_list[0].get("extraction", {})
+            first = res_list[0]
+            extraction = first.get("extraction", first) if isinstance(first, dict) else {}
         elif isinstance(res_list, dict):
-            extraction = res_list.get("extraction", {})
+            extraction = res_list.get("extraction", res_list)
         else:
             extraction = results_data.get("extraction", {})
 
@@ -238,11 +244,12 @@ class SarvamProvider(DocumentAIProvider):
         return {
             "provider": "Sarvam Vision AI (doc-ai/v1/job/extract)",
             "ocr_engine_version": "sarvam-doc-v2.1-job",
-            "document_type": document_type or extraction.get("document_type") or "7/12_extract_satbara",
+            "document_type": document_type or extraction.get("document_type") or "Unknown",
+            "document_type_confidence": extraction.get("document_type_confidence"),
             "detected_language": {
                 "primary": lang_code,
                 "name": lang_name,
-                "confidence": None
+                "confidence": detected_lang.get("confidence") if isinstance(detected_lang, dict) else None
             },
             "revenue_identifiers": revenue_identifiers,
             "location": location,

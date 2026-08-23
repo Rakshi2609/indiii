@@ -46,7 +46,7 @@ export default function DocumentUploadPage() {
     detectedType?: string;
     detectedState?: string;
     detectedDistrict?: string;
-    confidence?: number;
+    confidence?: number | null;
   } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [uploadedDocs, setUploadedDocs] = useState<any[]>([]);
@@ -170,7 +170,8 @@ export default function DocumentUploadPage() {
       setProcessingStep("3/4: Extracting Survey, Khasra, and Khatadar Entities...");
       const procRes = await fetch(`http://localhost:8000/api/documents/${docId}/process?sync=true`, {
         method: "POST",
-        headers,
+        headers: { ...headers, "Content-Type": "application/json" },
+        body: JSON.stringify({ mode: processingMode }),
       });
 
       let recordId = docId;
@@ -183,11 +184,11 @@ export default function DocumentUploadPage() {
             const recData = await recRes.json();
             recordId = recData.id;
             setExtractedMetadata({
-              detectedLanguage: procData.extracted_data?.language || "Marathi / English (Indic Script)",
-              detectedType: procData.extracted_data?.document_type || "Village Form VII-XII (7/12 Satbara)",
-              detectedState: recData.administrative?.state || "Maharashtra",
-              detectedDistrict: recData.administrative?.district || "Pune",
-              confidence: recData.overall_confidence_score || 0.96,
+              detectedLanguage: [procData.extracted_data?.detected_language?.name, procData.extracted_data?.detected_language?.script].filter(Boolean).join(" / ") || "Unknown",
+              detectedType: procData.extracted_data?.document_type || "Unknown",
+              detectedState: recData.administrative?.state || "Unknown State",
+              detectedDistrict: recData.administrative?.district || "Unknown District",
+              confidence: recData.overall_confidence_score ?? null,
             });
           }
         } catch {
@@ -383,7 +384,7 @@ export default function DocumentUploadPage() {
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-xs">
               <div className="bg-surface p-3 rounded-lg border border-outline-variant">
-                <span className="text-[10px] text-on-surface-variant block uppercase font-bold">Detected Script</span>
+                <span className="text-[10px] text-on-surface-variant block uppercase font-bold">Language / Script</span>
                 <strong className="text-on-surface">{extractedMetadata.detectedLanguage}</strong>
               </div>
               <div className="bg-surface p-3 rounded-lg border border-outline-variant">
@@ -395,8 +396,8 @@ export default function DocumentUploadPage() {
                 <strong className="text-on-surface">{extractedMetadata.detectedDistrict}, {extractedMetadata.detectedState}</strong>
               </div>
               <div className="bg-surface p-3 rounded-lg border border-outline-variant">
-                <span className="text-[10px] text-on-surface-variant block uppercase font-bold">Confidence</span>
-                <strong className="text-primary font-mono">{((extractedMetadata.confidence || 0.96) * 100).toFixed(1)}%</strong>
+                <span className="text-[10px] text-on-surface-variant block uppercase font-bold">Overall Record Confidence</span>
+                <strong className="text-primary font-mono">{extractedMetadata.confidence == null ? "Unknown" : `${(extractedMetadata.confidence * 100).toFixed(1)}%`}</strong>
               </div>
             </div>
 
