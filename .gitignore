@@ -23,8 +23,6 @@ env/
 htmlcov/
 
 # Environment and Secrets
-.env
-.env.local
 .env.development.local
 .env.test.local
 .env.production.local
@@ -39,7 +37,6 @@ redis_data/
 .DS_Store
 Thumbs.db
 .idea/
-.vscode/
 *.swp
 *.swo
 
@@ -64,3 +61,4 @@ test-results/
 playwright-report/
 blob-report/
 playwright/.cache/
+config.bat
