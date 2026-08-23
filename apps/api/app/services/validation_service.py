@@ -233,25 +233,26 @@ class ValidationService:
         evidence_items = record.evidence_items or []
         confidences: List[float] = []
         for ev in evidence_items:
-            confidences.append(ev.confidence_score)
-            if ev.confidence_score < 0.70:
-                issues.append({
-                    "issue_type": IssueType.RULE,
-                    "field_name": ev.field_name,
-                    "expected_value": "Confidence >= 0.85",
-                    "extracted_value": f"{ev.confidence_score:.2f} ({ev.extracted_value})",
-                    "severity": IssueSeverity.HIGH,
-                    "description": f"Low OCR extraction confidence ({ev.confidence_score:.2f}) for field '{ev.field_name}'."
-                })
-            elif ev.confidence_score < 0.85:
-                issues.append({
-                    "issue_type": IssueType.RULE,
-                    "field_name": ev.field_name,
-                    "expected_value": "Confidence >= 0.85",
-                    "extracted_value": f"{ev.confidence_score:.2f} ({ev.extracted_value})",
-                    "severity": IssueSeverity.LOW,
-                    "description": f"Marginal OCR confidence ({ev.confidence_score:.2f}) for field '{ev.field_name}'."
-                })
+            if ev.confidence_score is not None:
+                confidences.append(ev.confidence_score)
+                if ev.confidence_score < 0.70:
+                    issues.append({
+                        "issue_type": IssueType.RULE,
+                        "field_name": ev.field_name,
+                        "expected_value": "Confidence >= 0.85",
+                        "extracted_value": f"{ev.confidence_score:.2f} ({ev.extracted_value})",
+                        "severity": IssueSeverity.HIGH,
+                        "description": f"Low OCR extraction confidence ({ev.confidence_score:.2f}) for field '{ev.field_name}'."
+                    })
+                elif ev.confidence_score < 0.85:
+                    issues.append({
+                        "issue_type": IssueType.RULE,
+                        "field_name": ev.field_name,
+                        "expected_value": "Confidence >= 0.85",
+                        "extracted_value": f"{ev.confidence_score:.2f} ({ev.extracted_value})",
+                        "severity": IssueSeverity.LOW,
+                        "description": f"Marginal OCR confidence ({ev.confidence_score:.2f}) for field '{ev.field_name}'."
+                    })
 
         # -------------------------------------------------------------
         # 9. Encumbrance & Boja Active Charge Alerts

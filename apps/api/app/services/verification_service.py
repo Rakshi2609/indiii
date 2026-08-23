@@ -149,7 +149,7 @@ class VerificationService:
             )
 
         requires_attention = (
-            record.overall_confidence_score < 0.85
+            (record.overall_confidence_score is not None and record.overall_confidence_score < 0.85)
             or record.validation_status in ["FLAGGED_FOR_REVIEW", "REJECTED_CRITICAL", "VERIFIED_WITH_WARNINGS"]
         )
 
