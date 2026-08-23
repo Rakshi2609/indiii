@@ -135,6 +135,16 @@ class SarvamProvider(DocumentAIProvider):
                 results_res.raise_for_status()
                 results_data = results_res.json()
                 
+                # Log safe structural debug representation
+                logger.info(f"Sarvam Job {job_id} results response keys: {list(results_data.keys())}")
+                if "results" in results_data:
+                    logger.info(f"Sarvam Job {job_id} results element type: {type(results_data['results'])}")
+                    if isinstance(results_data["results"], list) and len(results_data["results"]) > 0:
+                        first_item = results_data["results"][0]
+                        logger.info(f"Sarvam Job {job_id} first item keys: {list(first_item.keys())}")
+                        if "extraction" in first_item:
+                            logger.info(f"Sarvam Job {job_id} extraction keys: {list(first_item['extraction'].keys())}")
+
                 return self._parse_sarvam_extract_output(results_data, path.name, document_type)
 
     def _parse_sarvam_extract_output(self, results_data: Dict[str, Any], filename: str, document_type: Optional[str]) -> Dict[str, Any]:
@@ -177,24 +187,61 @@ class SarvamProvider(DocumentAIProvider):
         }
 
         owners_list = []
-        for o in extraction.get("owners", []):
-            owners_list.append({
-                "name_english": o.get("name_english"),
-                "name_indic": o.get("name_indic"),
-                "gender": None,
-                "share_fraction": o.get("share_fraction"),
-                "share_percentage": float(o.get("share_percentage")) if o.get("share_percentage") is not None else None,
-                "mutation_entry_number": None,
-                "aadhaar_hash_matched": None
-            })
+        owners_val = extraction.get("owners")
+        if isinstance(owners_val, str):
+            for part in owners_val.split(","):
+                name = part.strip()
+                if name:
+                    owners_list.append({
+                        "name_english": name,
+                        "name_indic": name,
+                        "gender": None,
+                        "share_fraction": None,
+                        "share_percentage": None,
+                        "mutation_entry_number": None,
+                        "aadhaar_hash_matched": None
+                    })
+        elif isinstance(owners_val, list):
+            for o in owners_val:
+                if isinstance(o, dict):
+                    owners_list.append({
+                        "name_english": o.get("name_english") or o.get("name") or o.get("name_indic"),
+                        "name_indic": o.get("name_indic") or o.get("name") or o.get("name_english"),
+                        "gender": o.get("gender"),
+                        "share_fraction": o.get("share_fraction"),
+                        "share_percentage": float(o.get("share_percentage")) if o.get("share_percentage") is not None else None,
+                        "mutation_entry_number": None,
+                        "aadhaar_hash_matched": None
+                    })
+                elif isinstance(o, str):
+                    owners_list.append({
+                        "name_english": o,
+                        "name_indic": o,
+                        "gender": None,
+                        "share_fraction": None,
+                        "share_percentage": None,
+                        "mutation_entry_number": None,
+                        "aadhaar_hash_matched": None
+                    })
+
+        # Dynamically map language from response parameter
+        detected_lang = extraction.get("detected_language") or extraction.get("language")
+        lang_code = "unknown"
+        lang_name = "Unknown"
+        if isinstance(detected_lang, str):
+            lang_code = detected_lang.lower()
+            lang_name = detected_lang
+        elif isinstance(detected_lang, dict):
+            lang_code = detected_lang.get("primary") or detected_lang.get("code") or "unknown"
+            lang_name = detected_lang.get("name") or "Unknown"
 
         return {
             "provider": "Sarvam Vision AI (doc-ai/v1/job/extract)",
             "ocr_engine_version": "sarvam-doc-v2.1-job",
             "document_type": document_type or extraction.get("document_type") or "7/12_extract_satbara",
             "detected_language": {
-                "primary": "mr" if state == "Maharashtra" else "unknown",
-                "name": "Marathi" if state == "Maharashtra" else "Unknown",
+                "primary": lang_code,
+                "name": lang_name,
                 "confidence": None
             },
             "revenue_identifiers": revenue_identifiers,
