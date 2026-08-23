@@ -166,7 +166,9 @@ class MistralProvider(DocumentAIProvider):
         return {
             "provider": "Mistral OCR (mistral-ocr-latest)",
             "ocr_engine_version": "mistral-ocr-latest",
-            "document_type": document_type or "7/12_extract_satbara",
+            # Mistral OCR supplies text, not a document classifier.  Do not turn a
+            # caller default into a claimed classification.
+            "document_type": document_type or "Unknown",
             "layout": {
                 "detected_tables": len(pages),
                 "sections": []

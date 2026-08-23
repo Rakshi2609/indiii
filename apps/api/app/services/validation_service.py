@@ -30,6 +30,21 @@ class ValidationService:
         Returns: (issues_list, overall_confidence_score, validation_status)
         """
         issues: List[Dict[str, Any]] = []
+        raw = record.raw_extracted_payload or {}
+        language = raw.get("detected_language") or {}
+        document_type = str(raw.get("document_type") or "Unknown")
+
+        def unknown(value: Any) -> bool:
+            return value is None or not str(value).strip() or str(value).strip().lower() in {"unknown", "unknown state", "unknown district", "none", "null"}
+
+        # Classification and language are independent metadata.  An unsupported
+        # class or language cannot be promoted into a high overall record score.
+        if unknown(document_type):
+            issues.append({"issue_type": IssueType.RULE, "field_name": "document_type", "expected_value": "Evidence-supported document class", "extracted_value": document_type, "severity": IssueSeverity.HIGH, "description": "Document class is unknown; do not treat this upload as a land-record class."})
+        if not isinstance(language, dict) or unknown(language.get("name")):
+            issues.append({"issue_type": IssueType.RULE, "field_name": "language", "expected_value": "OCR-supported language", "extracted_value": str(language), "severity": IssueSeverity.HIGH, "description": "Document language is unknown or unsupported by OCR evidence."})
+        if unknown(record.state):
+            issues.append({"issue_type": IssueType.RULE, "field_name": "state", "expected_value": "State printed in document", "extracted_value": str(record.state), "severity": IssueSeverity.HIGH, "description": "State is missing or unverified."})
 
         # -------------------------------------------------------------
         # 1. Required Field & Identification Checks (State/Doc-Type Aware)
@@ -272,7 +287,10 @@ class ValidationService:
         # -------------------------------------------------------------
         # 10. Overall Confidence & Health Score Calculation
         # -------------------------------------------------------------
-        base_confidence = (sum(confidences) / len(confidences)) if confidences else 0.95
+        # Calibration policy: start only from field-level extraction evidence (not
+        # classification confidence).  No field evidence is deliberately neutral,
+        # then bounded down by missing critical fields and image/provider signals.
+        base_confidence = (sum(confidences) / len(confidences)) if confidences else 0.50
 
         penalties = 0.0
         for issue in issues:
@@ -287,6 +305,20 @@ class ValidationService:
                 penalties += 0.01
 
         final_score = max(0.0, min(1.0, round(base_confidence - penalties, 3)))
+
+        critical_fields = {"document_type", "language", "state", "survey_number", "owners", "total_area"}
+        if any(issue["field_name"] in critical_fields for issue in issues):
+            final_score = min(final_score, 0.35)
+
+        quality = str(raw.get("quality_assessment", {}).get("quality", "UNKNOWN")).upper()
+        quality_caps = {"CRITICAL": 0.20, "POOR": 0.35, "FAIR": 0.70}
+        if quality in quality_caps:
+            final_score = min(final_score, quality_caps[quality])
+
+        consensus = raw.get("_consensus", {}).get("overall_agreement_score")
+        if consensus is not None:
+            final_score = min(final_score, float(consensus))
+        final_score = round(final_score, 3)
 
         if any(i["severity"] == IssueSeverity.CRITICAL for i in issues):
             val_status = "REJECTED_CRITICAL"

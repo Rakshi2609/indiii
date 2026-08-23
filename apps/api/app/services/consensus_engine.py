@@ -86,8 +86,10 @@ class ConsensusEngine:
             agreement = False
             # Fuzzy match text fields, exact match numeric/identifiers
             if s_str == "" and m_str == "":
-                agreement = True
-                confidence = 1.0
+                # Two missing values are not corroboration.  Keep this field
+                # unassessed so an all-empty OCR result cannot score 100%.
+                agreement = None
+                confidence = None
             elif s_str == "" or m_str == "":
                 agreement = False
                 confidence = 0.5
@@ -100,9 +102,9 @@ class ConsensusEngine:
                 agreement = ratio >= 85
                 confidence = round(ratio / 100.0, 2)
 
-            if agreement:
+            if agreement is True:
                 agreements_count += 1
-            else:
+            elif agreement is False:
                 disagreements_count += 1
 
             field_consensus[field] = {
@@ -118,13 +120,13 @@ class ConsensusEngine:
             }
 
         # Calculate consensus score
-        total_fields = len(self.COMPARED_FIELDS)
-        consensus_score = round(agreements_count / total_fields, 3)
+        comparable_fields = agreements_count + disagreements_count
+        consensus_score = round(agreements_count / comparable_fields, 3) if comparable_fields else None
 
         # Flag fields that disagree (status = CONFLICT)
         conflicts = {}
         for f, details in field_consensus.items():
-            if not details["agreement"]:
+            if details["agreement"] is False:
                 conflicts[f] = {
                     "status": "CONFLICT",
                     "values": {

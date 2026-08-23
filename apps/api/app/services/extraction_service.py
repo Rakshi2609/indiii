@@ -1,4 +1,5 @@
 import logging
+import re
 from typing import Any, Dict, List, Optional
 from sqlalchemy.orm import Session
 
@@ -17,6 +18,37 @@ from app.schemas.record import (
 logger = logging.getLogger(__name__)
 
 
+def _canonical_state(location_state: Any, transcript: str) -> str:
+    """Return a state only when it is explicitly present in OCR/provider evidence."""
+    evidence = " ".join(str(value) for value in (location_state, transcript) if value).upper()
+    # This is evidence normalization, not document-specific routing.  Add aliases
+    # here only for state names that OCR can emit in more than one form.
+    aliases = {
+        "HIMACHAL PRADESH": "Himachal Pradesh",
+        "HIMACHAL": "Himachal Pradesh",
+        "हिमाचल प्रदेश": "Himachal Pradesh",
+        "MAHARASHTRA": "Maharashtra",
+    }
+    for alias, canonical in aliases.items():
+        if re.search(rf"\b{re.escape(alias)}\b", evidence):
+            return canonical
+    return str(location_state).strip() if location_state and str(location_state).strip().lower() not in {"unknown", "unknown state"} else "Unknown State"
+
+
+def _language_metadata(raw_data: Dict[str, Any]) -> Dict[str, Any]:
+    """Keep script evidence separate from a language claim."""
+    language = raw_data.get("detected_language") or {}
+    if not isinstance(language, dict):
+        language = {"name": str(language)} if language else {}
+    name = language.get("name") or "Unknown"
+    primary = language.get("primary") or "unknown"
+    transcript = raw_data.get("ocr_transcript_sample") or ""
+    script = language.get("script")
+    if not script and re.search(r"[\u0900-\u097F]", transcript):
+        script = "Devanagari"
+    return {"primary": primary, "name": name, "script": script or "Unknown", "confidence": language.get("confidence")}
+
+
 class ExtractionService:
     """
     Transforms raw AI/OCR outputs into strictly typed LandRecord domain models
@@ -27,8 +59,9 @@ class ExtractionService:
         """Parse raw AI dictionary into validated domain schemas."""
         # 1. Administrative
         loc = raw_data.get("location", {})
+        transcript = raw_data.get("ocr_transcript_sample", "")
         admin_info = AdministrativeInfo(
-            state=loc.get("state") or "Unknown State",
+            state=_canonical_state(loc.get("state"), transcript),
             district=loc.get("district") or "Unknown District",
             taluk=loc.get("taluk"),
             village=loc.get("village") or "Unknown Village",
@@ -95,17 +128,14 @@ class ExtractionService:
             )
 
         # 6. Generate Explainability Evidence items
-        prov_conf = raw_data.get("extraction_confidence")
-        consensus_score = raw_data.get("_consensus", {}).get("overall_agreement_score")
-        
+        # Field evidence may use a provider extraction confidence, but must never
+        # use document-type confidence as a record/field confidence.
+        prov_conf = raw_data.get("field_extraction_confidence", raw_data.get("extraction_confidence"))
         if prov_conf is not None:
             confidence = float(prov_conf)
-        elif consensus_score is not None:
-            confidence = float(consensus_score)
         else:
             confidence = None  # UNKNOWN
 
-        transcript = raw_data.get("ocr_transcript_sample", "")
         evidence_list: List[EvidenceSchema] = [
             EvidenceSchema(
                 field_name="survey_number",
@@ -205,8 +235,10 @@ class ExtractionService:
         record.owners_data = [o.model_dump() for o in structured.owners]
         record.mutations_data = [m.model_dump() for m in structured.mutations]
         record.encumbrances_data = [e.model_dump() for e in structured.encumbrances]
+        raw_data["detected_language"] = _language_metadata(raw_data)
         record.raw_extracted_payload = raw_data
-        record.overall_confidence_score = raw_data.get("extraction_confidence") or raw_data.get("_consensus", {}).get("overall_agreement_score")
+        # ValidationService is the single authority for calibrated overall score.
+        record.overall_confidence_score = None
 
         db.flush()
 

@@ -55,7 +55,7 @@ class DocumentUploadBatchResponse(BaseModel):
 
 class DocumentProcessRequest(BaseModel):
     provider: Optional[str] = Field(default="sarvam", description="AI provider to use for extraction ('sarvam', 'mistral', 'gemini')")
-    document_type: Optional[str] = Field(default="7/12_extract", description="Revenue document type hint")
+    document_type: Optional[str] = Field(default=None, description="Optional document type hint; omit to let the provider classify the document")
     mode: Optional[str] = Field(default="standard", description="Processing mode: 'standard' (fallback router), 'high_accuracy' (ensemble comparison), or 'single'")
 
 
