@@ -52,6 +52,9 @@ data/*.db
 *.jpeg
 *.png
 *.tiff
+*.mp4
+scratch/
+config.bat
 
 # Allow sample deeds for hackathon evaluation
 !sample/**
@@ -61,4 +64,3 @@ test-results/
 playwright-report/
 blob-report/
 playwright/.cache/
-config.bat

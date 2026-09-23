@@ -207,19 +207,26 @@ async def process_document_endpoint(
     mode = request.mode if request and request.mode else "standard"
 
     if sync:
-        processed_doc = await document_service.process_document(
-            document_id=document_id,
-            db=db,
-            provider_name=provider_name,
-            document_type=doc_type,
-            mode=mode
-        )
-        return DocumentProcessResponse(
-            message=f"Document processing completed successfully in '{mode}' mode.",
-            document_id=processed_doc.id,
-            status=processed_doc.status,
-            extracted_data=processed_doc.extracted_data
-        )
+        try:
+            processed_doc = await document_service.process_document(
+                document_id=document_id,
+                db=db,
+                provider_name=provider_name,
+                document_type=doc_type,
+                mode=mode
+            )
+            return DocumentProcessResponse(
+                message=f"Document processing completed successfully in '{mode}' mode.",
+                document_id=processed_doc.id,
+                status=processed_doc.status,
+                extracted_data=processed_doc.extracted_data
+            )
+        except Exception as exc:
+            logger.error(f"Sync processing failed for document {document_id}: {exc}", exc_info=True)
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Document processing failed: {str(exc)}"
+            )
     else:
         doc.status = DocumentStatus.PROCESSING
         db.commit()
