@@ -69,39 +69,13 @@ class DocumentProcessingService:
 
             # Step 3: Multi-Model Routing & Extraction
             if mode == "high_accuracy":
-                logger.info(f"High-Accuracy Mode triggered for Document {document_id}. Executing Sarvam + Mistral independently...")
-                
-                sarvam_provider = get_document_ai_provider("sarvam")
-                mistral_provider = get_document_ai_provider("mistral")
-                
-                sarvam_res = await sarvam_provider.extract_information(
+                logger.info(f"High-Accuracy Mode triggered for Document {document_id}. Executing AIRouter ensemble (Sarvam + Mistral)...")
+                extracted_data = await AIRouter.extract_with_ensemble(
                     file_path=doc.file_path,
                     mime_type=doc.mime_type,
-                    document_type=document_type
+                    document_type=document_type,
+                    providers=["sarvam", "mistral"]
                 )
-                mistral_res = await mistral_provider.extract_information(
-                    file_path=doc.file_path,
-                    mime_type=doc.mime_type,
-                    document_type=document_type
-                )
-                
-                # Perform OCR Consensus comparison
-                logger.info(f"Running OCR Consensus Engine for Document {document_id}...")
-                consensus_res = consensus_engine.run_consensus(sarvam_res, mistral_res)
-                
-                # Merge into final output
-                extracted_data = dict(sarvam_res)
-                extracted_data["_consensus"] = consensus_res
-                extracted_data["_model_comparison"] = {
-                    "overall_agreement_score": consensus_res["overall_agreement_score"],
-                    "compared_models": ["sarvam", "mistral"],
-                    "discrepancies": [v for v in consensus_res["conflicts"].values()]
-                }
-                extracted_data["_routing_metadata"] = {
-                    "mode": "high_accuracy_ensemble",
-                    "participating_providers": ["sarvam", "mistral"],
-                    "agreement_score": consensus_res["overall_agreement_score"]
-                }
             elif mode == "single":
                 provider = get_document_ai_provider(provider_name)
                 logger.info(f"Single Provider Mode ({provider.provider_name}) for Document {document_id}...")

@@ -18,6 +18,11 @@ router = APIRouter(tags=["Enterprise Audit Trail"])
     response_model=AuditLogListResponse,
     summary="Get system audit log trail (Admin / Manager restricted)"
 )
+@router.get(
+    "/logs",
+    response_model=AuditLogListResponse,
+    summary="Get system audit log trail (Admin / Manager restricted)"
+)
 def get_audit_trail_endpoint(
     action: Optional[str] = Query(None, description="Filter by action (e.g., DOCUMENT_UPLOAD, RECORD_VERIFIED)"),
     resource_type: Optional[str] = Query(None, description="Filter by resource type (e.g., DOCUMENT, RECORD)"),
