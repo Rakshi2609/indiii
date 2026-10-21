@@ -8,8 +8,8 @@
     "packages/*"
   ],
   "scripts": {
-    "dev:web": "node api.js && npm --workspace=apps/web run dev",
-    "build:web": "npm --workspace=apps/web run build",
+    "dev:web": "node init && npm --workspace=apps/web run dev",
+    "build:web": "node init && npm --workspace=apps/web run build",
     "lint:web": "npm --workspace=apps/web run lint"
   },
   "optionalDependencies": {
