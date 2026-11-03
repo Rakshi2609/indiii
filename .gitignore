@@ -54,7 +54,6 @@ data/*.db
 *.tiff
 *.mp4
 scratch/
-config.bat
 
 # Allow sample deeds for hackathon evaluation
 !sample/**
